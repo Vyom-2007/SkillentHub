@@ -6,6 +6,7 @@ from functools import wraps
 
 from flask import Blueprint, render_template, redirect, url_for, flash, session, request
 from database.db import execute_query
+from notifications.utils import create_notification
 
 
 # Create the feed blueprint
@@ -130,6 +131,16 @@ def like_post(post_id):
             (user_id, post_id),
             commit=True
         )
+        
+        # Notify post owner
+        post_owner = execute_query("SELECT user_id FROM posts WHERE id = %s", (post_id,), fetch_one=True)
+        if post_owner and post_owner['user_id'] != user_id:
+            liker_name = session.get('user_name', 'Someone')
+            create_notification(
+                user_id=post_owner['user_id'],
+                message=f"{liker_name} liked your post",
+                notification_type='like'
+            )
     
     # Redirect back to the referring page or feed
     referrer = request.referrer
@@ -160,6 +171,16 @@ def add_comment(post_id):
         
         if result is not None:
             flash('Comment added successfully!', 'success')
+            
+            # Notify post owner
+            post_owner = execute_query("SELECT user_id FROM posts WHERE id = %s", (post_id,), fetch_one=True)
+            if post_owner and post_owner['user_id'] != user_id:
+                commenter_name = session.get('user_name', 'Someone')
+                create_notification(
+                    user_id=post_owner['user_id'],
+                    message=f"{commenter_name} commented on your post",
+                    notification_type='comment'
+                )
         else:
             flash('Failed to add comment. Please try again.', 'danger')
     

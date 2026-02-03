@@ -93,11 +93,13 @@ CREATE TABLE IF NOT EXISTS `events` (
   `event_date` datetime NOT NULL,
   `registration_deadline` datetime DEFAULT NULL,
   `location` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `max_participants` int DEFAULT NULL,
   `created_by` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `created_by` (`created_by`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 -- --------------------------------------------------------
 
@@ -180,15 +182,34 @@ DROP TABLE IF EXISTS `opportunities`;
 CREATE TABLE IF NOT EXISTS `opportunities` (
   `id` int NOT NULL AUTO_INCREMENT,
   `title` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `company_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `type` enum('job','internship') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `company` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `job_type` enum('job','internship') COLLATE utf8mb4_unicode_ci NOT NULL,
   `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `requirements` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `location` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `salary_range` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `posted_by` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `posted_by` (`posted_by`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `posts`
+--
+
+DROP TABLE IF EXISTS `posts`;
+CREATE TABLE IF NOT EXISTS `posts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `image_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `project_link` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

@@ -70,6 +70,13 @@ def index():
         (user_id,),
         fetch_one=True
     )
+
+    # Total applications count
+    total_applications = execute_query(
+        "SELECT COUNT(*) as count FROM applications WHERE user_id = %s",
+        (user_id,),
+        fetch_one=True
+    )
     
     # ===== FETCH RECENT ACTIVITY =====
     
@@ -126,6 +133,29 @@ def index():
         (user_id,),
         fetch_all=True
     )
+
+    # Recommended opportunities (latest 10)
+    recommended_opportunities = execute_query(
+        """
+        SELECT id, title, company, location, job_type
+        FROM opportunities
+        ORDER BY created_at DESC
+        LIMIT 10
+        """,
+        fetch_all=True
+    )
+    
+    # Upcoming events (latest 10)
+    upcoming_events = execute_query(
+        """
+        SELECT id, title, type, event_date, location
+        FROM events
+        WHERE event_date >= NOW()
+        ORDER BY event_date ASC
+        LIMIT 10
+        """,
+        fetch_all=True
+    )
     
     # Get user info
     user = execute_query(
@@ -143,9 +173,12 @@ def index():
         unread_messages=unread_messages['count'] if unread_messages else 0,
         total_connections=total_connections['count'] if total_connections else 0,
         total_posts=total_posts['count'] if total_posts else 0,
+        total_applications=total_applications['count'] if total_applications else 0,
         # Recent activity
         my_applications=my_applications or [],
         my_events=my_events or [],
         recent_posts=recent_posts or [],
-        recent_notifications=recent_notifications or []
+        recent_notifications=recent_notifications or [],
+        recommended_opportunities=recommended_opportunities or [],
+        upcoming_events=upcoming_events or []
     )

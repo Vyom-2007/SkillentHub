@@ -15,12 +15,12 @@
     <!-- Stats Row -->
     <div class="row g-3 mb-4">
         <!-- Card 1: Jobs Applied -->
-        <div class="col-md-6 col-lg-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 hover-card">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <p class="text-muted small fw-bold mb-1">Jobs Applied</p>
-                        <h3 class="fw-bold mb-0 text-dark">12</h3>
+                        <h3 class="fw-bold mb-0 text-dark">{{ total_applications }}</h3>
                     </div>
                     <div class="bg-light text-primary rounded-circle p-3 d-flex align-items-center justify-content-center"
                         style="width: 50px; height: 50px;">
@@ -31,12 +31,12 @@
         </div>
 
         <!-- Card 2: Connections -->
-        <div class="col-md-6 col-lg-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 hover-card">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <p class="text-muted small fw-bold mb-1">Connections</p>
-                        <h3 class="fw-bold mb-0 text-dark">48</h3>
+                        <h3 class="fw-bold mb-0 text-dark">{{ total_connections }}</h3>
                     </div>
                     <div class="bg-light text-info rounded-circle p-3 d-flex align-items-center justify-content-center"
                         style="width: 50px; height: 50px;">
@@ -47,32 +47,16 @@
         </div>
 
         <!-- Card 3: Messages -->
-        <div class="col-md-6 col-lg-3">
+        <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 hover-card">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
                         <p class="text-muted small fw-bold mb-1">Messages</p>
-                        <h3 class="fw-bold mb-0 text-dark">5</h3>
+                        <h3 class="fw-bold mb-0 text-dark">{{ unread_messages }}</h3>
                     </div>
                     <div class="bg-light text-warning rounded-circle p-3 d-flex align-items-center justify-content-center"
                         style="width: 50px; height: 50px;">
                         <i class="bi bi-chat-dots-fill fs-5"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 4: Saved Jobs -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 hover-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <p class="text-muted small fw-bold mb-1">Saved Jobs</p>
-                        <h3 class="fw-bold mb-0 text-dark">8</h3>
-                    </div>
-                    <div class="bg-light text-danger rounded-circle p-3 d-flex align-items-center justify-content-center"
-                        style="width: 50px; height: 50px;">
-                        <i class="bi bi-bookmark-fill fs-5"></i>
                     </div>
                 </div>
             </div>
@@ -83,84 +67,119 @@
     <div class="row g-4">
         <!-- Left Column: Recommended Opportunities -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <!-- Recommended Opportunities Carousel -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold mb-0">Recommended Opportunities</h5>
-                    <a href="#" class="text-primary text-decoration-none small fw-bold">View All</a>
+                    <a href="{{ url_for('opportunities.list_opportunities') }}"
+                        class="text-primary text-decoration-none small fw-bold">View All</a>
                 </div>
 
-                <!-- Opportunity Item 1 -->
-                <div class="d-flex align-items-center justify-content-between py-3 border-bottom dashed-border">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center"
-                            style="width: 48px; height: 48px;">
-                            <i class="bi bi-google fs-4 text-dark"></i>
+                {% if recommended_opportunities %}
+                <div id="opportunitiesCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for op in recommended_opportunities %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <div
+                                class="d-flex align-items-center justify-content-between py-3 border rounded-3 p-3 bg-light">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="bi bi-briefcase-fill fs-4 text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">{{ op.title }}</h6>
+                                        <p class="text-muted small mb-0">{{ op.company }} • {{ op.location }}</p>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill mt-1">{{
+                                            op.job_type|title }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('opportunities.view_opportunity', id=op.id) }}"
+                                    class="btn btn-primary btn-sm rounded-pill px-4">Apply</a>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="fw-bold mb-1">UX Designer</h6>
-                            <p class="text-muted small mb-0">Google • Remote • Full-time</p>
-                        </div>
+                        {% endfor %}
                     </div>
-                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3">Apply</a>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#opportunitiesCarousel"
+                        data-bs-slide="prev" style="width: 5%;">
+                        <span class="carousel-control-prev-icon bg-secondary rounded-circle" aria-hidden="true"
+                            style="background-size: 50%;"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#opportunitiesCarousel"
+                        data-bs-slide="next" style="width: 5%;">
+                        <span class="carousel-control-next-icon bg-secondary rounded-circle" aria-hidden="true"
+                            style="background-size: 50%;"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted mb-0">No opportunities found.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Upcoming Events Carousel -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Upcoming Events</h5>
+                    <a href="{{ url_for('events.list_events') }}"
+                        class="text-primary text-decoration-none small fw-bold">View All</a>
                 </div>
 
-                <!-- Opportunity Item 2 -->
-                <div class="d-flex align-items-center justify-content-between py-3 border-bottom dashed-border">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center"
-                            style="width: 48px; height: 48px;">
-                            <i class="bi bi-microsoft fs-4 text-primary"></i>
+                {% if upcoming_events %}
+                <div id="eventsCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for event in upcoming_events %}
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <div
+                                class="d-flex align-items-center justify-content-between py-3 border rounded-3 p-3 bg-light">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-white shadow-sm d-flex align-items-center justify-content-center"
+                                        style="width: 50px; height: 50px;">
+                                        <i class="bi bi-calendar-event-fill fs-4 text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1">{{ event.title }}</h6>
+                                        <p class="text-muted small mb-0">{{ event.event_date.strftime('%d %b %Y') }} •
+                                            {{ event.location }}</p>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill mt-1">{{
+                                            event.type|title }}</span>
+                                    </div>
+                                </div>
+                                <a href="{{ url_for('events.view_event', id=event.id) }}"
+                                    class="btn btn-warning btn-sm rounded-pill px-4 text-white">View</a>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="fw-bold mb-1">Frontend Developer</h6>
-                            <p class="text-muted small mb-0">Microsoft • Seattle • Hybrid</p>
-                        </div>
+                        {% endfor %}
                     </div>
-                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3">Apply</a>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#eventsCarousel"
+                        data-bs-slide="prev" style="width: 5%;">
+                        <span class="carousel-control-prev-icon bg-secondary rounded-circle" aria-hidden="true"
+                            style="background-size: 50%;"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#eventsCarousel"
+                        data-bs-slide="next" style="width: 5%;">
+                        <span class="carousel-control-next-icon bg-secondary rounded-circle" aria-hidden="true"
+                            style="background-size: 50%;"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
                 </div>
-
-                <!-- Opportunity Item 3 -->
-                <div class="d-flex align-items-center justify-content-between py-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center"
-                            style="width: 48px; height: 48px;">
-                            <i class="bi bi-spotify fs-4 text-success"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1">Product Manager Intern</h6>
-                            <p class="text-muted small mb-0">Spotify • New York • Internship</p>
-                        </div>
-                    </div>
-                    <a href="#" class="btn btn-outline-primary btn-sm rounded-pill px-3">Apply</a>
+                {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted mb-0">No events found.</p>
                 </div>
+                {% endif %}
             </div>
         </div>
 
         <!-- Right Column: Sidebar Widgets -->
         <div class="col-lg-4">
-            <!-- Upgrade Skills Widget -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-white mb-4" style="background: var(--cta-gradient);">
-                <div class="mb-3">
-                    <i class="bi bi-stars fs-1 text-white-50"></i>
-                </div>
-                <h5 class="fw-bold text-white">Upgrade Skills</h5>
-                <p class="small opacity-75 mb-3">Join premium workshops today and boost your career prospects.</p>
-                <button class="btn btn-white text-primary btn-sm rounded-pill w-100 fw-bold shadow-sm">Explore
-                    Premium</button>
-            </div>
 
-            <!-- Complete Profile Widget -->
-            <div class="card border-0 shadow-sm rounded-4 p-4">
-                <h6 class="fw-bold mb-3">Profile Completion</h6>
-                <div class="progress mb-2" style="height: 8px;">
-                    <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;" aria-valuenow="75"
-                        aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">75% Complete</small>
-                    <a href="#" class="small text-primary text-decoration-none fw-bold">Finish Now</a>
-                </div>
-            </div>
+
+
         </div>
     </div>
 </div>

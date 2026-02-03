@@ -1,0 +1,4 @@
+Flask
+mysql-connector-python
+Flask-WTF
+email-validator

@@ -147,7 +147,7 @@ def apply(id):
         # Insert application into database
         result = execute_query(
             """
-            INSERT INTO applications (user_id, opportunity_id, resume_file, status, created_at) 
+            INSERT INTO applications (user_id, opportunity_id, resume_file, status, applied_at) 
             VALUES (%s, %s, %s, 'pending', NOW())
             """,
             (user_id, id, filename),
@@ -191,12 +191,12 @@ def my_applications():
     
     applications = execute_query(
         """
-        SELECT a.id, a.status, a.resume_file, a.created_at,
+        SELECT a.id, a.status, a.resume_file, a.applied_at as created_at,
                o.id as opportunity_id, o.title, o.company, o.location
         FROM applications a
         INNER JOIN opportunities o ON a.opportunity_id = o.id
         WHERE a.user_id = %s
-        ORDER BY a.created_at DESC
+        ORDER BY a.applied_at DESC
         """,
         (user_id,),
         fetch_all=True

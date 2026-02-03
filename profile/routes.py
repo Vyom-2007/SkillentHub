@@ -85,6 +85,8 @@ def save_uploaded_file(file, subfolder, user_id, prefix=''):
     return None
 
 
+from connections.routes import get_connection_status
+
 @profile_bp.route('/view/<int:user_id>', methods=['GET'])
 def view_profile(user_id):
     """
@@ -109,12 +111,19 @@ def view_profile(user_id):
         abort(404, description="User not found")
     
     # Check if viewing own profile
-    is_own_profile = session.get('user_id') == user_id
+    current_user_id = session.get('user_id')
+    is_own_profile = current_user_id == user_id
+    
+    # Get connection status
+    connection_status = None
+    if current_user_id and not is_own_profile:
+        connection_status = get_connection_status(current_user_id, user_id)
     
     return render_template(
         'profile/view_profile.html', 
         user=user, 
-        is_own_profile=is_own_profile
+        is_own_profile=is_own_profile,
+        connection_status=connection_status
     )
 
 

@@ -124,11 +124,11 @@ def view_event(id):
     # Get list of registered users (for display)
     registrations = execute_query(
         """
-        SELECT u.id, u.full_name, u.profile_pic, er.created_at
+        SELECT u.id, u.full_name, u.profile_pic, er.registered_at as created_at
         FROM event_registrations er
         INNER JOIN users u ON er.user_id = u.id
         WHERE er.event_id = %s
-        ORDER BY er.created_at DESC
+        ORDER BY er.registered_at DESC
         LIMIT 10
         """,
         (id,),
@@ -194,7 +194,7 @@ def register(id):
     
     # Insert registration
     result = execute_query(
-        "INSERT INTO event_registrations (user_id, event_id, created_at) VALUES (%s, %s, NOW())",
+        "INSERT INTO event_registrations (user_id, event_id, registered_at) VALUES (%s, %s, NOW())",
         (user_id, id),
         commit=True
     )
@@ -258,7 +258,7 @@ def my_registrations():
     
     registrations = execute_query(
         """
-        SELECT e.id, e.title, e.type, e.event_date, e.location, er.created_at as registered_at
+        SELECT e.id, e.title, e.type, e.event_date, e.location, er.registered_at
         FROM event_registrations er
         INNER JOIN events e ON er.event_id = e.id
         WHERE er.user_id = %s
