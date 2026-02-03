@@ -1,7 +1,0 @@
-Flask
-Flask-WTF
-WTForms
-email-validator
-mysql-connector-python
-Werkzeug
-python-dotenv
