@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% block title %}Feed - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-md-4">
+    <div class="row g-4">
+        <!-- LEFT COLUMN: Profile (Desktop Only) -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 sticky-top"
+                style="top: 90px; z-index: 10;">
+                <div class="card-body text-center p-0">
+                    <div class="bg-primary bg-gradient h-100px position-relative" style="height: 100px;"></div>
+                    <div class="position-relative mt-n5 px-4">
+                        {% if session.get('profile_pic') %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' ~ session.get('profile_pic')) }}"
+                            class="rounded-circle border border-4 border-white shadow-sm bg-white"
+                            style="width: 80px; height: 80px; object-fit: cover;" alt="Profile">
+                        {% else %}
+                        <div class="rounded-circle border border-4 border-white shadow-sm bg-light d-inline-flex align-items-center justify-content-center mt-0"
+                            style="width: 80px; height: 80px;">
+                            <i class="fas fa-user col-grey fs-3"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="p-3 pt-2">
+                        <h5 class="fw-bold fs-6 mb-1">{{ session.get('user_name', 'Guest') }}</h5>
+                        <p class="text-muted small mb-0">Welcome to your professional feed</p>
+                    </div>
+
+                    {% if session.get('user_id') %}
+                    <div class="bg-light p-3 border-top text-start">
+                        <a href="{{ url_for('profile.view_profile', user_id=session.get('user_id')) }}"
+                            class="small fw-bold text-dark text-decoration-none">
+                            <i class="fas fa-user-circle me-2 text-primary"></i> View Profile
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="p-3 pt-0">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm rounded-pill w-100">Sign
+                            In</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CENTER COLUMN: Feed -->
+        <div class="col-lg-6 col-md-12">
+            <!-- Create Post Input -->
+            {% if session.get('user_id') %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if session.get('profile_pic') %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' ~ session.get('profile_pic')) }}"
+                            class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted border border-light"
+                            style="width: 48px; height: 48px;"><i class="fas fa-user"></i></div>
+                        {% endif %}
+                        <a href="{{ url_for('posts.create') }}"
+                            class="btn btn-light rounded-pill flex-grow-1 text-start text-muted border ps-3 bg-white hover-shadow-sm transition-all">
+                            Start a post...
+                        </a>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 px-3">
+                        <button class="btn btn-sm btn-text text-muted fw-medium"><i
+                                class="fas fa-image text-primary me-2"></i>Media</button>
+                        <button class="btn btn-sm btn-text text-muted fw-medium"><i
+                                class="fas fa-calendar-alt text-warning me-2"></i>Event</button>
+                        <button class="btn btn-sm btn-text text-muted fw-medium"><i
+                                class="fas fa-newspaper text-danger me-2"></i>Write article</button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+                <div class="d-flex align-items-center gap-2">
+                    <hr class="flex-grow-1 d-none d-sm-block w-50px border-primary">
+                    <small class="text-muted">Sort by:</small>
+                    <select
+                        class="form-select form-select-sm border-0 bg-transparent fw-bold text-dark w-auto py-0 ps-1"
+                        style="box-shadow: none; cursor: pointer;">
+                        <option value="top">Top</option>
+                        <option value="recent">Recent</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Posts Feed -->
+            {% if posts %}
+            {% for post in posts %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4 hover-card">
+                <div class="card-header bg-white border-bottom-0 p-3">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div class="d-flex gap-3">
+                            <a href="{{ url_for('profile.view_profile', user_id=post.user_id) }}">
+                                {% if post.profile_pic %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' ~ post.profile_pic) }}"
+                                    class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;"
+                                    alt="{{ post.full_name }}">
+                                {% else %}
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted border"
+                                    style="width: 48px; height: 48px;"><i class="fas fa-user"></i></div>
+                                {% endif %}
+                            </a>
+                            <div>
+                                <a href="{{ url_for('profile.view_profile', user_id=post.user_id) }}"
+                                    class="fw-bold text-dark text-decoration-none d-block">{{ post.full_name }}</a>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    {{ post.headline if post.headline else 'SkillentHub Member' }}
+                                </small>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    <i class="fas fa-globe-americas me-1"></i> {{ post.created_at.strftime('%b %d') if
+                                    post.created_at }}
+                                </small>
+                            </div>
+                        </div>
+                        <button class="btn btn-link text-muted p-0"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="px-3 pb-2">
+                        <p class="card-text mb-2">{{ post.content }}</p>
+                    </div>
+
+                    {% if post.image_url %}
+                    <div class="bg-light text-center overflow-hidden">
+                        <img src="{{ url_for('static', filename='uploads/posts/' ~ post.image_url) }}"
+                            class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="Post content">
+                    </div>
+                    {% endif %}
+
+                    {% if post.project_link %}
+                    <div class="px-3 pb-3 pt-2">
+                        <a href="{{ post.project_link }}" target="_blank"
+                            class="card bg-light border-0 p-3 text-decoration-none">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-white p-2 rounded shadow-sm text-primary"><i
+                                        class="fas fa-link fa-lg"></i></div>
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark">View Project</h6>
+                                    <small class="text-muted text-break">{{ post.project_link }}</small>
+                                </div>
+                                <i class="fas fa-external-link-alt ms-auto text-muted"></i>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- Reaction Stats -->
+                    <div class="px-3 py-2 d-flex justify-content-between align-items-center border-bottom border-light">
+                        <div class="d-flex align-items-center">
+                            <span
+                                class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-1"
+                                style="width: 18px; height: 18px;">
+                                <i class="fas fa-thumbs-up text-white" style="font-size: 10px;"></i>
+                            </span>
+                            <small class="text-muted hover-underline cursor-pointer">{{ post.like_count }}</small>
+                        </div>
+                        <small class="text-muted hover-underline cursor-pointer">{{ post.comment_count }}
+                            comments</small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="px-2 py-1 d-flex justify-content-between">
+                        {% if session.get('user_id') %}
+                        <form action="{{ url_for('feed.like_post', post_id=post.id) }}" method="POST" class="flex-fill">
+                            <button type="submit"
+                                class="btn btn-white w-100 text-muted fw-medium py-3 rounded-0 {{ 'text-primary' if post.user_liked else '' }}">
+                                <i class="{{ 'fas' if post.user_liked else 'far' }} fa-thumbs-up me-2"></i> Like
+                            </button>
+                        </form>
+                        {% else %}
+                        <button class="btn btn-white w-100 text-muted fw-medium py-3 rounded-0">
+                            <i class="far fa-thumbs-up me-2"></i> Like
+                        </button>
+                        {% endif %}
+
+                        <a href="{{ url_for('feed.view_comments', post_id=post.id) }}"
+                            class="btn btn-white w-100 text-muted fw-medium py-3 rounded-0">
+                            <i class="far fa-comment-alt me-2"></i> Comment
+                        </a>
+
+                        <button class="btn btn-white w-100 text-muted fw-medium py-3 rounded-0">
+                            <i class="fas fa-share me-2"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <div class="mb-3">
+                    <i class="fas fa-stream fa-3x text-muted opacity-25"></i>
+                </div>
+                <h4 class="text-muted">No posts yet</h4>
+                <p class="text-muted">Follow people or create a post to see updates.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT COLUMN: Suggesions (Desktop Only) -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div
+                    class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">Add to your feed</h6>
+                    <i class="fas fa-info-circle text-muted small"></i>
+                </div>
+                <div class="card-body">
+                    <!-- Suggested connection 1 -->
+                    <div class="d-flex align-items-start gap-2 mb-3">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted"
+                            style="width: 48px; height: 48px;">
+                            <span class="fw-bold">UI</span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark small">UI/UX Designers</h6>
+                            <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">Company • Design</small>
+                            <button class="btn btn-outline-secondary btn-sm rounded-pill fw-bold py-0 px-3"><i
+                                    class="fas fa-plus small me-1"></i> Follow</button>
+                        </div>
+                    </div>
+
+                    <!-- Suggested connection 2 -->
+                    <div class="d-flex align-items-start gap-2 mb-3">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-muted"
+                            style="width: 48px; height: 48px;">
+                            <span class="fw-bold">P</span>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark small">Python Hub</h6>
+                            <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">Community • Tech</small>
+                            <button class="btn btn-outline-secondary btn-sm rounded-pill fw-bold py-0 px-3"><i
+                                    class="fas fa-plus small me-1"></i> Follow</button>
+                        </div>
+                    </div>
+
+                    <a href="#" class="btn btn-light btn-sm w-100 rounded-pill text-muted fw-bold">View all
+                        recommendations <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+
+            <!-- Footer Links Mini -->
+            <div class="text-center px-4">
+                <p class="text-muted small" style="font-size: 0.75rem;">SkillentHub Corporation &copy; 2026</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Float Button for New Post -->
+<div class="d-lg-none position-fixed bottom-0 end-0 m-4 pe-2 pb-2" style="z-index: 100;">
+    <a href="{{ url_for('posts.create') }}"
+        class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+        style="width: 56px; height: 56px;">
+        <i class="fas fa-plus fs-4"></i>
+    </a>
+</div>
+{% endblock %}

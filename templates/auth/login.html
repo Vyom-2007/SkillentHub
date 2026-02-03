@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% set hide_footer = True %}
+{% block body_class %}no-scroll{% endblock %}
+
+{% block title %}Sign In - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card animate-fade-in">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="auth-title">Sign In</h1>
+        </div>
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Email Input -->
+            <div class="mb-4">
+                {{ form.email(class="form-control", placeholder="Email Address") }}
+                {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                <div class="text-danger small mt-2 ms-3">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Password Input -->
+            <div class="mb-4">
+                {{ form.password(class="form-control", placeholder="Password") }}
+                {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                <div class="text-danger small mt-2 ms-3">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Forgot Password Link -->
+            <div class="mb-4 text-center">
+                <a href="{{ url_for('auth.forgot_password') }}" class="small fw-medium text-primary"
+                    style="text-decoration: none;">
+                    Forgot Password?
+                </a>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-pill shadow-soft">
+                Sign In
+            </button>
+        </form>
+
+        <!-- Sign Up Link -->
+        <div class="text-center mt-4 pt-4">
+            <p class="text-muted mb-0 small">
+                Don't have an account?
+                <a href="{{ url_for('auth.signup') }}" class="fw-bold ms-1">Sign up</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Manage Jobs - Admin - SkillentHub{% endblock %}
+{% block extra_css %}
+<style>
+    .admin-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+        color: var(--dark);
+    }
+
+    .admin-card {
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--light);
+    }
+
+    .table th {
+        background: var(--light);
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
+
+    .table td {
+        font-size: 0.9rem;
+        color: var(--dark);
+    }
+
+    .table tr:hover {
+        background: rgba(99, 102, 241, 0.03);
+    }
+
+    .btn-delete {
+        padding: 0.4rem 0.75rem;
+        background: var(--light);
+        color: var(--gray);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-delete:hover {
+        background: var(--danger);
+        color: var(--white);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--gray);
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <div class="page-header">
+        <h1><i class="fas fa-briefcase"></i> Manage Jobs</h1>
+        <a href="{{ url_for('admin.add_job') }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Job</a>
+    </div>
+    <div class="admin-card">
+        {% if jobs %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Company</th>
+                    <th>Type</th>
+                    <th>Applications</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr>
+                    <td><a href="{{ url_for('opportunities.view_opportunity', id=job.id) }}">{{ job.title }}</a></td>
+                    <td>{{ job.company }}</td>
+                    <td>{{ job.job_type }}</td>
+                    <td>{{ job.application_count }}</td>
+                    <td>{{ job.created_at.strftime('%b %d, %Y') if job.created_at else '-' }}</td>
+                    <td>
+                        <form action="{{ url_for('admin.delete_job', job_id=job.id) }}" method="POST"
+                            style="display:inline;" onsubmit="return confirm('Delete this job?');"><button type="submit"
+                                class="btn-delete"><i class="fas fa-trash"></i></button></form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state"><i class="fas fa-briefcase" style="font-size:2rem;margin-bottom:1rem;"></i>
+            <p>No jobs posted yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

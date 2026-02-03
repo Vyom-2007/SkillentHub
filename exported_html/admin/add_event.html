@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Add Event - Admin - SkillentHub{% endblock %}
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--gray);
+        text-decoration: none;
+        margin-bottom: 1rem;
+        transition: var(--transition);
+    }
+
+    .back-link:hover {
+        color: var(--primary);
+    }
+
+    .form-card {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.25rem;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--light);
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .form-hint {
+        font-size: 0.8rem;
+        color: var(--gray);
+        margin-top: 0.25rem;
+    }
+
+    .error-text {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="form-container">
+    <a href="{{ url_for('admin.dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Admin</a>
+    <div class="form-card">
+        <h2 class="form-title"><i class="fas fa-calendar-plus"></i> Create New Event</h2>
+        <form method="POST" action="{{ url_for('admin.add_event') }}">
+            {{ form.hidden_tag() }}
+            <div class="form-group">{{ form.title.label }}{{ form.title(class="form-control", placeholder="e.g. Annual
+                Hackathon 2026") }}{% for error in form.title.errors %}<span class="error-text">{{ error }}</span>{%
+                endfor %}</div>
+            <div class="form-row">
+                <div class="form-group">{{ form.event_type.label }}{{ form.event_type(class="form-control") }}</div>
+                <div class="form-group">{{ form.event_date.label }}{{ form.event_date(class="form-control") }}{% for
+                    error in form.event_date.errors %}<span class="error-text">{{ error }}</span>{% endfor %}</div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">{{ form.location.label }}{{ form.location(class="form-control",
+                    placeholder="e.g. Online / New York, NY") }}</div>
+                <div class="form-group">{{ form.max_participants.label }}{{ form.max_participants(class="form-control",
+                    placeholder="e.g. 100") }}<span class="form-hint">Leave empty for unlimited</span></div>
+            </div>
+            <div class="form-group">{{ form.description.label }}{{ form.description(class="form-control",
+                placeholder="Describe the event, what participants can expect...") }}{% for error in
+                form.description.errors %}<span class="error-text">{{ error }}</span>{% endfor %}</div>
+            <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-plus"></i> {{ form.submit.label.text
+                }}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

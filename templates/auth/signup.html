@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% set hide_footer = True %}
+{% block body_class %}no-scroll{% endblock %}
+
+{% block title %}Sign Up - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card animate-fade-in" style="max-width: 480px;">
+        <!-- Slightly wider for signup content if needed, referencing style guide -->
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="auth-title">Sign Up</h1>
+        </div>
+
+        <!-- Signup Form -->
+        <form method="POST" action="{{ url_for('auth.signup') }}" novalidate>
+            {{ form.hidden_tag() }}
+
+            <!-- Full Name Input -->
+            <div class="mb-4">
+                {{ form.full_name(class="form-control", placeholder="Full Name") }}
+                {% if form.full_name.errors %}
+                {% for error in form.full_name.errors %}
+                <div class="text-danger small mt-2 ms-3">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Email Input -->
+            <div class="mb-4">
+                {{ form.email(class="form-control", placeholder="Email Address") }}
+                {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                <div class="text-danger small mt-2 ms-3">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Password Input -->
+            <div class="mb-4">
+                {{ form.password(class="form-control", placeholder="Password") }}
+                {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                <div class="text-danger small mt-2 ms-3">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Confirm Password Input -->
+            <div class="mb-4">
+                {{ form.confirm(class="form-control", placeholder="Confirm Password") }}
+                {% if form.confirm.errors %}
+                {% for error in form.confirm.errors %}
+                <div class="text-danger small mt-2 ms-3">
+                    <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-pill shadow-soft">
+                Sign Up
+            </button>
+        </form>
+
+        <!-- Login Link -->
+        <div class="text-center mt-4 pt-4">
+            <p class="text-muted mb-0 small">
+                Already have an account?
+                <a href="{{ url_for('auth.login') }}" class="fw-bold ms-1">Login</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}403 Forbidden - SkillentHub{% endblock %}
+{% block extra_css %}
+<style>
+    .error-container {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .error-content {
+        max-width: 500px;
+    }
+
+    .error-icon {
+        font-size: 6rem;
+        color: var(--danger);
+        margin-bottom: 1.5rem;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-10px);
+        }
+
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .error-code {
+        font-size: 4rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .error-title {
+        font-size: 1.5rem;
+        color: var(--dark);
+        margin: 0.5rem 0;
+    }
+
+    .error-message {
+        color: var(--gray);
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="error-container">
+    <div class="error-content">
+        <div class="error-icon"><i class="fas fa-ban"></i></div>
+        <div class="error-code">403</div>
+        <h1 class="error-title">Access Denied</h1>
+        <p class="error-message">You don't have permission to access this page. Admin privileges are required.</p>
+        <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary"><i class="fas fa-home"></i> Go to
+            Dashboard</a>
+    </div>
+</div>
+{% endblock %}

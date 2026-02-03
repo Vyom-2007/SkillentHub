@@ -1,0 +1,121 @@
+<nav class="navbar navbar-expand-lg fixed-top glass-navbar py-3">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center gap-2"
+            href="{{ url_for('dashboard.index') if session.get('user_id') else '/' }}">
+            <i class="fas fa-rocket text-primary"></i> <span>SkillentHub</span>
+        </a>
+
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+            <div class="offcanvas-header border-bottom">
+                <h5 class="offcanvas-title fw-bold" id="offcanvasNavbarLabel">
+                    <i class="fas fa-rocket text-primary me-2"></i>SkillentHub
+                </h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+                    {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard.index') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'dashboard.index' }}">
+                        <i class="fas fa-home me-1 d-lg-none"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('feed.global_feed') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'feed.global_feed' }}">
+                        <i class="fas fa-stream me-1 d-lg-none"></i> Feed
+                    </a>
+                    <a href="{{ url_for('opportunities.list_opportunities') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'opportunities.list_opportunities' }}">
+                        <i class="fas fa-briefcase me-1 d-lg-none"></i> Jobs
+                    </a>
+                    <a href="{{ url_for('events.list_events') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'events.list_events' }}">
+                        <i class="fas fa-calendar me-1 d-lg-none"></i> Events
+                    </a>
+                    <a href="{{ url_for('connections.my_connections') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'connections.my_connections' }}">
+                        <i class="fas fa-users me-1 d-lg-none"></i> Network
+                    </a>
+                    <a href="{{ url_for('chat.chat_list') }}"
+                        class="nav-link {{ 'active' if request.endpoint == 'chat.chat_list' }}">
+                        <i class="fas fa-comments me-1 d-lg-none"></i> Chat
+                    </a>
+                    <a href="{{ url_for('notifications.list_notifications') }}"
+                        class="nav-link position-relative {{ 'active' if request.endpoint == 'notifications.list_notifications' }}">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_notification_count %}
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                            {{ unread_notification_count }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <!-- Theme Toggle Button -->
+                    <button type="button" class="theme-toggle ms-2" id="themeToggle" aria-label="Toggle theme">
+                        <i class="bi bi-sun-fill d-none" id="sunIcon"></i>
+                        <i class="bi bi-moon-stars-fill" id="moonIcon"></i>
+                    </button>
+
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle fs-5"></i>
+                            <span class="d-lg-none">Profile</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 mt-2">
+                            <li>
+                                <h6 class="dropdown-header">Signed in as <br><strong>{{ session.get('username', 'User')
+                                        }}</strong></h6>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                    href="{{ url_for('profile.view_profile', user_id=session.get('user_id')) }}">
+                                    <i class="fas fa-user me-2 text-muted"></i> My Profile
+                                </a>
+                            </li>
+                            {% if session.get('role') == 'admin' %}
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
+                                    <i class="fas fa-shield-alt me-2 text-danger"></i> Admin Panel
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{{ url_for('pages.about') }}" class="nav-link">About</a>
+                    <a href="{{ url_for('pages.contact') }}" class="nav-link">Contact</a>
+
+                    <!-- Theme Toggle Button (For Guest Users) -->
+                    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                        <i class="bi bi-sun-fill d-none" id="sunIcon"></i>
+                        <i class="bi bi-moon-stars-fill" id="moonIcon"></i>
+                    </button>
+
+                    <a href="{{ url_for('auth.login') }}"
+                        class="btn btn-outline-primary rounded-pill px-4 ms-2">Login</a>
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary rounded-pill px-4">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

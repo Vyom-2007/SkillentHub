@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillentHub - Connect, Learn, Grow{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <!-- Soft Background Blobs -->
+    <div class="hero-bg-blobs">
+        <div class="hero-blob blob-1"></div>
+        <div class="hero-blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Left Content -->
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h1 class="hero-title">
+                    Connect, Learn, <br>
+                    <span class="text-gradient">Grow Together</span>
+                </h1>
+                <p class="hero-subtitle">
+                    The professional community for students and developers.
+                    Unlock opportunities, build meaningful connections, and accelerate your career growth with
+                    SkillentHub.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('auth.signup') }}" class="btn btn-primary rounded-pill px-4 py-3 shadow-button">
+                        <i class="fas fa-rocket me-2"></i> Get Started Free
+                    </a>
+                    <a href="{{ url_for('pages.about') }}" class="btn btn-outline-primary rounded-pill px-4 py-3">
+                        <i class="fas fa-play-circle me-2"></i> How it Works
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Visual (Floating Card) -->
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="floating-main-card">
+                        <!-- Card Header -->
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-primary bg-gradient rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
+                                style="width: 56px; height: 56px; font-size: 1.25rem;">
+                                SK
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="mb-1 fw-bold">SkillentHub User</h5>
+                                <p class="mb-0 text-muted small">Software Engineer @ Top Tech</p>
+                            </div>
+                        </div>
+
+                        <!-- Card Stats -->
+                        <div class="d-flex justify-content-between border-top border-bottom py-3 mb-4"
+                            style="border-color: var(--border-color) !important;">
+                            <div class="text-center">
+                                <span class="d-block fw-bold fs-5 text-heading">500+</span>
+                                <span class="small text-muted">Connections</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="d-block fw-bold fs-5 text-heading">25</span>
+                                <span class="small text-muted">Posts</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="d-block fw-bold fs-5 text-heading">12</span>
+                                <span class="small text-muted">Events</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Action -->
+                        <div class="d-grid">
+                            <button class="btn btn-primary rounded-pill py-2">
+                                <i class="fas fa-user-plus me-2"></i> Connect
+                            </button>
+                        </div>
+
+                        <!-- Floating Badges -->
+                        <div class="floating-badge badge-1">
+                            <div class="badge-icon"><i class="fas fa-briefcase"></i></div>
+                            <div>
+                                <div class="small fw-bold">New Job Posted</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">2 minutes ago</div>
+                            </div>
+                        </div>
+
+                        <div class="floating-badge badge-2">
+                            <div class="badge-icon"><i class="fas fa-handshake"></i></div>
+                            <div>
+                                <div class="small fw-bold">Connection Request</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">Emily invited you</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light-soft" style="background-color: var(--bg-body);">
+    <div class="container py-5">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-7 text-center">
+                <h2 class="font-heading mb-3 fw-bold display-6">Everything You Need</h2>
+                <p class="text-muted fs-5">
+                    A complete ecosystem designed to help you showcase your skills, network with peers, and find your
+                    dream career path.
+                </p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Feature 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card p-4 border-0 shadow-sm hover-card">
+                    <div class="feature-icon-soft">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-3">Build Connections</h3>
+                    <p class="text-muted mb-0">
+                        Expand your professional network by connecting with students, alumni, and industry leaders in
+                        your field.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card p-4 border-0 shadow-sm hover-card">
+                    <div class="feature-icon-soft">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-3">Find Opportunities</h3>
+                    <p class="text-muted mb-0">
+                        Discover curated internships, full-time jobs, and freelance projects tailored to your skill set.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card p-4 border-0 shadow-sm hover-card">
+                    <div class="feature-icon-soft">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-3">Attend Events</h3>
+                    <p class="text-muted mb-0">
+                        Participate in hackathons, webinars, and networking events directly through the platform.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card p-4 border-0 shadow-sm hover-card">
+                    <div class="feature-icon-soft">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-3">Engage & Share</h3>
+                    <p class="text-muted mb-0">
+                        Share your achievements, ask for advice, and engage in meaningful discussions with the
+                        community.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card p-4 border-0 shadow-sm hover-card">
+                    <div class="feature-icon-soft">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-3">Stay Updated</h3>
+                    <p class="text-muted mb-0">
+                        Receive real-time notifications for new job postings, message requests, and event reminders.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 feature-card p-4 border-0 shadow-sm hover-card">
+                    <div class="feature-icon-soft">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3 class="h5 fw-bold mb-3">Showcase Profile</h3>
+                    <p class="text-muted mb-0">
+                        Create a comprehensive professional profile highlighting your skills, projects, and experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section position-relative overflow-hidden">
+    <div class="cta-bg-pattern"></div>
+    <div class="cta-orb orb-1"></div>
+    <div class="cta-orb orb-2"></div>
+    <div class="container position-relative z-2 text-center text-white py-5">
+        <h3 class="fw-light mb-0">Join thousands of students building their
+            future with SkillentHub.</h3>
+    </div>
+</section>
+{% endblock %}
