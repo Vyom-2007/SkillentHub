@@ -152,8 +152,7 @@
 
         // Initialize timers
         const expirySeconds = {{ expiry_seconds|default (300)
-    }};
-    const resendCooldown = 60;
+    }}; const resendCooldown = 60;
 
     // Start OTP expiry countdown
     startOTPTimer(expirySeconds);

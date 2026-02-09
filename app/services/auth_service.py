@@ -205,3 +205,62 @@ def update_password(user_id, new_password):
     """
     rows_affected = execute_query(query, (password_hash, user_id))
     return rows_affected > 0
+
+
+def initiate_password_reset(email):
+    """
+    Initiate password reset process.
+    Generates OTP, saves to DB, and sends email.
+    
+    Args:
+        email: User's email address
+    
+    Returns:
+        Tuple (success: bool, message: str)
+    """
+    import random
+    from app.services import email_service
+    
+    # 1. Check User
+    user = get_user_by_email(email)
+    if not user:
+        return False, "Email not found."
+    
+    user_id = user['user_id']
+    
+    # Get user name for email
+    profile = get_user_profile(user_id)
+    user_name = profile['full_name'] if profile else "User"
+    
+    # 2. Check Cooldown (60 seconds)
+    cooldown_sql = """
+        SELECT created_at FROM password_reset_otps 
+        WHERE email = %s 
+        ORDER BY created_at DESC LIMIT 1
+    """
+    last_otp = execute_query(cooldown_sql, (email,), fetch_one=True)
+    
+    if last_otp:
+        # Check if created within last 60 seconds
+        # Note: formatting might be needed depending on DB driver return type (often datetime)
+        from datetime import datetime, timedelta
+        
+        time_diff = datetime.now() - last_otp['created_at']
+        if time_diff.total_seconds() < 60:
+            return False, "Please wait 60 seconds before resending."
+
+    # 3. Generate OTP
+    otp = str(random.randint(100000, 999999))
+    
+    # 4. Save to DB (Expiry +5 mins)
+    insert_sql = """
+        INSERT INTO password_reset_otps (user_id, email, otp, created_at, expires_at)
+        VALUES (%s, %s, %s, NOW(), NOW() + INTERVAL 5 MINUTE)
+    """
+    execute_insert(insert_sql, (user_id, email, otp))
+    
+    # 5. Send Email
+    if email_service.send_otp_email(email, user_name, otp):
+        return True, "OTP sent to your email."
+    else:
+        return False, "Failed to send email. Please try again later."

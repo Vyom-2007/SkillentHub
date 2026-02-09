@@ -121,17 +121,30 @@ function pollNewMessages() {
         .then(res => res.json())
         .then(data => {
             if (data.success && data.messages.length > 0) {
-                data.messages.forEach(msg => {
-                    appendMessage(msg, msg.sender_id === currentUserId);
-                    lastMessageId = Math.max(lastMessageId, msg.message_id);
-                });
-                scrollToBottom();
+                const wasAtBottom = isAtBottom();
 
-                // Mark as read
-                markAsRead(targetUserId);
+                data.messages.forEach(msg => {
+                    // Check if message already exists to prevent duplicates
+                    if (!document.querySelector(`[data-message-id="${msg.message_id}"]`)) {
+                        appendMessage(msg, msg.sender_id === currentUserId);
+                        lastMessageId = Math.max(lastMessageId, msg.message_id);
+                    }
+                });
+
+                // Auto-scroll if user was already at bottom or if it's a new message from self
+                if (wasAtBottom) {
+                    scrollToBottom();
+                }
             }
         })
         .catch(console.error);
+}
+
+function isAtBottom() {
+    const container = document.getElementById('chatMessages');
+    if (!container) return false;
+    // allowable threshold of 100px
+    return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
 }
 
 function startGlobalPolling() {

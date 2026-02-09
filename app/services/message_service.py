@@ -131,7 +131,12 @@ def get_message_by_id(message_id):
 
 
 def get_new_messages(current_user_id, other_user_id, since_id=0):
-    """Get new messages from other user since a specific message ID."""
+    """
+    Get new messages between two users since a specific message ID.
+    Fetch both sent and received messages to keep multiple tabs in sync.
+    Side effect: Mark fetched incoming messages as read.
+    """
+    # 1. Fetch new messages
     query = """
         SELECT 
             m.message_id,
@@ -144,10 +149,35 @@ def get_new_messages(current_user_id, other_user_id, since_id=0):
             p.profile_picture as sender_picture
         FROM messages m
         LEFT JOIN profiles p ON m.sender_id = p.user_id
-        WHERE m.sender_id = %s AND m.receiver_id = %s AND m.message_id > %s
+        WHERE (
+            (m.sender_id = %s AND m.receiver_id = %s) OR 
+            (m.sender_id = %s AND m.receiver_id = %s)
+        )
+        AND m.message_id > %s
         ORDER BY m.created_at ASC
     """
-    return execute_query(query, (other_user_id, current_user_id, since_id), fetch_all=True) or []
+    messages = execute_query(query, (current_user_id, other_user_id, other_user_id, current_user_id, since_id), fetch_all=True) or []
+    
+    # 2. Mark incoming messages as read
+    incoming_ids = [m['message_id'] for m in messages if m['sender_id'] == other_user_id and m['receiver_id'] == current_user_id]
+    
+    if incoming_ids:
+        try:
+            # Flatten list for SQL IN clause safe parameterization? 
+            # Or just use mark_as_read helper if it processes all 'unread' from user.
+            # Requirement says "mark messages FETCHED".
+            # If we generally mark all unread from this user as read, it's safer/easier.
+            # Let's use the explicit update for this user pair to be consistent.
+            update_sql = """
+                UPDATE messages 
+                SET is_read = 1 
+                WHERE sender_id = %s AND receiver_id = %s AND message_id > %s
+            """
+            execute_update(update_sql, (other_user_id, current_user_id, since_id))
+        except Exception as e:
+            print(f"Error auto-marking messages read: {e}")
+            
+    return messages
 
 
 def mark_as_read(current_user_id, other_user_id):
