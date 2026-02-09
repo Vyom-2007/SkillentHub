@@ -101,6 +101,14 @@ def register_blueprints(app):
     from app.blueprints.teams.routes import teams_bp
     app.register_blueprint(teams_bp)
 
+    # Recruiter Auth blueprint
+    from app.blueprints.auth_recruiter.routes import auth_recruiter_bp
+    app.register_blueprint(auth_recruiter_bp)
+
+    # Recruiter Dashboard blueprint
+    from app.blueprints.recruiter.routes import recruiter_bp
+    app.register_blueprint(recruiter_bp)
+
 
 def register_error_handlers(app):
     """Register error handlers for the application."""

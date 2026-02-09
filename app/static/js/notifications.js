@@ -111,7 +111,16 @@ function markAllNotificationsRead() {
         .then(data => {
             if (data.success) {
                 updateBadge(0);
-                fetchRecentNotifications();
+                // Clear the dropdown and show empty state
+                const list = document.getElementById('notificationList');
+                if (list) {
+                    list.innerHTML = `
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-bell-slash"></i>
+                            <p class="small mb-0 mt-2">No notifications</p>
+                        </div>
+                    `;
+                }
             }
         });
 }
