@@ -1,4 +1,6 @@
 Flask
-mysql-connector-python
-Flask-WTF
-email-validator
+pymysql
+bcrypt
+Flask-Session
+Flask-Mail
+python-dotenv

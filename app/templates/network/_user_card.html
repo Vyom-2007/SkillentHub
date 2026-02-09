@@ -1,0 +1,42 @@
+<div class="col-md-6 col-lg-4 mb-4">
+    <div class="user-card">
+        {% if user.profile_picture %}
+        <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_picture) }}"
+            alt="{{ user.full_name }}" class="user-avatar">
+        {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ user.full_name or 'U' }}&size=80&background=random"
+            alt="{{ user.full_name }}" class="user-avatar">
+        {% endif %}
+
+        <h6 class="user-name">{{ user.full_name or 'User' }}</h6>
+
+        {% if user.headline %}
+        <p class="user-headline">{{ user.headline }}</p>
+        {% else %}
+        <p class="user-headline text-muted">No headline</p>
+        {% endif %}
+
+        {% if user.location %}
+        <p class="user-location"><i class="bi bi-geo-alt me-1"></i>{{ user.location }}</p>
+        {% endif %}
+
+        <div class="skills-container">
+            {% if user.top_skills %}
+            {% for skill in user.top_skills.split(', ')[:3] %}
+            <span class="skill-badge">{{ skill }}</span>
+            {% endfor %}
+            {% else %}
+            <span class="text-muted small">No skills listed</span>
+            {% endif %}
+        </div>
+
+        <div class="d-flex gap-2 justify-content-center">
+            <a href="{{ url_for('profile.view', user_id=user.user_id) }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-person me-1"></i>View
+            </a>
+            <a href="/messages?user={{ user.user_id }}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-chat me-1"></i>Message
+            </a>
+        </div>
+    </div>
+</div>

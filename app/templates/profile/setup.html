@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Setup - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .skill-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        border-radius: 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .skill-badge:hover {
+        border-color: var(--primary-color);
+    }
+
+    .skill-badge.selected {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-color: transparent;
+        color: white;
+    }
+
+    .skill-badge input {
+        display: none;
+    }
+
+    .education-entry {
+        background: #f8fafc;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .education-entry .remove-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1.25rem;
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e2e8f0;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .char-counter.warning {
+        color: #d97706;
+    }
+
+    .char-counter.danger {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="auth-card" style="max-width: 100%;">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-badge fs-1" style="color: var(--primary-color);"></i>
+                    <h1 class="auth-title mt-2">Complete Your Profile</h1>
+                    <p class="auth-subtitle">Tell us about yourself to get started</p>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" id="profileForm">
+                    <!-- Profile Picture -->
+                    <div class="text-center mb-4">
+                        <img src="https://via.placeholder.com/150?text=Photo" alt="Profile"
+                            class="profile-picture-preview mb-3" id="picturePreview">
+                        <div class="file-input-wrapper">
+                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-camera me-1"></i>Upload Photo
+                            </button>
+                            <input type="file" name="profile_picture" id="profilePicture" accept=".jpg,.jpeg,.png">
+                        </div>
+                        <p class="small text-muted mt-2">Max 5MB, JPG or PNG</p>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="full_name" value="{{ data.full_name or '' }}"
+                                required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Headline <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="headline" value="{{ data.headline or '' }}"
+                                placeholder="e.g., Full Stack Developer" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" value="{{ data.location or '' }}"
+                                placeholder="City, State">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone" id="phone"
+                                value="{{ data.phone or '' }}" placeholder="10 digit number" maxlength="10">
+                        </div>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="mb-4">
+                        <label class="form-label">Bio</label>
+                        <textarea class="form-control" name="bio" id="bio" rows="4" maxlength="5000"
+                            placeholder="Tell us about yourself...">{{ data.bio or '' }}</textarea>
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="char-counter"><span id="bioCount">0</span>/5000</span>
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="mb-4">
+                        <label class="form-label">Skills</label>
+                        <div class="skills-container" id="skillsContainer">
+                            {% for skill in skills %}
+                            <div class="skill-badge">
+                                <input type="checkbox" name="skills" value="{{ skill.skill_id }}"
+                                    id="skill_{{ skill.skill_id }}">
+                                <label for="skill_{{ skill.skill_id }}">{{ skill.skill_name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if not skills %}
+                        <p class="text-muted small">No skills available.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Education -->
+                    <div class="mb-4">
+                        <label class="form-label">Education</label>
+                        <div id="educationContainer"></div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="addEducation">
+                            <i class="bi bi-plus-lg me-1"></i>Add Education
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-check-circle me-2"></i>Complete Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        initProfileForm();
+        addEducationEntry();
+    });
+</script>
+{% endblock %}

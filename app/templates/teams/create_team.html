@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Create Team - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-team-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .event-info {
+        background: linear-gradient(135deg, #667eea11, #764ba211);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="create-team-card">
+        <h4 class="mb-4"><i class="bi bi-people-fill me-2"></i>Create Team</h4>
+
+        {% if event %}
+        <div class="event-info">
+            <small class="text-muted text-uppercase">{{ item_type | capitalize }}</small>
+            <h6 class="mb-1">{{ event.title }}</h6>
+            {% if event.team_size_min or event.team_size_max %}
+            <small class="text-muted">
+                Team size: {{ event.team_size_min or 1 }} - {{ event.team_size_max or 'unlimited' }} members
+            </small>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <form id="createTeamForm">
+            <input type="hidden" name="item_type" value="{{ item_type }}">
+            <input type="hidden" name="item_id" value="{{ item_id }}">
+
+            <div class="mb-3">
+                <label class="form-label">Team Name</label>
+                <input type="text" class="form-control" name="team_name" id="teamName" required minlength="3"
+                    maxlength="100" placeholder="Enter team name">
+            </div>
+
+            {% if not item_id %}
+            <div class="mb-3">
+                <label class="form-label">Event Type</label>
+                <select class="form-select" name="item_type" id="eventType" required>
+                    <option value="">Select type...</option>
+                    <option value="competition">Competition</option>
+                    <option value="hackathon">Hackathon</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Select Event</label>
+                <select class="form-select" name="item_id" id="eventSelect" required disabled>
+                    <option value="">Select event first...</option>
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="bi bi-plus-circle me-1"></i>Create Team
+                </button>
+                <a href="{{ url_for('teams.my_teams') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('createTeamForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Creating...';
+
+        const formData = new FormData(this);
+        const data = {
+            team_name: formData.get('team_name'),
+            item_type: formData.get('item_type'),
+            item_id: parseInt(formData.get('item_id'))
+        };
+
+        fetch('/api/teams/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/teams/' + data.team_id;
+                } else {
+                    alert(data.error || 'Failed to create team');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Create Team';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Network error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Create Team';
+            });
+    });
+
+    {% if not item_id %}
+    // Dynamic event loading
+    document.getElementById('eventType').addEventListener('change', function () {
+        const type = this.value;
+        const eventSelect = document.getElementById('eventSelect');
+        eventSelect.disabled = true;
+        eventSelect.innerHTML = '<option value="">Loading...</option>';
+
+        if (!type) return;
+
+        const endpoint = type === 'competition' ? '/api/competitions' : '/api/hackathons';
+        fetch(endpoint)
+            .then(res => res.json())
+            .then(data => {
+                const events = data.competitions || data.hackathons || [];
+                eventSelect.innerHTML = '<option value="">Select event...</option>';
+                events.forEach(e => {
+                    const id = e.competition_id || e.hackathon_id;
+                    eventSelect.innerHTML += `<option value="${id}">${e.title}</option>`;
+                });
+                eventSelect.disabled = false;
+            })
+            .catch(() => {
+                eventSelect.innerHTML = '<option value="">Error loading events</option>';
+            });
+    });
+    {% endif %}
+</script>
+{% endblock %}

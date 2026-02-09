@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .app-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+        transition: transform 0.2s;
+    }
+
+    .app-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-applied {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .status-reviewing {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-shortlisted {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .status-rejected {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .status-accepted {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .filter-pills {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-pill {
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        background: #f1f5f9;
+        color: #475569;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-pill:hover,
+    .filter-pill.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1rem 1.25rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+
+    .type-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .type-job {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .type-internship {
+        background: #fce7f3;
+        color: #be185d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-file-earmark-text me-2"></i>My Applications</h4>
+        <a href="{{ url_for('opportunities.opportunities') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Browse Opportunities
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-2">
+            <div class="stat-card">
+                <div class="stat-number">{{ counts.total }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="stat-card">
+                <div class="stat-number text-secondary">{{ counts.applied }}</div>
+                <div class="stat-label">Applied</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="stat-card">
+                <div class="stat-number text-primary">{{ counts.reviewing }}</div>
+                <div class="stat-label">Reviewing</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="stat-card">
+                <div class="stat-number text-warning">{{ counts.shortlisted }}</div>
+                <div class="stat-label">Shortlisted</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="stat-card">
+                <div class="stat-number text-success">{{ counts.accepted }}</div>
+                <div class="stat-label">Accepted</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="stat-card">
+                <div class="stat-number text-danger">{{ counts.rejected }}</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-pills">
+        <a href="{{ url_for('applications.my_applications') }}"
+            class="filter-pill {% if not current_type and not current_status %}active{% endif %}">All</a>
+        <a href="{{ url_for('applications.my_applications', type='job') }}"
+            class="filter-pill {% if current_type == 'job' %}active{% endif %}">Jobs</a>
+        <a href="{{ url_for('applications.my_applications', type='internship') }}"
+            class="filter-pill {% if current_type == 'internship' %}active{% endif %}">Internships</a>
+        <span class="border-start mx-2"></span>
+        <a href="{{ url_for('applications.my_applications', status='applied') }}"
+            class="filter-pill {% if current_status == 'applied' %}active{% endif %}">Applied</a>
+        <a href="{{ url_for('applications.my_applications', status='reviewing') }}"
+            class="filter-pill {% if current_status == 'reviewing' %}active{% endif %}">Reviewing</a>
+        <a href="{{ url_for('applications.my_applications', status='shortlisted') }}"
+            class="filter-pill {% if current_status == 'shortlisted' %}active{% endif %}">Shortlisted</a>
+        <a href="{{ url_for('applications.my_applications', status='accepted') }}"
+            class="filter-pill {% if current_status == 'accepted' %}active{% endif %}">Accepted</a>
+    </div>
+
+    <!-- Applications List -->
+    {% if applications %}
+    {% for app in applications %}
+    <div class="app-card">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="type-badge {% if app.item_type == 'job' %}type-job{% else %}type-internship{% endif %}">
+                    {{ app.item_type|capitalize }}
+                </span>
+                <h5 class="mt-2 mb-1">{{ app.title or 'Opportunity' }}</h5>
+                <p class="text-muted mb-2">{{ app.company_name or 'Company' }}</p>
+                <small class="text-muted">
+                    <i class="bi bi-geo-alt me-1"></i>{{ app.location or 'N/A' }}
+                    <span class="ms-3"><i class="bi bi-calendar me-1"></i>Applied {{ app.applied_at.strftime('%b %d,
+                        %Y') if app.applied_at else '' }}</span>
+                </small>
+            </div>
+            <div class="text-end">
+                <span class="status-badge status-{{ app.status }}">{{ app.status|capitalize }}</span>
+                <div class="mt-3">
+                    {% if app.resume_path %}
+                    <a href="{{ url_for('applications.download_resume', filename=app.resume_path) }}"
+                        class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-download me-1"></i>Resume
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <p class="mt-3 text-muted">No applications found.</p>
+        <a href="{{ url_for('opportunities.opportunities') }}" class="btn btn-primary">
+            <i class="bi bi-search me-1"></i>Find Opportunities
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

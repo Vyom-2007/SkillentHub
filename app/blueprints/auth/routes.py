@@ -1,0 +1,316 @@
+"""
+Authentication routes blueprint.
+Handles user registration, login, logout, and password reset flows.
+"""
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from datetime import timedelta
+from app.services import auth_service, otp_service, email_service
+
+auth_bp = Blueprint('auth', __name__, url_prefix='')
+
+
+@auth_bp.route('/')
+def landing():
+    """Landing page - redirect to login or dashboard based on auth status."""
+    if session.get('user_id'):
+        return redirect(url_for('auth.dashboard'))
+    return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/dashboard')
+def dashboard():
+    """Simple dashboard for logged-in users."""
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    return render_template('auth/dashboard.html')
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    """User registration page."""
+    # Redirect if already logged in
+    if session.get('user_id'):
+        return redirect(url_for('auth.dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        full_name = request.form.get('full_name', '').strip()
+        
+        # Validation
+        errors = []
+        
+        if not email:
+            errors.append("Email is required")
+        elif not _is_valid_email(email):
+            errors.append("Please enter a valid email address")
+            
+        if not full_name:
+            errors.append("Full name is required")
+            
+        if not password:
+            errors.append("Password is required")
+        elif len(password) < 8:
+            errors.append("Password must be at least 8 characters")
+        elif not _is_valid_password(password):
+            errors.append("Password must contain at least one uppercase letter and one number")
+            
+        if password != confirm_password:
+            errors.append("Passwords do not match")
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return render_template('auth/register.html', 
+                                   email=email, 
+                                   full_name=full_name)
+        
+        # Register user
+        success, result = auth_service.register_user(email, password, full_name)
+        
+        if success:
+            # Send welcome email (non-blocking)
+            email_service.send_welcome_email(email, full_name)
+            flash('Registration successful! Please log in.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash(result, 'error')
+            return render_template('auth/register.html', 
+                                   email=email, 
+                                   full_name=full_name)
+    
+    return render_template('auth/register.html')
+
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    """User login page."""
+    # Redirect if already logged in
+    if session.get('user_id'):
+        return redirect(url_for('auth.dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        
+        if not email or not password:
+            flash('Please enter both email and password', 'error')
+            return render_template('auth/login.html', email=email)
+        
+        # Verify credentials
+        success, result = auth_service.verify_user(email, password)
+        
+        if success:
+            # Create session
+            session.clear()
+            session['user_id'] = result['user_id']
+            session['email'] = result['email']
+            session['full_name'] = result.get('full_name')
+            session.permanent = False  # 30-minute session as per config
+            
+            flash(f'Welcome back, {result.get("full_name", "User")}!', 'success')
+            return redirect(url_for('auth.dashboard'))
+        else:
+            flash(result, 'error')
+            return render_template('auth/login.html', email=email)
+    
+    return render_template('auth/login.html')
+
+
+@auth_bp.route('/logout')
+def logout():
+    """Log out the current user."""
+    session.clear()
+    flash('You have been logged out successfully.', 'success')
+    return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Forgot password - request OTP."""
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        
+        if not email:
+            flash('Please enter your email address', 'error')
+            return render_template('auth/forgot_password.html')
+        
+        # Check if user exists
+        user = auth_service.get_user_by_email(email)
+        
+        if not user:
+            # Don't reveal if email exists - security best practice
+            flash('If an account exists with this email, you will receive an OTP shortly.', 'info')
+            return redirect(url_for('auth.forgot_password'))
+        
+        # Check resend cooldown
+        can_resend, seconds_remaining = otp_service.can_resend_otp(email)
+        if not can_resend:
+            flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
+            return render_template('auth/forgot_password.html', email=email)
+        
+        # Generate and send OTP
+        otp, expires_at = otp_service.create_otp(user['user_id'], email)
+        email_service.send_otp_email(email, otp)
+        
+        # Store email in session for OTP verification
+        session['reset_email'] = email
+        
+        flash('OTP has been sent to your email address.', 'success')
+        return redirect(url_for('auth.verify_otp'))
+    
+    return render_template('auth/forgot_password.html')
+
+
+@auth_bp.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp():
+    """Verify OTP for password reset."""
+    email = session.get('reset_email')
+    
+    if not email:
+        flash('Please request a password reset first.', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+    
+    # Get expiry time for countdown
+    expiry_seconds = otp_service.get_otp_expiry_seconds(email)
+    
+    if request.method == 'POST':
+        # Collect OTP from 6 separate inputs
+        otp_digits = []
+        for i in range(1, 7):
+            digit = request.form.get(f'otp{i}', '')
+            otp_digits.append(digit)
+        
+        otp_input = ''.join(otp_digits)
+        
+        if len(otp_input) != 6 or not otp_input.isdigit():
+            flash('Please enter a valid 6-digit OTP', 'error')
+            return render_template('auth/verify_otp.html', 
+                                   email=email, 
+                                   expiry_seconds=expiry_seconds)
+        
+        # Verify OTP
+        success, message, otp_record = otp_service.verify_otp(email, otp_input)
+        
+        if success:
+            session['otp_verified'] = True
+            session['otp_id'] = otp_record['otp_id']
+            flash('OTP verified successfully. Please set your new password.', 'success')
+            return redirect(url_for('auth.reset_password'))
+        else:
+            flash(message, 'error')
+            # Refresh expiry time
+            expiry_seconds = otp_service.get_otp_expiry_seconds(email)
+            return render_template('auth/verify_otp.html', 
+                                   email=email, 
+                                   expiry_seconds=expiry_seconds)
+    
+    return render_template('auth/verify_otp.html', 
+                           email=email, 
+                           expiry_seconds=expiry_seconds)
+
+
+@auth_bp.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    """Resend OTP for password reset."""
+    email = session.get('reset_email')
+    
+    if not email:
+        flash('Please request a password reset first.', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+    
+    # Check resend cooldown
+    can_resend, seconds_remaining = otp_service.can_resend_otp(email)
+    if not can_resend:
+        flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
+        return redirect(url_for('auth.verify_otp'))
+    
+    # Get user
+    user = auth_service.get_user_by_email(email)
+    if not user:
+        flash('An error occurred. Please try again.', 'error')
+        return redirect(url_for('auth.forgot_password'))
+    
+    # Generate and send new OTP
+    otp, expires_at = otp_service.create_otp(user['user_id'], email)
+    email_service.send_otp_email(email, otp)
+    
+    flash('A new OTP has been sent to your email.', 'success')
+    return redirect(url_for('auth.verify_otp'))
+
+
+@auth_bp.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    """Reset password after OTP verification."""
+    email = session.get('reset_email')
+    otp_verified = session.get('otp_verified')
+    
+    if not email or not otp_verified:
+        flash('Please verify your OTP first.', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+    
+    # Verify OTP is still valid
+    otp_record = otp_service.get_verified_otp(email)
+    if not otp_record:
+        session.pop('reset_email', None)
+        session.pop('otp_verified', None)
+        flash('OTP has expired. Please request a new one.', 'error')
+        return redirect(url_for('auth.forgot_password'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        # Validation
+        errors = []
+        
+        if not password:
+            errors.append("Password is required")
+        elif len(password) < 8:
+            errors.append("Password must be at least 8 characters")
+        elif not _is_valid_password(password):
+            errors.append("Password must contain at least one uppercase letter and one number")
+            
+        if password != confirm_password:
+            errors.append("Passwords do not match")
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return render_template('auth/reset_password.html')
+        
+        # Update password
+        success = auth_service.update_password(otp_record['user_id'], password)
+        
+        if success:
+            # Mark OTP as used
+            otp_service.mark_otp_used(otp_record['otp_id'])
+            
+            # Clear reset session data
+            session.pop('reset_email', None)
+            session.pop('otp_verified', None)
+            session.pop('otp_id', None)
+            
+            flash('Password reset successful! Please log in with your new password.', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('An error occurred. Please try again.', 'error')
+            return render_template('auth/reset_password.html')
+    
+    return render_template('auth/reset_password.html')
+
+
+# Helper functions
+def _is_valid_email(email):
+    """Basic email validation."""
+    import re
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+
+def _is_valid_password(password):
+    """Validate password has at least one uppercase and one number."""
+    has_upper = any(c.isupper() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    return has_upper and has_digit
