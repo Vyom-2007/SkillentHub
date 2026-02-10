@@ -233,15 +233,8 @@ def register_hackathon(hackathon_id, user_id, team_name=None, members=None):
                     'email': email
                 })
             else:
-                # Non-user member
-                if not name:
-                     return False, f"Name is required for non-user member: {email}"
-                
-                member_data.append({
-                    'user_id': None,
-                    'name': name,
-                    'email': email
-                })
+                # Non-user member - REJECT
+                return False, f"User with email {email} is not registered. All team members must be registered users."
             
         # Create Team & Register
     connection = get_db_connection()

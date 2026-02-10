@@ -22,6 +22,7 @@ def get_all_users(page=1, per_page=50, current_user_id=None):
         LEFT JOIN profiles p ON u.user_id = p.user_id
         WHERE u.is_active = 1 AND p.profile_id IS NOT NULL
         AND u.user_id != %s
+        AND u.email NOT IN (SELECT company_email FROM recruiters)
         ORDER BY p.full_name ASC
         LIMIT %s OFFSET %s
     """
@@ -30,7 +31,7 @@ def get_all_users(page=1, per_page=50, current_user_id=None):
     
     # Get total count
     count_result = execute_query(
-        "SELECT COUNT(*) as total FROM users u JOIN profiles p ON u.user_id = p.user_id WHERE u.is_active = 1",
+        "SELECT COUNT(*) as total FROM users u JOIN profiles p ON u.user_id = p.user_id WHERE u.is_active = 1 AND u.email NOT IN (SELECT company_email FROM recruiters)",
         fetch_one=True
     )
     total = count_result['total'] if count_result else 0
@@ -57,7 +58,7 @@ def search_users(q=None, skills=None, location=None, page=1, per_page=50, curren
     """
     offset = (page - 1) * per_page
     params = []
-    where_clauses = ["u.is_active = 1", "p.profile_id IS NOT NULL"]
+    where_clauses = ["u.is_active = 1", "p.profile_id IS NOT NULL", "u.email NOT IN (SELECT company_email FROM recruiters)"]
     join_clauses = ["LEFT JOIN profiles p ON u.user_id = p.user_id"]
     
     # Exclude current user

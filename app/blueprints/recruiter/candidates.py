@@ -1,5 +1,5 @@
 
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
 from app.database.connection import execute_query
 
 # Assume this is imported/registered in __init__.py or routes.py
