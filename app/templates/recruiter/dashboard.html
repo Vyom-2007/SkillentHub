@@ -268,10 +268,10 @@
                             <span class="badge bg-secondary">{{ app.item_type | capitalize }}</span>
                         </td>
                         <td>
-                            {% if app.status == 'pending' %}
-                            <span class="status-badge bg-warning text-dark">Pending</span>
-                            {% elif app.status == 'reviewed' %}
-                            <span class="status-badge bg-info">Reviewed</span>
+                            {% if app.status == 'applied' %}
+                            <span class="status-badge bg-warning text-dark">Applied</span>
+                            {% elif app.status == 'reviewing' %}
+                            <span class="status-badge bg-info">Reviewing</span>
                             {% elif app.status == 'shortlisted' %}
                             <span class="status-badge bg-primary">Shortlisted</span>
                             {% elif app.status == 'accepted' %}

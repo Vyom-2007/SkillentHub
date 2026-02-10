@@ -107,8 +107,8 @@ def get_recent_applications(recruiter_id, limit=5):
             a.status,
             a.applied_at,
             u.user_id,
-            u.full_name as candidate_name,
-            p.profile_photo
+            p.full_name as candidate_name,
+            p.profile_picture as profile_photo
         FROM applications a
         JOIN users u ON a.user_id = u.user_id
         LEFT JOIN profiles p ON u.user_id = p.user_id
@@ -121,12 +121,15 @@ def get_recent_applications(recruiter_id, limit=5):
         ORDER BY a.applied_at DESC
         LIMIT %s
     """
-    applications = execute_query(query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id, limit))
+    applications = execute_query(query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id, limit), fetch_all=True)
     
     # Enrich with item titles
-    for app in applications:
-        app['item_title'] = get_item_title(app['item_type'], app['item_id'])
-        app['time_ago'] = get_time_ago(app['applied_at'])
+    if applications:
+        for app in applications:
+            app['item_title'] = get_item_title(app['item_type'], app['item_id'])
+            app['time_ago'] = get_time_ago(app['applied_at'])
+    else:
+        applications = []
     
     return applications
 
@@ -191,9 +194,9 @@ def get_all_applications(recruiter_id, status=None, item_type=None, page=1, per_
             a.applied_at,
             a.cover_letter,
             u.user_id,
-            u.full_name as candidate_name,
+            p.full_name as candidate_name,
             u.email as candidate_email,
-            p.profile_photo,
+            p.profile_picture as profile_photo,
             p.headline
         FROM applications a
         JOIN users u ON a.user_id = u.user_id
