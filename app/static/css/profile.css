@@ -1,0 +1,595 @@
+/* ================================================================
+   SkillentHub — Profile Styles
+   Consistent with auth.css design system
+   ================================================================ */
+
+/* ── Profile Setup / Edit Card ────────────────────────────── */
+.profile-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-setup-card {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.setup-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.setup-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.setup-header p {
+    color: #94a3b8;
+    margin-bottom: 0;
+}
+
+.form-section {
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.section-title i {
+    color: #6366f1;
+}
+
+/* ── Picture Upload ───────────────────────────────────────── */
+.picture-upload-area {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatar-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    overflow: hidden;
+    background-position: center;
+    background-size: cover;
+}
+
+.avatar-preview:hover {
+    border-color: #6366f1;
+    background-color: rgba(99, 102, 241, 0.1);
+}
+
+.avatar-preview i {
+    font-size: 1.5rem;
+    color: #94a3b8;
+}
+
+.avatar-preview span {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ── Skill Tags ───────────────────────────────────────────── */
+.skill-input-area .form-control,
+.skill-input-area .form-select {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border-radius: 12px;
+}
+
+.skill-input-area .form-control:focus,
+.skill-input-area .form-select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #6366f1;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    color: #fff;
+}
+
+.skill-input-area .form-select option {
+    background: #1a1440;
+    color: #fff;
+}
+
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    min-height: 20px;
+}
+
+.skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    animation: fadeIn 0.2s ease;
+}
+
+.skill-tag.beginner {
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+    color: #67e8f9;
+}
+
+.skill-tag.intermediate {
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #a5b4fc;
+}
+
+.skill-tag.advanced {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #6ee7b7;
+}
+
+.skill-tag .remove-skill {
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.skill-tag .remove-skill:hover {
+    opacity: 1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ── Education Rows ───────────────────────────────────────── */
+.education-row {
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.remove-edu-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* ── Profile View Card ────────────────────────────────────── */
+.profile-view-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.profile-header-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.profile-avatar-large {
+    flex-shrink: 0;
+}
+
+.profile-avatar-large img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(99, 102, 241, 0.4);
+}
+
+.avatar-placeholder-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-placeholder-large i {
+    font-size: 3rem;
+    color: #6366f1;
+}
+
+.profile-header-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+}
+
+.profile-headline {
+    font-size: 1.05rem;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.profile-location {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 0;
+}
+
+.profile-location i {
+    color: #6366f1;
+}
+
+/* ── Completion Ring ──────────────────────────────────────── */
+.completion-ring-wrapper {
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.completion-ring {
+    position: relative;
+    width: 90px;
+    height: 90px;
+}
+
+.completion-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 6;
+}
+
+.ring-fill {
+    fill: none;
+    stroke: #6366f1;
+    stroke-width: 6;
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease;
+}
+
+.ring-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.ring-value {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.ring-text {
+    display: block;
+    font-size: 0.6rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ── Profile Stats Bar ────────────────────────────────────── */
+.profile-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    flex: 1;
+}
+
+.stat-card i {
+    font-size: 1.3rem;
+    color: #6366f1;
+}
+
+.stat-num {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.stat-lbl {
+    display: block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* ── Section Titles (view) ────────────────────────────────── */
+.section-title-view {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 16px;
+}
+
+.section-title-view i {
+    color: #6366f1;
+}
+
+/* ── Bio ──────────────────────────────────────────────────── */
+.profile-bio {
+    color: #cbd5e1;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+/* ── Education Timeline ───────────────────────────────────── */
+.education-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.education-timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.edu-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.edu-item:last-child {
+    margin-bottom: 0;
+}
+
+.edu-icon {
+    position: absolute;
+    left: -30px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edu-icon i {
+    font-size: 0.7rem;
+    color: #fff;
+}
+
+.edu-degree {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 2px;
+}
+
+.edu-institution {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-bottom: 2px;
+}
+
+.edu-dates {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.edu-description {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* ── Skills Badges (view) ─────────────────────────────────── */
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-badge-view {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.skill-badge-view.beginner {
+    background: rgba(6, 182, 212, 0.15);
+    color: #67e8f9;
+}
+
+.skill-badge-view.intermediate {
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
+}
+
+.skill-badge-view.advanced {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+}
+
+.proficiency-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.beginner .proficiency-dot {
+    background: #06b6d4;
+}
+
+.intermediate .proficiency-dot {
+    background: #6366f1;
+}
+
+.advanced .proficiency-dot {
+    background: #10b981;
+}
+
+/* ── Contact List ─────────────────────────────────────────── */
+.contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.contact-list li {
+    padding: 8px 0;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.contact-list li:last-child {
+    border-bottom: none;
+}
+
+.contact-list li i {
+    color: #6366f1;
+    width: 20px;
+    margin-right: 8px;
+}
+
+/* ── Posts ─────────────────────────────────────────────────── */
+.post-item {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.post-item:last-child {
+    border-bottom: none;
+}
+
+.post-content {
+    color: #cbd5e1;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.post-image {
+    max-width: 100%;
+    border-radius: 12px;
+    margin: 12px 0;
+}
+
+.post-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.post-meta i {
+    color: #ef4444;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .profile-setup-card {
+        padding: 24px 16px;
+    }
+
+    .profile-view-card {
+        padding: 20px 16px;
+    }
+
+    .profile-header-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .completion-ring-wrapper {
+        margin-left: 0;
+        margin-top: 12px;
+    }
+
+    .profile-stats {
+        flex-direction: column;
+    }
+
+    .profile-avatar-large img,
+    .avatar-placeholder-large {
+        width: 90px;
+        height: 90px;
+    }
+
+    .profile-name {
+        font-size: 1.4rem;
+    }
+}

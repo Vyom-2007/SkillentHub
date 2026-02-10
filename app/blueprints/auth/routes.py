@@ -86,7 +86,7 @@ def login():
     session['user_name'] = user['full_name']
 
     update_last_login(user['user_id'])
-    return redirect('/api/feed')
+    return redirect(url_for('auth.feed_redirect'))
 
 
 @auth_bp.route('/feed')

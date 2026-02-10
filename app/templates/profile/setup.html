@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Set Up Your Profile — SkillentHub{% endblock %}
+
+{% block head %}
+<!-- Cropper.js CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <div class="container py-5">
+        <div class="profile-setup-card animate-in">
+            <div class="setup-header">
+                <h1><i class="bi bi-person-gear me-2"></i>Set Up Your Profile</h1>
+                <p class="text-secondary">Complete your profile to stand out to recruiters and peers</p>
+            </div>
+
+            <form id="profile-form" action="{{ url_for('profile.setup') }}" method="POST" enctype="multipart/form-data"
+                novalidate>
+
+                <!-- ── Section 1: Personal Info ──────────────── -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-person-circle me-2"></i>Personal Information</h3>
+
+                    <!-- Profile Picture -->
+                    <div class="picture-upload-area mb-4">
+                        <div class="avatar-preview" id="avatar-preview">
+                            <i class="bi bi-camera-fill"></i>
+                            <span>Upload Photo</span>
+                        </div>
+                        <input type="file" id="profile_picture" name="profile_picture" accept="image/jpeg,image/png"
+                            class="d-none">
+                        <div class="picture-info">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="upload-pic-btn">
+                                <i class="bi bi-upload me-1"></i>Choose Image
+                            </button>
+                            <small class="text-muted d-block mt-1">JPG or PNG, max 5 MB</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="headline" name="headline"
+                                    placeholder="e.g. Computer Science Student | Web Developer" maxlength="500">
+                                <label for="headline"><i class="bi bi-megaphone me-1"></i>Headline</label>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="bio" name="bio" placeholder="Bio"
+                                    style="height:100px"></textarea>
+                                <label for="bio"><i class="bi bi-card-text me-1"></i>Bio</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="location" name="location"
+                                    placeholder="City, Country">
+                                <label for="location"><i class="bi bi-geo-alt me-1"></i>Location</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                    placeholder="10-digit phone" maxlength="10" pattern="[0-9]{10}">
+                                <label for="phone"><i class="bi bi-telephone me-1"></i>Phone (10 digits)</label>
+                                <div class="invalid-feedback" id="phone-error">Phone must be exactly 10 digits.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Section 2: Skills ─────────────────────── -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-star me-2"></i>Skills</h3>
+
+                    <div class="skill-input-area">
+                        <div class="row g-2 align-items-end">
+                            <div class="col">
+                                <input type="text" class="form-control" id="skill-input"
+                                    placeholder="Type a skill and press Enter (e.g. Python)">
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-select" id="skill-proficiency">
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate" selected>Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary" id="add-skill-btn">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="skill-tags" id="skill-tags"></div>
+                        <input type="hidden" name="skills_json" id="skills-json" value="[]">
+                    </div>
+                </div>
+
+                <!-- ── Section 3: Education ──────────────────── -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-mortarboard me-2"></i>Education</h3>
+
+                    <div id="education-container">
+                        <!-- First education row (default) -->
+                        <div class="education-row" data-index="0">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" name="institution[]"
+                                            placeholder="University / College">
+                                        <label>Institution</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" name="degree[]"
+                                            placeholder="B.Tech, M.Sc, etc.">
+                                        <label>Degree</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" name="field_of_study[]"
+                                            placeholder="Computer Science">
+                                        <label>Field of Study</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" name="start_date[]" placeholder=" ">
+                                        <label>Start Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" name="end_date[]" placeholder=" ">
+                                        <label>End Date</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" name="edu_description[]"
+                                            placeholder="Description" style="height:70px"></textarea>
+                                        <label>Description (optional)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="add-education-btn">
+                        <i class="bi bi-plus-circle me-1"></i>Add Another Education
+                    </button>
+                </div>
+
+                <!-- ── Section 4: Documents ──────────────────── -->
+                <div class="form-section">
+                    <h3 class="section-title"><i class="bi bi-file-earmark-text me-2"></i>Documents</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light">Resume (PDF / DOCX)</label>
+                            <input type="file" class="form-control" name="resume" accept=".pdf,.docx">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light">Cover Letter (PDF / DOCX)</label>
+                            <input type="file" class="form-control" name="cover_letter" accept=".pdf,.docx">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn btn-primary btn-auth w-100 mt-4" id="submit-btn">
+                    <span class="btn-text"><i class="bi bi-check-lg me-2"></i>Save Profile</span>
+                    <span class="btn-loader d-none">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+{% endblock %}
