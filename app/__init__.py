@@ -21,6 +21,7 @@ def create_app():
     uploads_root = os.path.join(app.root_path, '..', 'uploads')
     os.makedirs(os.path.join(uploads_root, 'profiles'), exist_ok=True)
     os.makedirs(os.path.join(uploads_root, 'resumes'), exist_ok=True)
+    os.makedirs(os.path.join(uploads_root, 'posts'), exist_ok=True)
 
     # ── Initialise extensions ───────────────────────────────
     sess.init_app(app)
@@ -42,5 +43,8 @@ def create_app():
 
     from app.blueprints.profile import profile_bp
     app.register_blueprint(profile_bp)
+
+    from app.blueprints.posts import posts_bp
+    app.register_blueprint(posts_bp)
 
     return app

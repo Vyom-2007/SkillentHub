@@ -91,21 +91,10 @@ def login():
 
 @auth_bp.route('/feed')
 def feed_redirect():
-    """Temporary placeholder until the feed blueprint is built."""
+    """Redirect to the real feed page."""
     if 'user_id' not in session:
         return redirect(url_for('auth.login_page'))
-    return f"""
-    <html><body style="font-family:Inter,sans-serif;display:flex;align-items:center;
-    justify-content:center;height:100vh;background:#f5f5ff;">
-    <div style="text-align:center;">
-        <h1>Welcome, {session.get('user_name', 'User')}!</h1>
-        <p>Feed page coming soon.</p>
-        <form action="{url_for('auth.logout')}" method="post">
-            <button type="submit" style="padding:10px 28px;background:#4f46e5;color:#fff;
-            border:none;border-radius:8px;cursor:pointer;font-size:16px;">Log Out</button>
-        </form>
-    </div></body></html>
-    """
+    return redirect(url_for('posts.feed'))
 
 
 # ──────────────────────────────────────────────────────────

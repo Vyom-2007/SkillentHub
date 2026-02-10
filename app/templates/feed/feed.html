@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Feed — SkillentHub{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/feed.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="feed-wrapper">
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+
+                <!-- ── New Posts Banner ───────────────── -->
+                <div class="new-posts-banner d-none" id="new-posts-banner">
+                    <i class="bi bi-arrow-up-circle me-2"></i>
+                    <span id="new-posts-text"></span>
+                </div>
+
+                <!-- ── Create Post ────────────────────── -->
+                <div class="feed-card create-post-card animate-in mb-4">
+                    <form id="create-post-form" action="{{ url_for('posts.post_create') }}" method="POST"
+                        enctype="multipart/form-data">
+                        <div class="create-post-header">
+                            <div class="create-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            <textarea class="form-control create-textarea" id="post-content" name="content" rows="2"
+                                placeholder="What's on your mind, {{ session.get('user_name', 'User').split(' ')[0] }}?"></textarea>
+                        </div>
+
+                        <!-- Image preview -->
+                        <div class="image-preview-container d-none" id="image-preview-container">
+                            <img id="image-preview" alt="Preview">
+                            <button type="button" class="btn-remove-image" id="remove-image-btn">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="create-post-footer">
+                            <label class="btn btn-sm btn-outline-secondary upload-label" for="post-image">
+                                <i class="bi bi-image me-1"></i>Photo
+                            </label>
+                            <input type="file" id="post-image" name="image" accept="image/jpeg,image/png,image/gif"
+                                class="d-none">
+
+                            <button type="submit" class="btn btn-primary btn-sm ms-auto" id="post-submit-btn">
+                                <span class="btn-text"><i class="bi bi-send me-1"></i>Post</span>
+                                <span class="btn-loader d-none">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>Posting...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── Feed Posts ──────────────────────── -->
+                <div id="feed-container">
+                    {% if posts %}
+                    {% for post in posts %}
+                    <div class="feed-card post-card animate-in mb-3" data-post-id="{{ post.post_id }}">
+                        <!-- Author Header -->
+                        <div class="post-header">
+                            <div class="post-avatar">
+                                {% if post.author_pic %}
+                                <img src="/{{ post.author_pic }}" alt="{{ post.author_name }}">
+                                {% else %}
+                                <div class="avatar-placeholder-sm">
+                                    {% if post.author_type == 'recruiter' %}
+                                    <i class="bi bi-building"></i>
+                                    {% else %}
+                                    <i class="bi bi-person-fill"></i>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="post-author-info">
+                                <span class="post-author-name">
+                                    {{ post.author_name }}
+                                    {% if post.author_type == 'recruiter' %}
+                                    <span class="badge-recruiter">Recruiter</span>
+                                    {% endif %}
+                                </span>
+                                <span class="post-time"
+                                    data-time="{{ post.created_at.isoformat() if post.created_at else '' }}"></span>
+                            </div>
+                            {% if post.author_type == 'user' and post.author_id == session.get('user_id') %}
+                            <div class="post-menu ms-auto">
+                                <button class="btn btn-sm btn-link text-secondary delete-post-btn"
+                                    data-post-id="{{ post.post_id }}" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Content -->
+                        <div class="post-content">
+                            {% if post.content|length > 200 %}
+                            <p class="post-text truncated" data-full="{{ post.content }}">{{ post.content[:200] }}...<a
+                                    href="#" class="read-more-link">Read more</a></p>
+                            {% else %}
+                            <p class="post-text">{{ post.content }}</p>
+                            {% endif %}
+                        </div>
+
+                        {% if post.image_path %}
+                        <div class="post-image-container">
+                            <img src="/{{ post.image_path }}" class="post-image" alt="Post image" loading="lazy">
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="post-actions">
+                            <button class="btn btn-sm action-btn like-btn {{ 'liked' if post.is_liked else '' }}"
+                                data-post-id="{{ post.post_id }}">
+                                <i class="bi {{ 'bi-heart-fill' if post.is_liked else 'bi-heart' }}"></i>
+                                <span class="like-count">{{ post.likes_count }}</span>
+                            </button>
+                            <button class="btn btn-sm action-btn comment-toggle-btn" data-post-id="{{ post.post_id }}">
+                                <i class="bi bi-chat"></i>
+                                <span>Comment</span>
+                            </button>
+                        </div>
+
+                        <!-- Comments Section (hidden by default) -->
+                        <div class="comments-section d-none" id="comments-{{ post.post_id }}">
+                            <div class="comments-list" id="comments-list-{{ post.post_id }}">
+                                <!-- loaded via AJAX -->
+                            </div>
+                            <div class="comment-input-area">
+                                <input type="text" class="form-control comment-input" placeholder="Write a comment..."
+                                    data-post-id="{{ post.post_id }}" maxlength="500">
+                                <button class="btn btn-sm btn-primary send-comment-btn"
+                                    data-post-id="{{ post.post_id }}">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    {% if posts|length == 10 %}
+                    <div class="text-center mb-4">
+                        <a href="{{ url_for('posts.feed', offset=offset+10) }}"
+                            class="btn btn-outline-primary load-more-btn">
+                            <i class="bi bi-arrow-down-circle me-1"></i>Load More
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="feed-card empty-feed animate-in text-center py-5">
+                        <i class="bi bi-newspaper" style="font-size:3rem;color:#6366f1;"></i>
+                        <h4 class="mt-3 text-light">No posts yet</h4>
+                        <p class="text-secondary">Be the first to share something!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ── Sidebar ────────────────────────── -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="feed-card sidebar-card animate-in">
+                    <h6 class="sidebar-title"><i class="bi bi-person-circle me-2"></i>Quick Links</h6>
+                    <ul class="sidebar-links">
+                        <li><a href="{{ url_for('profile.own_profile') }}"><i class="bi bi-person me-2"></i>My
+                                Profile</a></li>
+                        <li><a href="{{ url_for('profile.edit_page') }}"><i class="bi bi-pencil me-2"></i>Edit
+                                Profile</a></li>
+                        <li>
+                            <form action="{{ url_for('auth.logout') }}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-link sidebar-link-btn">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Store the latest post ID for polling -->
+{% if posts %}
+<input type="hidden" id="latest-post-id" value="{{ posts[0].post_id }}">
+{% else %}
+<input type="hidden" id="latest-post-id" value="0">
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/feed.js') }}"></script>
+{% endblock %}
