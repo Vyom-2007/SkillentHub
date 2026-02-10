@@ -179,55 +179,76 @@ def register_hackathon(hackathon_id, user_id, team_name=None, members=None):
     
     # If members provided, validate and handle team
     team_id = None
-    member_ids = []
+    member_data = [] # List of dicts: {user_id, name, email}
     
     if members:
         if not team_name:
             return False, "Team name is required when adding members"
             
         # Validate team size
-        max_size = hack.get('team_size', 1) # Fallback to 1 if null (though schema says int, might be null)
-        # Check team_size logic. Schema has team_size? 
-        # Wait, previous view of schema for hackathons: `team_size` int DEFAULT NULL.
-        # So we should check that.
+        max_size = hack.get('team_size', 1) or 1
         
         current_size = 1 + len(members) # Leader + members
         if max_size and current_size > max_size:
              return False, f"Team size exceeds limit of {max_size}"
 
-        # Resolve emails to User IDs
-        for email in members:
-            user = auth_service.get_user_by_email(email)
-            if not user:
-                return False, f"User with email {email} not found"
-            
-            m_id = user['user_id']
-            if m_id == user_id:
-                return False, "You cannot add yourself as a member"
-                
-            if is_registered_hackathon(hackathon_id, m_id):
-                return False, f"User {email} is already registered"
-                
-            if m_id in member_ids:
-                return False, f"Duplicate member email: {email}"
-                
-            member_ids.append(m_id)
-            
-        # Create Team
-        # We use a direct DB transaction here to ensure atomicity of team + registrations
-        # instead of calling team_service which might commit separately.
-        # But for simplicity let's use team_service to create the team shell 
-        # and then manually add members and registrations in a transaction.
-        # Actually, let's just do it all here in one transaction.
+        # Resolve emails to User IDs or keep as non-users
+        processed_emails = set()
         
+        for m in members:
+            # Handle both string (old format) and dict (new format) for backward compatibility/robustness
+            if isinstance(m, str):
+                email = m
+                name = None
+            else:
+                email = m.get('email')
+                name = m.get('name')
+            
+            if not email:
+                continue
+                
+            if email in processed_emails:
+                return False, f"Duplicate member email: {email}"
+            processed_emails.add(email)
+
+            # Check if user exists
+            user = auth_service.get_user_by_email(email)
+            
+            if user:
+                m_id = user['user_id']
+                if m_id == user_id:
+                    return False, "You cannot add yourself as a member"
+                    
+                if is_registered_hackathon(hackathon_id, m_id):
+                    return False, f"User {email} is already registered"
+                
+                # Get name from profile if not provided
+                if not name:
+                    profile = auth_service.get_user_profile(m_id)
+                    name = profile.get('full_name') if profile else 'Unknown'
+                    
+                member_data.append({
+                    'user_id': m_id,
+                    'name': name,
+                    'email': email
+                })
+            else:
+                # Non-user member
+                if not name:
+                     return False, f"Name is required for non-user member: {email}"
+                
+                member_data.append({
+                    'user_id': None,
+                    'name': name,
+                    'email': email
+                })
+            
+        # Create Team & Register
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
             # 1. Create Team if needed
             if team_name and (members or (hack.get('team_size') or 1) > 1):
-                # Check if team already exists for this user/event? 
-                # team_service logic handles user-event uniqueness for teams.
-                # Let's insert directly.
                 cursor.execute("""
                     INSERT INTO teams (team_name, item_type, item_id, created_by, max_members)
                     VALUES (%s, 'hackathon', %s, %s, %s)
@@ -235,11 +256,23 @@ def register_hackathon(hackathon_id, user_id, team_name=None, members=None):
                 team_id = cursor.lastrowid
                 
                 # Add leader
-                cursor.execute("INSERT INTO team_members (team_id, user_id, role) VALUES (%s, %s, 'leader')", (team_id, user_id))
+                # Fetch leader name/email for completeness? 
+                leader_profile = auth_service.get_user_profile(user_id)
+                leader_name = leader_profile.get('full_name') if leader_profile else 'Leader'
+                leader_user = auth_service.get_user_by_id(user_id)
+                leader_email = leader_user.get('email') if leader_user else ''
+
+                cursor.execute("""
+                    INSERT INTO team_members (team_id, user_id, name, email, role) 
+                    VALUES (%s, %s, %s, %s, 'leader')
+                """, (team_id, user_id, leader_name, leader_email))
                 
                 # Add members
-                for m_id in member_ids:
-                     cursor.execute("INSERT INTO team_members (team_id, user_id, role) VALUES (%s, %s, 'member')", (team_id, m_id))
+                for member in member_data:
+                     cursor.execute("""
+                        INSERT INTO team_members (team_id, user_id, name, email, role) 
+                        VALUES (%s, %s, %s, %s, 'member')
+                     """, (team_id, member['user_id'], member['name'], member['email']))
             
             # 2. Register Leader
             cursor.execute("""
@@ -248,11 +281,11 @@ def register_hackathon(hackathon_id, user_id, team_name=None, members=None):
             """, (hackathon_id, user_id, team_name))
             
             # 3. Register Members
-            for m_id in member_ids:
+            for member in member_data:
                 cursor.execute("""
-                    INSERT INTO hackathon_registrations (hackathon_id, user_id, team_name) 
-                    VALUES (%s, %s, %s)
-                """, (hackathon_id, m_id, team_name))
+                    INSERT INTO hackathon_registrations (hackathon_id, user_id, name, email, team_name) 
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (hackathon_id, member['user_id'], member['name'], member['email'], team_name))
                 
         connection.commit()
         return True, "Registration successful"

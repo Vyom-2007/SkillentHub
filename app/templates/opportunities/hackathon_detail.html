@@ -231,15 +231,16 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label d-flex justify-content-between align-items-center">
-                        Team Members (Emails)
+                        Team Members
                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="addMemberInput()">
                             <i class="bi bi-plus"></i> Add
                         </button>
                     </label>
                     <div id="teamMembersContainer">
                         <!-- Dynamic inputs will be added here -->
-                        <div class="input-group mb-2">
-                            <input type="email" class="form-control member-email" placeholder="Member email" required>
+                        <div class="input-group mb-2 member-row">
+                            <input type="text" class="form-control member-name" placeholder="Name" required>
+                            <input type="email" class="form-control member-email" placeholder="Email" required>
                             <button class="btn btn-outline-secondary" type="button" onclick="removeMemberInput(this)">
                                 <i class="bi bi-x"></i>
                             </button>
@@ -258,9 +259,10 @@
                         }
                         const container = document.getElementById('teamMembersContainer');
                         const div = document.createElement('div');
-                        div.className = 'input-group mb-2';
+                        div.className = 'input-group mb-2 member-row';
                         div.innerHTML = `
-                            <input type="email" class="form-control member-email" placeholder="Member email">
+                            <input type="text" class="form-control member-name" placeholder="Name" required>
+                            <input type="email" class="form-control member-email" placeholder="Email" required>
                             <button class="btn btn-outline-secondary" type="button" onclick="removeMemberInput(this)">
                                 <i class="bi bi-x"></i>
                             </button>
@@ -270,10 +272,10 @@
                     }
 
                     function removeMemberInput(btn) {
-                        if (document.querySelectorAll('.member-email').length <= 1) {
+                        if (document.querySelectorAll('.member-row').length <= 1) {
                             return; // Keep at least one
                         }
-                        btn.closest('.input-group').remove();
+                        btn.closest('.member-row').remove();
                         memberCount--;
                     }
                 </script>

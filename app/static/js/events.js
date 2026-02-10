@@ -64,9 +64,15 @@ function registerEvent(eventType, eventId) {
 
         // Collect members
         const members = [];
-        document.querySelectorAll('.member-email').forEach(input => {
-            if (input.value && input.value.trim()) {
-                members.push(input.value.trim());
+        document.querySelectorAll('.member-row').forEach(row => {
+            const nameInput = row.querySelector('.member-name');
+            const emailInput = row.querySelector('.member-email');
+
+            if (emailInput && emailInput.value && emailInput.value.trim()) {
+                members.push({
+                    name: nameInput ? nameInput.value.trim() : '',
+                    email: emailInput.value.trim()
+                });
             }
         });
 
