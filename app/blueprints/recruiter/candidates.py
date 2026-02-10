@@ -13,7 +13,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('recruiter_id'):
-            return redirect(url_for('recruiter.login'))
+            return redirect(url_for('auth_recruiter.login'))
         return f(*args, **kwargs)
     return decorated_function
 
