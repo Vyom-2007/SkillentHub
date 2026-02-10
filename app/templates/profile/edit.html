@@ -1,264 +1,178 @@
-{% extends "base.html" %}
-{% block title %}Edit Profile — SkillentHub{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-{% endblock %}
+{% extends "layout.html" %}
 
 {% block content %}
-<div class="profile-wrapper">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <h2 class="mb-4 fw-bold">Edit Profile</h2>
 
-    <div class="container py-5">
-        <div class="profile-setup-card animate-in">
-            <div class="setup-header">
-                <h1><i class="bi bi-pencil-square me-2"></i>Edit Profile</h1>
-                <p class="text-secondary">Update your information to keep your profile fresh</p>
+            <!-- Basic Info Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Basic Information</div>
+                <div class="card-body">
+                    <form action="{{ url_for('profile.edit_profile') }}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="existing_profile_picture"
+                            value="{{ profile.profile_picture if profile else '' }}">
+                        <input type="hidden" name="existing_resume_path"
+                            value="{{ profile.resume_path if profile else '' }}">
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Headline</label>
+                                <input type="text" class="form-control" name="headline"
+                                    value="{{ profile.headline if profile else '' }}" maxlength="500">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Location</label>
+                                <input type="text" class="form-control" name="location"
+                                    value="{{ profile.location if profile else '' }}" maxlength="100">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Bio (Summary)</label>
+                            <textarea class="form-control" name="bio" rows="4"
+                                maxlength="5000">{{ profile.bio if profile else '' }}</textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" name="phone"
+                                    value="{{ profile.phone if profile else '' }}" maxlength="15">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" name="profile_picture" accept="image/*">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Resume (PDF)</label>
+                            <input type="file" class="form-control" name="resume" accept=".pdf">
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary px-4">Save Basic Info</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            {% set p = data.profile if data else {} %}
-
-            <form id="profile-form" action="{{ url_for('profile.edit') }}" method="POST" enctype="multipart/form-data"
-                novalidate>
-
-                <!-- ── Section 1: Personal Info ──────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-person-circle me-2"></i>Personal Information</h3>
-
-                    <div class="picture-upload-area mb-4">
-                        <div class="avatar-preview" id="avatar-preview" {% if p and p.profile_picture %}
-                            style="background-image:url('/{{ p.profile_picture }}');background-size:cover;" {% endif %}>
-                            {% if not p or not p.profile_picture %}
-                            <i class="bi bi-camera-fill"></i>
-                            <span>Upload Photo</span>
-                            {% endif %}
-                        </div>
-                        <input type="file" id="profile_picture" name="profile_picture" accept="image/jpeg,image/png"
-                            class="d-none">
-                        <div class="picture-info">
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="upload-pic-btn">
-                                <i class="bi bi-upload me-1"></i>Change Photo
-                            </button>
-                            <small class="text-muted d-block mt-1">JPG or PNG, max 5 MB</small>
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="headline" name="headline"
-                                    placeholder="Headline" maxlength="500" value="{{ p.headline or '' }}">
-                                <label for="headline"><i class="bi bi-megaphone me-1"></i>Headline</label>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-floating">
-                                <textarea class="form-control" id="bio" name="bio" placeholder="Bio"
-                                    style="height:100px">{{ p.bio or '' }}</textarea>
-                                <label for="bio"><i class="bi bi-card-text me-1"></i>Bio</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="location" name="location"
-                                    placeholder="City, Country" value="{{ p.location or '' }}">
-                                <label for="location"><i class="bi bi-geo-alt me-1"></i>Location</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="tel" class="form-control" id="phone" name="phone"
-                                    placeholder="10-digit phone" maxlength="10" pattern="[0-9]{10}"
-                                    value="{{ p.phone or '' }}">
-                                <label for="phone"><i class="bi bi-telephone me-1"></i>Phone (10 digits)</label>
-                                <div class="invalid-feedback" id="phone-error">Phone must be exactly 10 digits.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── Section 2: Skills ─────────────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-star me-2"></i>Skills</h3>
-
-                    <div class="skill-input-area">
-                        <div class="row g-2 align-items-end">
-                            <div class="col">
-                                <input type="text" class="form-control" id="skill-input"
-                                    placeholder="Type a skill and press Enter">
-                            </div>
-                            <div class="col-auto">
-                                <select class="form-select" id="skill-proficiency">
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate" selected>Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                </select>
-                            </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-primary" id="add-skill-btn">
-                                    <i class="bi bi-plus-lg"></i>
+            <!-- Skills Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Skills</div>
+                <div class="card-body">
+                    <!-- Current Skills -->
+                    <div class="mb-3">
+                        {% if skills %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in skills %}
+                            <form action="{{ url_for('profile.remove_skill', skill_id=skill.skill_id) }}" method="POST"
+                                class="d-inline">
+                                <button type="submit"
+                                    class="badge bg-light text-dark border p-2 d-flex align-items-center gap-2"
+                                    style="border: none; cursor: pointer;">
+                                    {{ skill.skill_name }}
+                                    <span class="text-secondary small">({{ skill.proficiency_level }})</span>
+                                    <span class="text-danger fw-bold">&times;</span>
                                 </button>
-                            </div>
+                            </form>
+                            {% endfor %}
                         </div>
-                        <div class="skill-tags" id="skill-tags"></div>
-                        <!-- Pre-populate existing skills -->
-                        <input type="hidden" name="skills_json" id="skills-json"
-                            value='{{ data.skills | tojson if data and data.skills else "[]" }}'>
-                    </div>
-                </div>
-
-                <!-- ── Section 3: Education ──────────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-mortarboard me-2"></i>Education</h3>
-
-                    <div id="education-container">
-                        {% if data and data.education %}
-                        {% for edu in data.education %}
-                        <div class="education-row" data-index="{{ loop.index0 }}">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="institution[]"
-                                            placeholder="Institution" value="{{ edu.institution }}">
-                                        <label>Institution</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="degree[]" placeholder="Degree"
-                                            value="{{ edu.degree }}">
-                                        <label>Degree</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="field_of_study[]"
-                                            placeholder="Field" value="{{ edu.field_of_study or '' }}">
-                                        <label>Field of Study</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="date" class="form-control" name="start_date[]" placeholder=" "
-                                            value="{{ edu.start_date.strftime('%Y-%m-%d') if edu.start_date else '' }}">
-                                        <label>Start Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="date" class="form-control" name="end_date[]" placeholder=" "
-                                            value="{{ edu.end_date.strftime('%Y-%m-%d') if edu.end_date else '' }}">
-                                        <label>End Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <textarea class="form-control" name="edu_description[]"
-                                            placeholder="Description"
-                                            style="height:70px">{{ edu.description or '' }}</textarea>
-                                        <label>Description (optional)</label>
-                                    </div>
-                                </div>
-                            </div>
-                            {% if not loop.first %}
-                            <button type="button" class="btn btn-sm btn-outline-danger remove-edu-btn mt-2">
-                                <i class="bi bi-trash me-1"></i>Remove
-                            </button>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
                         {% else %}
-                        <div class="education-row" data-index="0">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="institution[]"
-                                            placeholder="Institution">
-                                        <label>Institution</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="degree[]" placeholder="Degree">
-                                        <label>Degree</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="field_of_study[]"
-                                            placeholder="Field">
-                                        <label>Field of Study</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="date" class="form-control" name="start_date[]" placeholder=" ">
-                                        <label>Start Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="date" class="form-control" name="end_date[]" placeholder=" ">
-                                        <label>End Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <textarea class="form-control" name="edu_description[]"
-                                            placeholder="Description" style="height:70px"></textarea>
-                                        <label>Description (optional)</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="text-muted small">No skills added yet.</p>
                         {% endif %}
                     </div>
 
-                    <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="add-education-btn">
-                        <i class="bi bi-plus-circle me-1"></i>Add Another Education
-                    </button>
+                    <!-- Add Skill Form -->
+                    <form action="{{ url_for('profile.add_skill') }}" method="POST" class="row g-2 align-items-center">
+                        <div class="col-auto">
+                            <select class="form-select" name="skill_id" required>
+                                <option value="" selected disabled>Select Skill...</option>
+                                {% for s in all_skills %}
+                                <option value="{{ s.skill_id }}">{{ s.skill_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <select class="form-select" name="proficiency">
+                                <option value="beginner">Beginner</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-outline-primary">Add Skill</button>
+                        </div>
+                    </form>
                 </div>
+            </div>
 
-                <!-- ── Section 4: Documents ──────────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-file-earmark-text me-2"></i>Documents</h3>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Resume (PDF / DOCX)</label>
-                            <input type="file" class="form-control" name="resume" accept=".pdf,.docx">
-                            {% if p and p.resume_path %}
-                            <small class="text-success mt-1 d-block">
-                                <i class="bi bi-check-circle me-1"></i>Current: {{ p.resume_path.split('/')[-1] }}
-                            </small>
-                            {% endif %}
+            <!-- Education Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Education</div>
+                <div class="card-body">
+                    <!-- List Education -->
+                    {% if education %}
+                    <div class="list-group mb-4">
+                        {% for edu in education %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">{{ edu.institution }}</h6>
+                                <small class="text-muted">{{ edu.degree }} - {{ edu.field_of_study }}</small>
+                            </div>
+                            <form action="{{ url_for('profile.delete_education', edu_id=edu.education_id) }}"
+                                method="POST">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Cover Letter (PDF / DOCX)</label>
-                            <input type="file" class="form-control" name="cover_letter" accept=".pdf,.docx">
-                            {% if p and p.cover_letter_path %}
-                            <small class="text-success mt-1 d-block">
-                                <i class="bi bi-check-circle me-1"></i>Current: {{ p.cover_letter_path.split('/')[-1] }}
-                            </small>
-                            {% endif %}
-                        </div>
+                        {% endfor %}
                     </div>
-                </div>
+                    {% endif %}
 
-                <button type="submit" class="btn btn-primary btn-auth w-100 mt-4" id="submit-btn">
-                    <span class="btn-text"><i class="bi bi-check-lg me-2"></i>Update Profile</span>
-                    <span class="btn-loader d-none">
-                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...
-                    </span>
-                </button>
-            </form>
+                    <!-- Add Education Form -->
+                    <h6 class="text-muted mb-3">Add New Education</h6>
+                    <form action="{{ url_for('profile.add_education') }}" method="POST">
+                        <div class="row mb-2">
+                            <div class="col-md-6 mb-2">
+                                <input type="text" class="form-control" name="institution" placeholder="Institution"
+                                    required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <input type="text" class="form-control" name="degree" placeholder="Degree" required>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6 mb-2">
+                                <input type="text" class="form-control" name="field_of_study"
+                                    placeholder="Field of Study">
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-6 mb-2">
+                                <label class="small text-muted">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="small text-muted">End Date (Leave empty if current)</label>
+                                <input type="date" class="form-control" name="end_date">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <textarea class="form-control" name="description" placeholder="Description/Activities"
+                                rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Add Education</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mb-5">
+                <a href="{{ url_for('profile.own_profile') }}" class="btn btn-success btn-lg px-5">Done</a>
+            </div>
+
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
-<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

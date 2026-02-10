@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Notifications</h2>
+        <button class="btn btn-outline-primary btn-sm" onclick="markAllRead()">Mark all as read</button>
+    </div>
+
+    <div class="list-group shadow-sm">
+        {% for notif in notifications %}
+        <a href="#" class="list-group-item list-group-item-action {{ 'bg-light' if not notif.is_read else '' }}">
+            <div class="d-flex w-100 justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="me-3 fs-4">
+                        {% if notif.type == 'post_like' %}❤️
+                        {% elif notif.type == 'post_comment' %}💬
+                        {% elif notif.type == 'connection_request' %}👋
+                        {% elif notif.type == 'connection_accepted' %}🤝
+                        {% else %}🔔{% endif %}
+                    </div>
+                    <div>
+                        <p class="mb-1 {{ 'fw-bold' if not notif.is_read else '' }}">{{ notif.content }}</p>
+                        <small class="text-muted">{{ notif.created_at.strftime('%h %d, %H:%M') }}</small>
+                    </div>
+                </div>
+                {% if not notif.is_read %}
+                <span class="badge bg-primary rounded-pill h-100 d-flex align-items-center"
+                    style="width: 10px; height: 10px;">&nbsp;</span>
+                {% endif %}
+            </div>
+        </a>
+        {% else %}
+        <div class="list-group-item text-center py-5 text-muted">
+            <p class="mb-0">No notifications yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function markAllRead() {
+        fetch('/notifications/api/mark-all-read', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    }
+</script>
+{% endblock %}

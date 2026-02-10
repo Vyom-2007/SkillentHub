@@ -1,10 +1,5 @@
 from flask import Blueprint
 
-posts_bp = Blueprint(
-    'posts',
-    __name__,
-    url_prefix='/api',
-    template_folder='../../templates',
-)
+posts_bp = Blueprint('posts', __name__)
 
-from app.blueprints.posts import routes   # noqa: E402, F401
+from . import routes

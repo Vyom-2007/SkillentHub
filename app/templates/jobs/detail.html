@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }} - {{ item.company_name }}{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Header -->
+    <div class="col-md-12 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-start">
+                    <img src="{{ url_for('uploaded_file', filename='profiles/' + item.company_logo) if item.company_logo else 'https://via.placeholder.com/80' }}"
+                        class="rounded me-3" width="80" height="80" style="object-fit: contain;">
+                    <div class="flex-grow-1">
+                        <h2>{{ item.title }}</h2>
+                        <h5 class="text-muted">{{ item.company_name }}</h5>
+                        <p class="text-muted">{{ item.location }} ({{ item.work_mode }})</p>
+
+                        <div class="mb-3">
+                            {% if item.salary_range %}
+                            <span class="badge bg-success mb-2">Salary: {{ item.salary_range }}</span>
+                            {% endif %}
+                            {% if item.stipend %}
+                            <span class="badge bg-success mb-2">Stipend: {{ item.stipend }}</span>
+                            {% endif %}
+                            {% if item.job_type %}
+                            <span class="badge bg-info text-dark mb-2">{{ item.job_type }}</span>
+                            {% endif %}
+                            {% if item.duration %}
+                            <span class="badge bg-warning text-dark mb-2">Duration: {{ item.duration }} months</span>
+                            {% endif %}
+                        </div>
+
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#applyModal">Apply
+                            Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5>Job Description</h5>
+                <p style="white-space: pre-wrap;">{{ item.description }}</p>
+
+                {% if item.requirements %}
+                <h5 class="mt-4">Requirements</h5>
+                <p style="white-space: pre-wrap;">{{ item.requirements }}</p>
+                {% endif %}
+
+                {% if item.perks_benefits %}
+                <h5 class="mt-4">Perks & Benefits</h5>
+                <p style="white-space: pre-wrap;">{{ item.perks_benefits }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5>About the Company</h5>
+                <p><strong>{{ item.company_name }}</strong></p>
+                <a href="#" class="btn btn-outline-secondary btn-sm w-100">View Company Profile</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+<div class="modal fade" id="applyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Apply to {{ item.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form
+                action="{{ url_for('jobs.apply', type=item.type, id=(item.job_id if item.type=='job' else item.internship_id)) }}"
+                method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Resume</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="resume_option" id="resumeExisting"
+                                value="existing" checked>
+                            <label class="form-check-label" for="resumeExisting">
+                                Use my existing resume (if uploaded)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="resume_option" id="resumeUpload"
+                                value="upload">
+                            <label class="form-check-label" for="resumeUpload">
+                                Upload new resume
+                            </label>
+                        </div>
+                        <input type="file" name="resume" class="form-control mt-2" accept=".pdf">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cover Letter (Optional)</label>
+                        <textarea name="cover_letter" class="form-control" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

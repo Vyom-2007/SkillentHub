@@ -1,208 +1,141 @@
-{% extends "base.html" %}
-{% block title %}{{ data.profile.full_name }} — SkillentHub{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-{% endblock %}
+{% extends "layout.html" %}
 
 {% block content %}
-{% set p = data.profile %}
-<div class="profile-wrapper">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-
-    <div class="container py-5">
-        <!-- ── Profile Header Card ───────────────────── -->
-        <div class="profile-view-card animate-in mb-4">
-            <div class="profile-header-section">
-                <div class="profile-avatar-large">
-                    {% if p.profile_picture %}
-                    <img src="/{{ p.profile_picture }}" alt="{{ p.full_name }}">
-                    {% else %}
-                    <div class="avatar-placeholder-large">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div class="profile-header-info">
-                    <h1 class="profile-name">{{ p.full_name }}</h1>
-                    {% if p.headline %}
-                    <p class="profile-headline">{{ p.headline }}</p>
-                    {% endif %}
-                    {% if p.location %}
-                    <p class="profile-location"><i class="bi bi-geo-alt me-1"></i>{{ p.location }}</p>
-                    {% endif %}
-
-                    <div class="profile-actions mt-3">
-                        {% if is_own %}
-                        <a href="{{ url_for('profile.edit_page') }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-pencil me-1"></i>Edit Profile
-                        </a>
-                        {% else %}
-                        {% if connection_status == 'accepted' %}
-                        <a href="/api/messages/{{ p.user_id }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-chat-dots me-1"></i>Message
-                        </a>
-                        {% elif connection_status == 'pending' %}
-                        <button class="btn btn-secondary btn-sm" disabled>
-                            <i class="bi bi-clock me-1"></i>Request Sent
-                        </button>
-                        {% else %}
-                        <button class="btn btn-primary btn-sm connect-btn" data-user-id="{{ p.user_id }}"
-                            id="connect-btn">
-                            <i class="bi bi-person-plus me-1"></i>Connect
-                        </button>
-                        {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Completion ring (own profile only) -->
-                {% if is_own %}
-                <div class="completion-ring-wrapper">
-                    <div class="completion-ring" data-value="{{ data.completion }}">
-                        <svg viewBox="0 0 100 100">
-                            <circle class="ring-bg" cx="50" cy="50" r="42"></circle>
-                            <circle class="ring-fill" cx="50" cy="50" r="42"
-                                stroke-dasharray="{{ data.completion * 2.64 }} {{ 264 - data.completion * 2.64 }}"
-                                stroke-dashoffset="0"></circle>
-                        </svg>
-                        <div class="ring-label">
-                            <span class="ring-value">{{ data.completion }}%</span>
-                            <span class="ring-text">Complete</span>
+<div class="container py-4">
+    <div class="row">
+        <!-- Profile Header -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <img src="{{ url_for('static', filename=profile.profile_picture) if profile and profile.profile_picture else 'https://via.placeholder.com/150' }}"
+                                class="rounded-circle img-thumbnail mb-3"
+                                style="width: 150px; height: 150px; object-fit: cover;" alt="Profile Picture">
                         </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Stats (own profile) -->
-            {% if is_own %}
-            <div class="profile-stats">
-                <div class="stat-card">
-                    <i class="bi bi-eye"></i>
-                    <div>
-                        <span class="stat-num">{{ p.profile_visits_by_users or 0 }}</span>
-                        <span class="stat-lbl">Student Views</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="bi bi-building"></i>
-                    <div>
-                        <span class="stat-num">{{ p.profile_visits_by_recruiters or 0 }}</span>
-                        <span class="stat-lbl">Recruiter Views</span>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <i class="bi bi-file-post"></i>
-                    <div>
-                        <span class="stat-num">{{ data.posts | length }}</span>
-                        <span class="stat-lbl">Posts</span>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="row g-4">
-            <!-- ── Left Column ────────────────────────── -->
-            <div class="col-lg-8">
-                <!-- Bio -->
-                {% if p.bio %}
-                <div class="profile-view-card animate-in mb-4">
-                    <h3 class="section-title-view"><i class="bi bi-card-text me-2"></i>About</h3>
-                    <p class="profile-bio">{{ p.bio }}</p>
-                </div>
-                {% endif %}
-
-                <!-- Education -->
-                {% if data.education %}
-                <div class="profile-view-card animate-in mb-4">
-                    <h3 class="section-title-view"><i class="bi bi-mortarboard me-2"></i>Education</h3>
-                    <div class="education-timeline">
-                        {% for edu in data.education %}
-                        <div class="edu-item">
-                            <div class="edu-icon"><i class="bi bi-book"></i></div>
-                            <div class="edu-content">
-                                <h5 class="edu-degree">{{ edu.degree }}{% if edu.field_of_study %} in {{
-                                    edu.field_of_study }}{% endif %}</h5>
-                                <p class="edu-institution">{{ edu.institution }}</p>
-                                <p class="edu-dates">
-                                    {{ edu.start_date.strftime('%b %Y') if edu.start_date else '' }}
-                                    {% if edu.end_date %} — {{ edu.end_date.strftime('%b %Y') }}{% else %} — Present{%
-                                    endif %}
-                                </p>
-                                {% if edu.description %}
-                                <p class="edu-description">{{ edu.description }}</p>
+                        <div class="col-md-9">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h2 class="fw-bold mb-0">{{ user.full_name }}</h2>
+                                    <p class="text-muted mb-2">{{ profile.headline if profile and profile.headline else
+                                        'No headline yet' }}</p>
+                                    <p class="mb-1">📍 {{ profile.location if profile and profile.location else
+                                        'Location not set' }}</p>
+                                    <p class="mb-3">📞 {{ profile.phone if profile and profile.phone else 'No phone' }}
+                                    </p>
+                                </div>
+                                {% if is_own %}
+                                <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-outline-primary">
+                                    ✏️ Edit Profile
+                                </a>
+                                {% else %}
+                                <div class="d-flex gap-2">
+                                    <!-- Connection logic here later -->
+                                    <button class="btn btn-primary">Connect</button>
+                                    <button class="btn btn-outline-secondary">Message</button>
+                                </div>
                                 {% endif %}
                             </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
 
-                <!-- Posts -->
-                {% if data.posts %}
-                <div class="profile-view-card animate-in mb-4">
-                    <h3 class="section-title-view"><i class="bi bi-newspaper me-2"></i>Posts</h3>
-                    {% for post in data.posts %}
-                    <div class="post-item">
-                        <p class="post-content">{{ post.content }}</p>
-                        {% if post.image_path %}
-                        <img src="/{{ post.image_path }}" class="post-image" alt="Post image">
-                        {% endif %}
-                        <div class="post-meta">
-                            <span><i class="bi bi-heart me-1"></i>{{ post.likes_count }}</span>
-                            <span>{{ post.created_at.strftime('%b %d, %Y') }}</span>
+                            <!-- Completion Bar -->
+                            {% if is_own and profile %}
+                            <div class="mt-3">
+                                <span class="small text-muted">Profile Strength: {{ profile.profile_completion
+                                    }}%</span>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                        style="width: {{ profile.profile_completion }}%"></div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                {% endif %}
+            </div>
+        </div>
+
+        <!-- Left Column -->
+        <div class="col-md-4">
+            <!-- About -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">About</div>
+                <div class="card-body">
+                    <p class="card-text">{{ profile.bio if profile and profile.bio else 'No bio added yet.' }}</p>
+                </div>
             </div>
 
-            <!-- ── Right Column ───────────────────────── -->
-            <div class="col-lg-4">
-                <!-- Skills -->
-                {% if data.skills %}
-                <div class="profile-view-card animate-in mb-4">
-                    <h3 class="section-title-view"><i class="bi bi-star me-2"></i>Skills</h3>
-                    <div class="skills-list">
-                        {% for skill in data.skills %}
-                        <div class="skill-badge-view {{ skill.proficiency_level }}">
+            <!-- Skills -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Skills</div>
+                <div class="card-body">
+                    {% if skills %}
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for skill in skills %}
+                        <span class="badge bg-light text-dark border">
                             {{ skill.skill_name }}
-                            <span class="proficiency-dot"></span>
+                            <span class="text-muted small">({{ skill.proficiency_level }})</span>
+                        </span>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small">No skills added.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Attachments -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Documents</div>
+                <div class="card-body">
+                    {% if profile and profile.resume_path %}
+                    <a href="{{ url_for('static', filename=profile.resume_path) }}" target="_blank"
+                        class="btn btn-sm btn-outline-secondary d-block mb-2">📄 View Resume</a>
+                    {% else %}
+                    <p class="text-muted small">No resume uploaded.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-8">
+            <!-- Education -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between">
+                    <span>Education</span>
+                    {% if is_own %}<a href="{{ url_for('profile.edit_profile') }}"
+                        class="text-decoration-none small">Manage</a>{% endif %}
+                </div>
+                <div class="card-body">
+                    {% if education %}
+                    <div class="timeline">
+                        {% for edu in education %}
+                        <div class="mb-3 pb-3 border-bottom last-no-border">
+                            <h5 class="fw-bold mb-1">{{ edu.institution }}</h5>
+                            <p class="mb-1">{{ edu.degree }} in {{ edu.field_of_study }}</p>
+                            <p class="text-muted small">
+                                {{ edu.start_date }} - {{ edu.end_date if edu.end_date else 'Present' }}
+                            </p>
+                            {% if edu.description %}
+                            <p class="small text-muted">{{ edu.description }}</p>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
-                </div>
-                {% endif %}
-
-                <!-- Contact Info (own profile) -->
-                {% if is_own %}
-                <div class="profile-view-card animate-in mb-4">
-                    <h3 class="section-title-view"><i class="bi bi-info-circle me-2"></i>Contact</h3>
-                    <ul class="contact-list">
-                        <li><i class="bi bi-envelope"></i> {{ p.email }}</li>
-                        {% if p.phone %}
-                        <li><i class="bi bi-telephone"></i> {{ p.phone }}</li>
-                        {% endif %}
-                    </ul>
-                    {% if p.resume_path %}
-                    <a href="/{{ p.resume_path }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-2">
-                        <i class="bi bi-file-earmark-pdf me-1"></i>View Resume
-                    </a>
+                    {% else %}
+                    <p class="text-muted">No education details added.</p>
                     {% endif %}
                 </div>
-                {% endif %}
+            </div>
+
+            <!-- Posts (Placeholder) -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Recent Activity</div>
+                <div class="card-body">
+                    <p class="text-muted">No posts to show.</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Recruiter Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group mb-4">
+            <a href="{{ url_for('recruiter_dashboard.index') }}"
+                class="list-group-item list-group-item-action active">Dashboard</a>
+            <a href="{{ url_for('recruiter_jobs.index') }}" class="list-group-item list-group-item-action">Jobs</a>
+            <a href="#" class="list-group-item list-group-item-action">Internships</a>
+            <a href="#" class="list-group-item list-group-item-action">Competitions</a>
+            <a href="{{ url_for('recruiter_applications.index') }}"
+                class="list-group-item list-group-item-action">Applications</a>
+            <a href="#" class="list-group-item list-group-item-action">Settings</a>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <h2 class="mb-4">Dashboard</h2>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center text-white bg-primary mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Applications</h5>
+                        <p class="card-text display-4">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Jobs</h5>
+                        <p class="card-text display-4">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center text-white bg-info mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Internships</h5>
+                        <p class="card-text display-4">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4>Quick Actions</h4>
+        <div class="d-grid gap-2 d-md-block">
+            <a href="{{ url_for('recruiter_jobs.create') }}" class="btn btn-outline-primary">Post New Job</a>
+            <button class="btn btn-outline-primary">Post Internship</button>
+            <button class="btn btn-outline-primary">Post Competition</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-5 mb-4 bg-light rounded-3 text-center">
+    <div class="container-fluid py-5">
+        <h1 class="display-3 fw-bold text-primary">Connect. Compete. Grow.</h1>
+        <p class="col-md-8 fs-4 mx-auto">Project-based networking for the next generation of talent.</p>
+        <div class="mt-4">
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('feed.index') }}" class="btn btn-primary btn-lg px-5">Go to Feed</a>
+            {% elif session.get('recruiter_id') %}
+            <a href="{{ url_for('recruiter_dashboard.index') }}" class="btn btn-primary btn-lg px-5">Go to Dashboard</a>
+            {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg mx-2">Join as Talent</a>
+            <a href="{{ url_for('recruiter_auth.register') }}" class="btn btn-outline-primary btn-lg mx-2">Join as
+                Recruiter</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row align-items-md-stretch">
+    <div class="col-md-6">
+        <div class="h-100 p-5 text-white bg-dark rounded-3">
+            <h2>For Talent</h2>
+            <p>Showcase your skills, join hackathons, compete in challenges, and find your dream job or internship.</p>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light" type="button">Get Started</a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="h-100 p-5 bg-light border rounded-3">
+            <h2>For Recruiters</h2>
+            <p>Find top talent, host competitions, post jobs, and manage applications seamlessly.</p>
+            <a href="{{ url_for('recruiter_auth.register') }}" class="btn btn-outline-dark" type="button">Hire
+                Talent</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

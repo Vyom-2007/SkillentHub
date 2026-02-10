@@ -1,63 +1,34 @@
-import bcrypt
-from app.database.connection import get_db_connection
+from app.models.user import User
+from flask import session
 
+class AuthService:
+    @staticmethod
+    def register_user(email, password, full_name):
+        if User.get_by_email(email):
+            return {"error": "Email already exists"}
+            
+        user_id = User.create(email, password, full_name)
+        if user_id:
+            return {"success": True, "user_id": user_id}
+        return {"error": "Registration failed"}
 
-def find_user_by_email(email):
-    """Return user dict or None."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
-            return cur.fetchone()
-    finally:
-        conn.close()
+    @staticmethod
+    def login_user(email, password):
+        user = User.get_by_email(email)
+        if user and User.verify_password(user['password_hash'], password):
+            session['user_id'] = user['user_id']
+            session['full_name'] = user['full_name']
+            session.permanent = True
+            return {"success": True, "user": user}
+        return {"error": "Invalid email or password"}
 
-
-def create_user(full_name, email, password):
-    """Hash password with bcrypt and insert a new user. Returns user_id."""
-    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO users (full_name, email, password_hash) VALUES (%s, %s, %s)",
-                (full_name, email, hashed.decode('utf-8')),
-            )
-            return cur.lastrowid
-    finally:
-        conn.close()
-
-
-def verify_password(plain_password, hashed_password):
-    """Check a plain-text password against a bcrypt hash."""
-    return bcrypt.checkpw(
-        plain_password.encode('utf-8'),
-        hashed_password.encode('utf-8'),
-    )
-
-
-def update_password(user_id, new_password):
-    """Hash and store a new password for the given user."""
-    hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "UPDATE users SET password_hash = %s WHERE user_id = %s",
-                (hashed.decode('utf-8'), user_id),
-            )
-    finally:
-        conn.close()
-
-
-def update_last_login(user_id):
-    """Set last_login to the current timestamp."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "UPDATE users SET last_login = NOW() WHERE user_id = %s",
-                (user_id,),
-            )
-    finally:
-        conn.close()
+    @staticmethod
+    def logout_user():
+        session.clear()
+        return {"success": True}
+        
+    @staticmethod
+    def get_current_user():
+        if 'user_id' in session:
+            return User.get_by_id(session['user_id'])
+        return None

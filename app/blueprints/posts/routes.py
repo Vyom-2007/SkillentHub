@@ -1,142 +1,46 @@
-from flask import (
-    render_template, request, redirect, url_for,
-    session, flash, jsonify,
-)
-from app.blueprints.posts import posts_bp
-from app.utils.decorators import login_required
-from app.services.post_service import (
-    get_feed,
-    get_new_posts_count,
-    create_post,
-    delete_post,
-    toggle_like,
-    get_comments,
-    add_comment,
-    save_post_image,
-)
+from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for
+from app.services.feed_service import FeedService
 
+posts_bp = Blueprint('posts', __name__, url_prefix='/posts')
 
-# ──────────────────────────────────────────────────────────
-# Feed
-# ──────────────────────────────────────────────────────────
+@posts_bp.route('/create', methods=['POST'])
+def create_post():
+    if 'user_id' not in session: return redirect(url_for('auth.login'))
+    
+    content = request.form.get('content')
+    image = request.files.get('image')
+    
+    if FeedService.create_post(session['user_id'], content, image):
+        pass # Success
+    
+    return redirect(url_for('pages.feed'))
 
-@posts_bp.route('/feed', methods=['GET'])
-@login_required
-def feed():
-    user_id = session['user_id']
-    offset = request.args.get('offset', 0, type=int)
-    posts = get_feed(offset, user_id)
-    return render_template('feed/feed.html', posts=posts, offset=offset)
+@posts_bp.route('/<int:post_id>/like', methods=['POST'])
+def like_post(post_id):
+    if 'user_id' not in session: return jsonify({'error': 'Unauthorized'}), 401
+    
+    action = FeedService.toggle_like(post_id, session['user_id'])
+    return jsonify({'success': True, 'action': action})
 
-
-@posts_bp.route('/feed/new', methods=['GET'])
-@login_required
-def feed_new():
-    since_id = request.args.get('since', 0, type=int)
-    count = get_new_posts_count(since_id)
-    return jsonify({'new_count': count})
-
-
-# ──────────────────────────────────────────────────────────
-# Create Post
-# ──────────────────────────────────────────────────────────
-
-@posts_bp.route('/posts/create', methods=['POST'])
-@login_required
-def post_create():
-    user_id = session['user_id']
-    content = request.form.get('content', '').strip()
-
-    # Handle image upload
-    image_path = None
-    img_file = request.files.get('image')
-    has_image = img_file and img_file.filename
-
-    # Validate: need either content or image
-    if not content and not has_image:
-        flash('Post must have text or an image.', 'danger')
-        return redirect(url_for('posts.feed'))
-
-    if has_image:
-        try:
-            image_path = save_post_image(img_file)
-        except ValueError as e:
-            flash(str(e), 'danger')
-            return redirect(url_for('posts.feed'))
-
-    create_post(user_id, 'user', content, image_path)
-    flash('Post created!', 'success')
-    return redirect(url_for('posts.feed'))
-
-
-# ──────────────────────────────────────────────────────────
-# Like / Unlike
-# ──────────────────────────────────────────────────────────
-
-@posts_bp.route('/posts/<int:post_id>/like', methods=['POST'])
-@login_required
-def post_like(post_id):
-    user_id = session['user_id']
-    result = toggle_like(post_id, user_id)
-    return jsonify(result)
-
-
-# ──────────────────────────────────────────────────────────
-# Comments
-# ──────────────────────────────────────────────────────────
-
-@posts_bp.route('/posts/<int:post_id>/comments', methods=['GET'])
-@login_required
-def post_comments(post_id):
-    comments = get_comments(post_id)
-    # Serialize datetimes
-    out = []
-    for c in comments:
-        out.append({
-            'comment_id': c['comment_id'],
-            'content': c['content'],
-            'full_name': c['full_name'],
-            'profile_picture': c['profile_picture'],
-            'created_at': c['created_at'].isoformat() if c['created_at'] else '',
+@posts_bp.route('/<int:post_id>/comment', methods=['POST'])
+def comment_post(post_id):
+    if 'user_id' not in session: return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    content = data.get('content')
+    
+    comment_id = FeedService.add_comment(post_id, session['user_id'], content)
+    if comment_id:
+        # Return comment data for appending to DOM
+        return jsonify({
+            'success': True, 
+            'comment_id': comment_id, 
+            'user_name': session['full_name'],
+            'content': content
         })
-    return jsonify(out)
+    return jsonify({'error': 'Failed'}), 500
 
-
-@posts_bp.route('/posts/<int:post_id>/comments', methods=['POST'])
-@login_required
-def post_comment_create(post_id):
-    user_id = session['user_id']
-    data = request.get_json(silent=True) or {}
-    content = data.get('content', '').strip()
-
-    if not content:
-        return jsonify({'error': 'Comment cannot be empty.'}), 400
-
-    if len(content) > 500:
-        return jsonify({'error': 'Comment must be under 500 characters.'}), 400
-
-    comment = add_comment(post_id, user_id, content)
-    if not comment:
-        return jsonify({'error': 'Failed to add comment.'}), 500
-
-    return jsonify({
-        'comment_id': comment['comment_id'],
-        'content': comment['content'],
-        'full_name': comment['full_name'],
-        'profile_picture': comment['profile_picture'],
-        'created_at': comment['created_at'].isoformat() if comment['created_at'] else '',
-    }), 201
-
-
-# ──────────────────────────────────────────────────────────
-# Delete Post
-# ──────────────────────────────────────────────────────────
-
-@posts_bp.route('/posts/<int:post_id>', methods=['DELETE'])
-@login_required
-def post_delete(post_id):
-    user_id = session['user_id']
-    deleted = delete_post(post_id, user_id)
-    if deleted:
-        return jsonify({'status': 'deleted'})
-    return jsonify({'error': 'Not found or not authorized.'}), 403
+@posts_bp.route('/<int:post_id>/comments')
+def get_comments(post_id):
+    comments = FeedService.get_post_comments(post_id)
+    return jsonify(comments)

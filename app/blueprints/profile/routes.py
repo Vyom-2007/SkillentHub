@@ -1,226 +1,81 @@
-import json
-from flask import (
-    render_template, request, redirect, url_for,
-    session, flash,
-)
-from app.blueprints.profile import profile_bp
-from app.utils.decorators import login_required
-from app.services.profile_service import (
-    get_full_profile,
-    upsert_profile,
-    save_skills,
-    save_education,
-    update_profile_completion,
-    increment_visit,
-)
-from app.services.file_service import save_profile_picture, save_document
-from app.services.connection_service import get_connection_status
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from app.services.profile_service import ProfileService
+from app.services.auth_service import AuthService
 
+profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
 
-# ──────────────────────────────────────────────────────────
-# Profile Setup
-# ──────────────────────────────────────────────────────────
+@profile_bp.before_request
+def login_required():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
 
-@profile_bp.route('/setup', methods=['GET'])
-@login_required
-def setup_page():
-    return render_template('profile/setup.html')
-
-
-@profile_bp.route('/setup', methods=['POST'])
-@login_required
-def setup():
-    user_id = session['user_id']
-
-    # Collect profile fields
-    profile_data = {
-        'headline': request.form.get('headline', '').strip(),
-        'bio': request.form.get('bio', '').strip(),
-        'location': request.form.get('location', '').strip(),
-        'phone': request.form.get('phone', '').strip(),
-    }
-
-    # Handle file uploads
-    try:
-        pic = request.files.get('profile_picture')
-        if pic and pic.filename:
-            profile_data['profile_picture'] = save_profile_picture(pic, user_id)
-
-        resume = request.files.get('resume')
-        if resume and resume.filename:
-            profile_data['resume_path'] = save_document(resume, user_id, 'resume')
-
-        cover_letter = request.files.get('cover_letter')
-        if cover_letter and cover_letter.filename:
-            profile_data['cover_letter_path'] = save_document(cover_letter, user_id, 'cover_letter')
-    except ValueError as e:
-        flash(str(e), 'danger')
-        return redirect(url_for('profile.setup_page'))
-
-    # Save profile
-    upsert_profile(user_id, profile_data)
-
-    # Save skills (JSON from hidden input)
-    skills_json = request.form.get('skills_json', '[]')
-    try:
-        skills_list = json.loads(skills_json)
-        if skills_list:
-            save_skills(user_id, skills_list)
-    except (json.JSONDecodeError, TypeError):
-        pass
-
-    # Save education (dynamic rows)
-    institutions = request.form.getlist('institution[]')
-    degrees = request.form.getlist('degree[]')
-    fields = request.form.getlist('field_of_study[]')
-    start_dates = request.form.getlist('start_date[]')
-    end_dates = request.form.getlist('end_date[]')
-    descriptions = request.form.getlist('edu_description[]')
-
-    edu_list = []
-    for i in range(len(institutions)):
-        if institutions[i].strip():
-            edu_list.append({
-                'institution': institutions[i],
-                'degree': degrees[i] if i < len(degrees) else '',
-                'field_of_study': fields[i] if i < len(fields) else '',
-                'start_date': start_dates[i] if i < len(start_dates) else None,
-                'end_date': end_dates[i] if i < len(end_dates) else None,
-                'description': descriptions[i] if i < len(descriptions) else '',
-            })
-
-    if edu_list:
-        save_education(user_id, edu_list)
-
-    # Update completion
-    update_profile_completion(user_id)
-
-    flash('Profile setup complete!', 'success')
-    return redirect(url_for('profile.own_profile'))
-
-
-# ──────────────────────────────────────────────────────────
-# Profile Edit
-# ──────────────────────────────────────────────────────────
-
-@profile_bp.route('/edit', methods=['GET'])
-@login_required
-def edit_page():
-    user_id = session['user_id']
-    data = get_full_profile(user_id)
-    return render_template('profile/edit.html', data=data)
-
-
-@profile_bp.route('/edit', methods=['POST'])
-@login_required
-def edit():
-    user_id = session['user_id']
-
-    profile_data = {
-        'headline': request.form.get('headline', '').strip(),
-        'bio': request.form.get('bio', '').strip(),
-        'location': request.form.get('location', '').strip(),
-        'phone': request.form.get('phone', '').strip(),
-    }
-
-    # Handle file uploads
-    try:
-        pic = request.files.get('profile_picture')
-        if pic and pic.filename:
-            profile_data['profile_picture'] = save_profile_picture(pic, user_id)
-
-        resume = request.files.get('resume')
-        if resume and resume.filename:
-            profile_data['resume_path'] = save_document(resume, user_id, 'resume')
-
-        cover_letter = request.files.get('cover_letter')
-        if cover_letter and cover_letter.filename:
-            profile_data['cover_letter_path'] = save_document(cover_letter, user_id, 'cover_letter')
-    except ValueError as e:
-        flash(str(e), 'danger')
-        return redirect(url_for('profile.edit_page'))
-
-    upsert_profile(user_id, profile_data)
-
-    # Skills
-    skills_json = request.form.get('skills_json', '[]')
-    try:
-        skills_list = json.loads(skills_json)
-        save_skills(user_id, skills_list)
-    except (json.JSONDecodeError, TypeError):
-        pass
-
-    # Education
-    institutions = request.form.getlist('institution[]')
-    degrees = request.form.getlist('degree[]')
-    fields = request.form.getlist('field_of_study[]')
-    start_dates = request.form.getlist('start_date[]')
-    end_dates = request.form.getlist('end_date[]')
-    descriptions = request.form.getlist('edu_description[]')
-
-    edu_list = []
-    for i in range(len(institutions)):
-        if institutions[i].strip():
-            edu_list.append({
-                'institution': institutions[i],
-                'degree': degrees[i] if i < len(degrees) else '',
-                'field_of_study': fields[i] if i < len(fields) else '',
-                'start_date': start_dates[i] if i < len(start_dates) else None,
-                'end_date': end_dates[i] if i < len(end_dates) else None,
-                'description': descriptions[i] if i < len(descriptions) else '',
-            })
-    save_education(user_id, edu_list)
-
-    update_profile_completion(user_id)
-
-    flash('Profile updated successfully!', 'success')
-    return redirect(url_for('profile.own_profile'))
-
-
-# ──────────────────────────────────────────────────────────
-# View Own Profile
-# ──────────────────────────────────────────────────────────
-
-@profile_bp.route('/own', methods=['GET'])
-@login_required
+@profile_bp.route('/')
 def own_profile():
-    user_id = session['user_id']
-    data = get_full_profile(user_id)
+    user = AuthService.get_current_user()
+    data = ProfileService.get_full_profile(user['user_id'])
+    return render_template('profile/view.html', user=user, **data, is_own=True)
 
-    if not data:
-        flash('Please set up your profile first.', 'info')
-        return redirect(url_for('profile.setup_page'))
-
-    return render_template('profile/view.html', data=data, is_own=True, connection_status=None)
-
-
-# ──────────────────────────────────────────────────────────
-# View Other User's Profile
-# ──────────────────────────────────────────────────────────
-
-@profile_bp.route('/<int:user_id>', methods=['GET'])
-@login_required
+@profile_bp.route('/<int:user_id>')
 def view_profile(user_id):
-    current_user_id = session['user_id']
-
-    # Redirect to own profile if same user
+    current_user_id = session.get('user_id')
     if user_id == current_user_id:
         return redirect(url_for('profile.own_profile'))
+        
+    # TODO: Get other user details (need User model update or service)
+    # For now, redirecting to own if not same (mock logic)
+    return redirect(url_for('profile.own_profile')) 
 
-    data = get_full_profile(user_id)
-    if not data:
-        flash('User not found.', 'danger')
-        return redirect(url_for('profile.own_profile'))
+@profile_bp.route('/edit', methods=['GET', 'POST'])
+def edit_profile():
+    user_id = session['user_id']
+    user = AuthService.get_current_user()
+    
+    if request.method == 'POST':
+        success = ProfileService.update_profile(user_id, request.form, request.files)
+        if success:
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('profile.own_profile'))
+        else:
+            flash('Error updating profile.', 'danger')
+            
+    data = ProfileService.get_full_profile(user_id)
+    all_skills = ProfileService.get_all_available_skills()
+    return render_template('profile/edit.html', user=user, **data, all_skills=all_skills)
 
-    # Increment visit count
-    increment_visit(user_id, 'user')
+@profile_bp.route('/education/add', methods=['POST'])
+def add_education():
+    success = ProfileService.add_education(session['user_id'], request.form)
+    if success:
+        flash('Education added.', 'success')
+    else:
+        flash('Failed to add education.', 'danger')
+    return redirect(url_for('profile.edit_profile'))
 
-    # Get connection status
-    conn_status = get_connection_status(current_user_id, user_id)
+@profile_bp.route('/education/<int:edu_id>/delete', methods=['POST'])
+def delete_education(edu_id):
+    success = ProfileService.delete_education(session['user_id'], edu_id)
+    if success:
+        flash('Education removed.', 'success')
+    else:
+        flash('Failed to remove education.', 'danger')
+    return redirect(url_for('profile.edit_profile'))
 
-    return render_template(
-        'profile/view.html',
-        data=data,
-        is_own=False,
-        connection_status=conn_status,
-    )
+@profile_bp.route('/skills/add', methods=['POST'])
+def add_skill():
+    skill_id = request.form.get('skill_id')
+    proficiency = request.form.get('proficiency')
+    success = ProfileService.add_skill(session['user_id'], skill_id, proficiency)
+    if success:
+        flash('Skill added.', 'success')
+    else:
+        flash('Failed to add skill.', 'danger')
+    return redirect(url_for('profile.edit_profile'))
+
+@profile_bp.route('/skills/<int:skill_id>/delete', methods=['POST'])
+def remove_skill(skill_id):
+    success = ProfileService.remove_skill(session['user_id'], skill_id)
+    if success:
+        flash('Skill removed.', 'success')
+    else:
+        flash('Failed to remove skill.', 'danger')
+    return redirect(url_for('profile.edit_profile'))

@@ -1,76 +1,78 @@
-{% extends "base.html" %}
-{% block title %}Register — SkillentHub{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<div class="auth-wrapper">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - SkillentHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
 
-    <div class="auth-card animate-in">
-        <div class="auth-header">
-            <a href="/" class="auth-brand">
-                <i class="bi bi-rocket-takeoff-fill"></i> SkillentHub
-            </a>
-            <h1 class="auth-title">Create Account</h1>
-            <p class="auth-subtitle">Start your career journey today</p>
-        </div>
-
-        <form id="register-form" action="{{ url_for('auth.register') }}" method="POST" novalidate>
-            <!-- Full Name -->
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="John Doe" required
-                    autocomplete="name">
-                <label for="full_name"><i class="bi bi-person me-2"></i>Full Name</label>
-                <div class="invalid-feedback" id="name-error"></div>
+<body class="bg-light">
+    <div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+        <div class="card shadow p-4" style="max-width: 500px; width: 100%;">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold text-primary">SkillentHub</h2>
+                <p class="text-muted">Create your professional account</p>
             </div>
 
-            <!-- Email -->
-            <div class="form-floating mb-3">
-                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required
-                    autocomplete="email">
-                <label for="email"><i class="bi bi-envelope me-2"></i>Email Address</label>
-                <div class="invalid-feedback" id="email-error"></div>
-            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
 
-            <!-- Password -->
-            <div class="form-floating mb-3 position-relative">
-                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
-                    required autocomplete="new-password">
-                <label for="password"><i class="bi bi-lock me-2"></i>Password</label>
-                <button type="button" class="password-toggle" id="toggle-password" tabindex="-1">
-                    <i class="bi bi-eye"></i>
-                </button>
-                <div class="invalid-feedback" id="password-error"></div>
-            </div>
-
-            <!-- Password strength indicators -->
-            <div class="password-rules mb-3" id="password-rules">
-                <div class="rule" id="rule-length">
-                    <i class="bi bi-circle"></i> At least 8 characters
+            <form action="{{ url_for('auth.register') }}" method="POST" id="registerForm">
+                <div class="mb-3">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name"
+                        value="{{ full_name if full_name else '' }}" required>
                 </div>
-                <div class="rule" id="rule-upper">
-                    <i class="bi bi-circle"></i> 1 uppercase letter
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                        value="{{ email if email else '' }}" required>
+                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                 </div>
-                <div class="rule" id="rule-number">
-                    <i class="bi bi-circle"></i> 1 number
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="form-text small">
+                        Min 8 chars, 1 uppercase, 1 number.
+                    </div>
                 </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-auth w-100" id="submit-btn">
-                <span class="btn-text">Create Account</span>
-                <span class="btn-loader d-none">
-                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>Creating...
-                </span>
-            </button>
-        </form>
-
-        <div class="auth-footer">
-            Already have an account? <a href="{{ url_for('auth.login_page') }}">Log In</a>
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <span class="text-muted small">Already have an account?</span>
+                    <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold small">Login</a>
+                </div>
+            </form>
         </div>
     </div>
-</div>
-{% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        const form = document.getElementById('registerForm');
+        const passwordInput = document.getElementById('password');
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
-{% endblock %}
+        form.addEventListener('submit', function (event) {
+            const password = passwordInput.value;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const isLongEnough = password.length >= 8;
+
+            if (!isLongEnough || !hasUpperCase || !hasNumber) {
+                event.preventDefault();
+                alert('Password must be at least 8 characters long and contain at least one uppercase letter and one number.');
+            }
+        });
+    </script>
+</body>
+
+</html>

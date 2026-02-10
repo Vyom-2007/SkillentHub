@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - SkillentHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">SkillentHub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('pages.feed') }}">Feed</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Opportunities</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Messages</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <a href="#" class="text-white me-3 text-decoration-none">
+                        🔔 <span class="badge bg-danger rounded-pill">0</span>
+                    </a>
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" href="#"
+                            id="profileDropdown" data-bs-toggle="dropdown">
+                            <span class="me-2">{{ user.full_name }}</span>
+                            <div class="bg-white rounded-circle" style="width: 32px; height: 32px;"></div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#">Profile</a></li>
+                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-md-3 d-none d-md-block">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body text-center">
+                        <div class="bg-secondary rounded-circle mx-auto mb-3" style="width: 80px; height: 80px;"></div>
+                        <h5 class="card-title">{{ user.full_name }}</h5>
+                        <p class="card-text text-muted small">No headline set</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">View Profile</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Feed -->
+            <div class="col-md-6">
+                <!-- Create Post -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form action="{{ url_for('posts.create_post') }}" method="POST" enctype="multipart/form-data">
+                            <div class="d-flex mb-3">
+                                <img src="{{ url_for('static', filename=user.profile_picture) if user.profile_picture else 'https://via.placeholder.com/40' }}"
+                                    class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                <input type="text" name="content" class="form-control rounded-pill"
+                                    placeholder="What's on your mind?" required>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <input type="file" name="image" id="postImage" class="d-none" accept="image/*">
+                                <button type="button" class="btn btn-light btn-sm text-primary"
+                                    onclick="document.getElementById('postImage').click()">🖼️ Photo</button>
+                                <button type="submit" class="btn btn-primary btn-sm px-4">Post</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Posts Feed -->
+                {% for post in posts %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex mb-3">
+                            <img src="{{ url_for('static', filename=post.profile_picture) if post.profile_picture else 'https://via.placeholder.com/40' }}"
+                                class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ post.full_name }}</h6>
+                                <small class="text-muted">{{ post.headline if post.headline else 'Member' }} • {{
+                                    post.created_at.strftime('%h %d, %Y') }}</small>
+                            </div>
+                        </div>
+                        <p class="card-text">{{ post.content }}</p>
+                        {% if post.image_path %}
+                        <img src="{{ url_for('static', filename=post.image_path) }}" class="img-fluid rounded mb-3"
+                            alt="Post Image">
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
+                            <button
+                                class="btn btn-link text-decoration-none {{ 'text-danger' if post.is_liked else 'text-muted' }}"
+                                onclick="likePost({{ post.post_id }}, this)">
+                                ❤️ <span id="like-count-{{ post.post_id }}">{{ post.likes_count }}</span>
+                            </button>
+                            <button class="btn btn-link text-decoration-none text-muted"
+                                onclick="toggleComments({{ post.post_id }})">
+                                💬 {{ post.comment_count }}
+                            </button>
+                        </div>
+
+                        <!-- Comments Section (Hidden by default or loaded via AJAX) -->
+                        <div id="comments-{{ post.post_id }}" class="mt-3 d-none">
+                            <div class="comments-list mb-2 text-muted small">
+                                <!-- Comments loaded here -->
+                            </div>
+                            <div class="d-flex">
+                                <input type="text" class="form-control form-control-sm me-2"
+                                    placeholder="Write a comment..." id="comment-input-{{ post.post_id }}">
+                                <button class="btn btn-sm btn-primary"
+                                    onclick="postComment({{ post.post_id }})">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <p>No posts yet. Connect with others to see their updates!</p>
+                </div>
+                {% endfor %}
+
+                <script>
+                    function likePost(postId, btn) {
+                        fetch(`/posts/${postId}/like`, { method: 'POST' })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    let countSpan = document.getElementById(`like-count-${postId}`);
+                                    let count = parseInt(countSpan.innerText);
+                                    if (data.action === 'liked') {
+                                        count++;
+                                        btn.classList.add('text-danger');
+                                        btn.classList.remove('text-muted');
+                                    } else {
+                                        count--;
+                                        btn.classList.remove('text-danger');
+                                        btn.classList.add('text-muted');
+                                    }
+                                    countSpan.innerText = count;
+                                }
+                            });
+                    }
+
+                    function toggleComments(postId) {
+                        const section = document.getElementById(`comments-${postId}`);
+                        if (section.classList.contains('d-none')) {
+                            // Load comments
+                            fetch(`/posts/${postId}/comments`)
+                                .then(res => res.json())
+                                .then(comments => {
+                                    const list = section.querySelector('.comments-list');
+                                    list.innerHTML = comments.map(c => `
+                                    <div class="mb-1"><strong>${c.full_name}:</strong> ${c.content}</div>
+                                `).join('');
+                                    section.classList.remove('d-none');
+                                });
+                        } else {
+                            section.classList.add('d-none');
+                        }
+                    }
+
+                    function postComment(postId) {
+                        const input = document.getElementById(`comment-input-${postId}`);
+                        const content = input.value;
+                        if (!content) return;
+
+                        fetch(`/posts/${postId}/comment`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ content: content })
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const list = document.querySelector(`#comments-${postId} .comments-list`);
+                                    const div = document.createElement('div');
+                                    div.className = 'mb-1';
+                                    div.innerHTML = `<strong>${data.user_name}:</strong> ${data.content}`;
+                                    list.appendChild(div);
+                                    input.value = '';
+                                }
+                            });
+                    }
+                </script>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="col-md-3 d-none d-md-block">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">Suggested Connections</h6>
+                        <p class="text-muted small">No suggestions available.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

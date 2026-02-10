@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-9">
+            <h2 class="fw-bold mb-1">{{ team.team_name }}</h2>
+            <p class="text-muted fs-5 mb-0">{{ team.event_name }}</p>
+        </div>
+        <div class="col-md-3 text-md-end">
+            {% if is_member %}
+            <button class="btn btn-outline-danger btn-sm">Leave Team</button>
+            {% else %}
+            <button class="btn btn-primary btn-sm">Request to Join</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Members List -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                    <span>Members</span>
+                    <span class="badge bg-secondary">{{ members|length }}</span>
+                </div>
+                <div class="list-group list-group-flush">
+                    {% for member in members %}
+                    <div class="list-group-item d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ url_for('static', filename=member.profile_picture) if member.profile_picture else 'https://via.placeholder.com/40' }}"
+                                class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                            <div>
+                                <h6 class="mb-0">
+                                    <a href="{{ url_for('profile.view_profile', user_id=member.user_id) }}"
+                                        class="text-decoration-none text-dark">
+                                        {{ member.full_name }}
+                                    </a>
+                                </h6>
+                                <small class="text-muted">Joined {{ member.joined_at.strftime('%b %Y') }}</small>
+                            </div>
+                        </div>
+                        <span
+                            class="badge {{ 'bg-success' if member.role == 'leader' else 'bg-light text-dark border' }}">
+                            {{ member.role|title }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Posts/Discussion Placeholder -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center text-muted py-5">
+                    <p>Team discussions coming soon...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Invite Card -->
+            {% if is_member %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">Invite Members</div>
+                <div class="card-body">
+                    <form action="{{ url_for('teams.invite_member', team_id=team.team_id) }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small">Email Address</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">Send Invitation</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Team Info -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted d-block mb-1">Created</small>
+                    <p class="mb-3">{{ team.created_at.strftime('%B %d, %Y') }}</p>
+
+                    <small class="text-muted d-block mb-1">Status</small>
+                    <p class="mb-0"><span class="badge bg-success">Active</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
