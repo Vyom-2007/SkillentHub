@@ -82,7 +82,7 @@ def register():
 def login():
     """Recruiter login page."""
     if session.get('recruiter_id'):
-        return redirect(url_for('auth_recruiter.dashboard'))
+        return redirect(url_for('recruiter.dashboard'))
     
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()

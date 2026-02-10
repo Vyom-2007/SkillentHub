@@ -11,16 +11,22 @@ from app import create_app
 
 def reproduce_error():
     app = create_app('development')
-    with app.test_request_context('/recruiter/login', method='GET'):
-        try:
-            print("Rendering login template...")
-            # Simulate what the route probably does (we'll confirm after viewing routes.py)
-            # If routes.py doesn't pass 'email', this might trigger the error if strict
-            output = render_template('recruiter/login.html')
-            print("Render successful.")
-        except Exception:
-            print("Exception during render:")
-            traceback.print_exc()
+    app.config['TESTING'] = True
+    app.config['DEBUG'] = True
+    client = app.test_client()
+    
+    try:
+        print("Requesting /recruiter/login...")
+        response = client.get('/recruiter/login')
+        print(f"Status Code: {response.status_code}")
+        if response.status_code == 500:
+            print("Server Error Triggered!")
+            # In debug mode, response.data might contain the traceback rendered as HTML
+            # but getting the internal exception is harder without a signal listener
+            # However, typical Flask debug output might show up in stderr/stdout
+    except Exception:
+        print("Exception during request:")
+        traceback.print_exc()
 
 if __name__ == "__main__":
     reproduce_error()
