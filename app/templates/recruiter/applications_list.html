@@ -85,6 +85,10 @@
                                 <div class="fw-bold text-dark">{{ app.item_title }}</div>
                                 <span class="badge bg-light text-secondary border text-uppercase"
                                     style="font-size: 0.65rem;">{{ app.item_type }}</span>
+                                {% if app.team_name %}
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info ms-1"
+                                    style="font-size: 0.65rem;">Item Team: {{ app.team_name }}</span>
+                                {% endif %}
                             </td>
                             <td class="text-muted small">
                                 {{ app.applied_at.strftime('%Y-%m-%d') if app.applied_at else 'N/A' }}
@@ -98,10 +102,30 @@
                                 </span>
                             </td>
                             <td class="text-end pe-4">
+                                {% if app.item_type in ['job', 'internship'] %}
                                 <a href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}"
                                     class="btn btn-sm btn-outline-primary">
                                     View Details
                                 </a>
+                                {% else %}
+                                {# Event Registrations #}
+                                {% if app.email and app.email != 'No Email' %}
+                                <a href="mailto:{{ app.email }}" class="btn btn-sm btn-outline-secondary"
+                                    title="Email Candidate">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                                {% endif %}
+
+                                {# Check if we have a user_id to link to profile.
+                                Note: Our query didn't select user_id explicitly in the main wrapper,
+                                but we can infer from profile_picture or if we selected it.
+                                Let's assume if profile_picture is not default, it might be a user.
+                                Better: The service query didn't explicitly select user_id in the outer wrapper.
+                                We should probably add user_id to the query to be safe.
+                                But for now, sticking to what we have or just showing a disabled button if guest.
+                                #}
+                                <span class="text-muted small ms-2">Registration</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% else %}

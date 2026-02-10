@@ -89,53 +89,132 @@ def toggle_opportunity_status(item_type, item_id, recruiter_id):
 
 def get_applications(recruiter_id, filters=None):
     """
-    Fetch applications with Candidate Details and Item Titles.
-    Performs JOINs to access mapped tables.
+    Fetch applications AND registrations (Unified ATS).
     """
-    params = []
-    
-    # CTE or Complex Join approach?
-    # Since we need to join on different tables based on item_type, 
-    # and we need to filter by recruiter_id which is in those tables.
-    
-    query = """
-    SELECT 
-        a.application_id, a.item_type, a.item_id, a.status, a.applied_at,
-        a.application_id, a.item_type, a.item_id, a.status, a.applied_at,
-        p.full_name, u.email,
-        p.profile_picture,
-        COALESCE(j.title, i.title, c.title, h.title) as item_title
-    FROM applications a
-    JOIN users u ON a.user_id = u.user_id
-    LEFT JOIN profiles p ON u.user_id = p.user_id
-    
-    -- LEFT JOINS to get Titles and Check Recruiter ID
-    LEFT JOIN jobs j ON a.item_type = 'job' AND a.item_id = j.job_id
-    LEFT JOIN internships i ON a.item_type = 'internship' AND a.item_id = i.internship_id
-    LEFT JOIN competitions c ON a.item_type = 'competition' AND a.item_id = c.competition_id
-    LEFT JOIN hackathons h ON a.item_type = 'hackathon' AND a.item_id = h.hackathon_id
-    
-    WHERE (
-        (j.recruiter_id = %s) OR 
-        (i.recruiter_id = %s) OR 
-        (c.recruiter_id = %s) OR 
-        (h.recruiter_id = %s)
-    )
+    # 1. Applications Query
+    # Note: We use p.full_name for candidates.
+    app_query = """
+        SELECT 
+            a.application_id, 
+            a.item_type, 
+            a.item_id, 
+            a.status, 
+            a.applied_at as date,
+            p.full_name, 
+            u.email,
+            p.profile_picture,
+            COALESCE(j.title, i.title, c.title, h.title) as item_title,
+            NULL as team_name
+        FROM applications a
+        JOIN users u ON a.user_id = u.user_id
+        LEFT JOIN profiles p ON u.user_id = p.user_id
+        LEFT JOIN jobs j ON a.item_type = 'job' AND a.item_id = j.job_id
+        LEFT JOIN internships i ON a.item_type = 'internship' AND a.item_id = i.internship_id
+        LEFT JOIN competitions c ON a.item_type = 'competition' AND a.item_id = c.competition_id
+        LEFT JOIN hackathons h ON a.item_type = 'hackathon' AND a.item_id = h.hackathon_id
+        WHERE (
+            (j.recruiter_id = %s) OR 
+            (i.recruiter_id = %s) OR 
+            (c.recruiter_id = %s) OR 
+            (h.recruiter_id = %s)
+        )
     """
-    params.extend([recruiter_id, recruiter_id, recruiter_id, recruiter_id])
+    app_params = [recruiter_id, recruiter_id, recruiter_id, recruiter_id]
+    
+    # 2. Hackathon Registrations Query
+    # registration_id -> application_id
+    # 'registered' -> status (dummy)
+    # registered_at -> date
+    # COALESCE(hr.name, p.full_name) -> full_name (handles guests)
+    # COALESCE(hr.email, u.email) -> email (handles guests)
+    hack_query = """
+        SELECT 
+            hr.registration_id as application_id, 
+            'hackathon' as item_type, 
+            hr.hackathon_id as item_id, 
+            'registered' as status, 
+            hr.registered_at as date,
+            COALESCE(p.full_name, hr.name, 'Guest') as full_name, 
+            COALESCE(u.email, hr.email, 'No Email') as email,
+            p.profile_picture,
+            h.title as item_title,
+            hr.team_name
+        FROM hackathon_registrations hr
+        JOIN hackathons h ON hr.hackathon_id = h.hackathon_id
+        LEFT JOIN users u ON hr.user_id = u.user_id
+        LEFT JOIN profiles p ON u.user_id = p.user_id
+        WHERE h.recruiter_id = %s
+    """
+    hack_params = [recruiter_id]
+
+    # 3. Competition Registrations Query
+    comp_query = """
+        SELECT 
+            cr.registration_id as application_id, 
+            'competition' as item_type, 
+            cr.competition_id as item_id, 
+            'registered' as status, 
+            cr.registered_at as date,
+            p.full_name, 
+            u.email,
+            p.profile_picture,
+            c.title as item_title,
+            NULL as team_name
+        FROM competition_registrations cr
+        JOIN competitions c ON cr.competition_id = c.competition_id
+        JOIN users u ON cr.user_id = u.user_id
+        LEFT JOIN profiles p ON u.user_id = p.user_id
+        WHERE c.recruiter_id = %s
+    """
+    comp_params = [recruiter_id]
+
+    # Apply Filters (Harder with UNION, but possible by wrapping)
+    # For simplicity, we filter AFTER union in SQL or construct WHERE clauses.
+    # Given the complexity, wrapping is cleaner.
+    
+    full_query = f"""
+        SELECT * FROM (
+            {app_query}
+            UNION ALL
+            {hack_query}
+            UNION ALL
+            {comp_query}
+        ) as unified
+        WHERE 1=1
+    """
+    
+    all_params = app_params + hack_params + comp_params
     
     if filters:
         if filters.get('status'):
-            query += " AND a.status = %s"
-            params.append(filters['status'])
+            # Note: Event registrations will only show up if status='registered' (or whatever we set)
+            full_query += " AND status = %s"
+            all_params.append(filters['status'])
             
         if filters.get('item_type'):
-            query += " AND a.item_type = %s"
-            params.append(filters['item_type'])
+            full_query += " AND item_type = %s"
+            all_params.append(filters['item_type'])
             
-    query += " ORDER BY a.applied_at DESC"
+    full_query += " ORDER BY applied_at DESC"
     
-    return execute_query(query, tuple(params), fetch_all=True)
+    # Execute with fetch_all names mapped correctly
+    # Note: execute_query returns dicts, keys are based on alias.
+    # We aliased 'applied_at' as 'date' in union. 
+    # But template might expect 'applied_at'. Let's alias it as 'applied_at' in outer query or inner.
+    # Let's fix aliases to match original ATS expectation: applied_at
+    
+    # RE-DO aliases in queries above for consistency
+    # We replaced " as date" with " as applied_at" in the return call, but that only affects the string passed to execute_query if done there.
+    # But the ORDER BY clause was appended to `full_query` before the replacement.
+    # And `full_query` uses `ORDER BY date DESC`. 
+    # The replacement `full_query.replace(" as date", " as applied_at")` would change inner aliases to `applied_at`.
+    # But filters might use `date`? No, filters use `status` and `item_type`.
+    # The ORDER BY clause `ORDER BY date DESC` would fail if `date` is replaced by `applied_at`.
+    # Let's simple use "applied_at" everywhere in the string construction or just do the replacement safely.
+    
+    final_sql = full_query.replace(" as date", " as applied_at").replace("ORDER BY date", "ORDER BY applied_at")
+    
+    return execute_query(final_sql, tuple(all_params), fetch_all=True)
 
 def get_application_detail(application_id, recruiter_id):
     """
