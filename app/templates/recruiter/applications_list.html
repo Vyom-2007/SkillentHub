@@ -73,7 +73,7 @@
                         <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ app.profile_picture or url_for('static', filename='images/default_profile.png') }}"
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_picture) if app.profile_picture else url_for('static', filename='images/default_profile.png') }}"
                                         class="rounded-circle me-3 border" width="40" height="40" alt="Profile">
                                     <div>
                                         <h6 class="mb-0 fw-bold">{{ app.full_name }}</h6>
@@ -124,6 +124,16 @@
                                 We should probably add user_id to the query to be safe.
                                 But for now, sticking to what we have or just showing a disabled button if guest.
                                 #}
+
+
+                                {# Message Action for any registered user #}
+                                {% if app.user_id %}
+                                <a href="{{ url_for('recruiter_messages.messages', user=app.user_id, type='user') }}"
+                                    class="btn btn-sm btn-outline-success ms-1" title="Message Candidate">
+                                    <i class="bi bi-chat-dots"></i>
+                                </a>
+                                {% endif %}
+
                                 <span class="text-muted small ms-2">Registration</span>
                                 {% endif %}
                             </td>
