@@ -1,6 +1,0 @@
-Flask
-pymysql
-bcrypt
-Flask-Session
-Flask-Mail
-python-dotenv
