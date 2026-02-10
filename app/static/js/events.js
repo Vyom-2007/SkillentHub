@@ -60,9 +60,21 @@ function registerEvent(eventType, eventId) {
         url = `/competitions/${eventId}/register`;
     } else {
         url = `/hackathons/${eventId}/register`;
-        const teamName = document.getElementById('teamNameInput')?.value;
-        if (teamName) {
-            body = { team_name: teamName };
+        const teamNameInput = document.getElementById('teamNameInput');
+
+        // Collect members
+        const members = [];
+        document.querySelectorAll('.member-email').forEach(input => {
+            if (input.value && input.value.trim()) {
+                members.push(input.value.trim());
+            }
+        });
+
+        if (teamNameInput) {
+            body = {
+                team_name: teamNameInput.value,
+                members: members
+            };
         }
     }
 

@@ -72,8 +72,9 @@ def register_hackathon(hackathon_id):
     
     if request.is_json:
         team_name = request.json.get('team_name')
+        members = request.json.get('members', [])
     
-    success, result = event_service.register_hackathon(hackathon_id, user_id, team_name)
+    success, result = event_service.register_hackathon(hackathon_id, user_id, team_name, members)
     
     if success:
         return jsonify({'success': True, 'registration_id': result})

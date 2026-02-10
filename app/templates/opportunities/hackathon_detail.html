@@ -226,9 +226,57 @@
                 <p>Are you sure you want to register for <strong>{{ event.title }}</strong>?</p>
                 {% if event.team_size and event.team_size > 1 %}
                 <div class="mb-3">
-                    <label class="form-label">Team Name (Optional)</label>
-                    <input type="text" class="form-control" id="teamNameInput" placeholder="Enter team name">
+                    <label class="form-label">Team Name</label>
+                    <input type="text" class="form-control" id="teamNameInput" placeholder="Enter team name" required>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label d-flex justify-content-between align-items-center">
+                        Team Members (Emails)
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addMemberInput()">
+                            <i class="bi bi-plus"></i> Add
+                        </button>
+                    </label>
+                    <div id="teamMembersContainer">
+                        <!-- Dynamic inputs will be added here -->
+                        <div class="input-group mb-2">
+                            <input type="email" class="form-control member-email" placeholder="Member email" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="removeMemberInput(this)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted">Max team size: {{ event.team_size }}</small>
+                </div>
+                <script>
+                    const maxTeamSize = {{ event.team_size }};
+                    let memberCount = 1; // Initial input
+
+                    function addMemberInput() {
+                        if (memberCount >= maxTeamSize - 1) { // -1 because user is already 1
+                            alert('Maximum team size reached');
+                            return;
+                        }
+                        const container = document.getElementById('teamMembersContainer');
+                        const div = document.createElement('div');
+                        div.className = 'input-group mb-2';
+                        div.innerHTML = `
+                            <input type="email" class="form-control member-email" placeholder="Member email">
+                            <button class="btn btn-outline-secondary" type="button" onclick="removeMemberInput(this)">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        `;
+                        container.appendChild(div);
+                        memberCount++;
+                    }
+
+                    function removeMemberInput(btn) {
+                        if (document.querySelectorAll('.member-email').length <= 1) {
+                            return; // Keep at least one
+                        }
+                        btn.closest('.input-group').remove();
+                        memberCount--;
+                    }
+                </script>
                 {% endif %}
                 <p class="text-muted small mb-0">
                     <i class="bi bi-calendar me-1"></i>
