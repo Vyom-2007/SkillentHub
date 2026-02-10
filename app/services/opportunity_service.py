@@ -6,6 +6,46 @@ from app.database.connection import execute_query
 from datetime import datetime, timedelta
 
 
+def _ensure_dates(item):
+    """Convert date strings to datetime objects."""
+    if not item:
+        return item
+        
+    for field in ['posted_at', 'deadline', 'start_date', 'end_date']:
+        if field in item and isinstance(item[field], str):
+            val = item[field]
+            # Try common formats
+            formats = [
+                '%Y-%m-%d',
+                '%Y-%m-%d %H:%M:%S',
+                '%Y-%m-%dT%H:%M:%S',
+                '%Y-%m-%dT%H:%M:%S.%f',
+                '%a, %d %b %Y %H:%M:%S %Z'
+            ]
+            parsed = False
+            for fmt in formats:
+                try:
+                    item[field] = datetime.strptime(val, fmt)
+                    parsed = True
+                    break
+                except ValueError:
+                    continue
+            
+            if not parsed:
+                # If cannot parse, maybe set to None so it doesn't crash template
+                # Or keep string but log warning? Safe to set None if it's junk data
+                # But better to keep string for debugging? No, string crashes template.
+                # Let's set to None or allow crash if it's really partial?
+                # User says "Error is not solving", likely 500.
+                # If we convert to None, template handles it gracefully ('Open' for deadline, etc.)
+                # But for 'posted_at', sort might fail if None?
+                # lambda x: x.get('posted_at') or datetime.min
+                # If we set None, datetime.min is used. Safe.
+                print(f"Failed to parse date: {val}")
+                item[field] = None
+    return item
+
+
 def search_opportunities(opp_type='all', q=None, location=None, work_mode=None, 
                          job_type=None, date_posted=None, experience=None,
                          page=1, per_page=50):
@@ -100,7 +140,10 @@ def _search_jobs(q=None, location=None, work_mode=None, job_type=None,
     """
     params.extend([limit, offset])
     
-    return execute_query(query, tuple(params), fetch_all=True) or []
+    results = execute_query(query, tuple(params), fetch_all=True) or []
+    for r in results:
+        _ensure_dates(r)
+    return results
 
 
 def _search_internships(q=None, location=None, work_mode=None, date_posted=None, 
@@ -147,7 +190,10 @@ def _search_internships(q=None, location=None, work_mode=None, date_posted=None,
     """
     params.extend([limit, offset])
     
-    return execute_query(query, tuple(params), fetch_all=True) or []
+    results = execute_query(query, tuple(params), fetch_all=True) or []
+    for r in results:
+        _ensure_dates(r)
+    return results
 
 
 def get_job_by_id(job_id):
@@ -159,7 +205,8 @@ def get_job_by_id(job_id):
         LEFT JOIN recruiters r ON j.recruiter_id = r.recruiter_id
         WHERE j.job_id = %s
     """
-    return execute_query(query, (job_id,), fetch_one=True)
+    job = execute_query(query, (job_id,), fetch_one=True)
+    return _ensure_dates(job)
 
 
 def get_internship_by_id(internship_id):
@@ -171,7 +218,8 @@ def get_internship_by_id(internship_id):
         LEFT JOIN recruiters r ON i.recruiter_id = r.recruiter_id
         WHERE i.internship_id = %s
     """
-    return execute_query(query, (internship_id,), fetch_one=True)
+    internship = execute_query(query, (internship_id,), fetch_one=True)
+    return _ensure_dates(internship)
 
 
 def get_all_locations():

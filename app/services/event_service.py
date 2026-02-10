@@ -9,6 +9,20 @@ from datetime import datetime
 def get_event_status(start_date, end_date):
     """Calculate event status based on current time."""
     now = datetime.now()
+    
+    # Convert strings to datetime if needed
+    if isinstance(start_date, str):
+        try:
+            start_date = datetime.fromisoformat(start_date)
+        except ValueError:
+            pass
+            
+    if isinstance(end_date, str):
+        try:
+            end_date = datetime.fromisoformat(end_date)
+        except ValueError:
+            pass
+            
     if now < start_date:
         return 'upcoming'
     elif start_date <= now <= end_date:
@@ -86,10 +100,13 @@ def register_competition(competition_id, user_id):
     
     # Register
     query = "INSERT INTO competition_registrations (competition_id, user_id) VALUES (%s, %s)"
-    reg_id = execute_insert(query, (competition_id, user_id))
-    
-    if reg_id:
-        return True, reg_id
+    try:
+        reg_id = execute_insert(query, (competition_id, user_id))
+        if reg_id:
+            return True, reg_id
+    except Exception as e:
+        return False, f"Database error: {str(e)}"
+        
     return False, "Registration failed"
 
 
@@ -159,10 +176,14 @@ def register_hackathon(hackathon_id, user_id, team_name=None):
     
     # Register
     query = "INSERT INTO hackathon_registrations (hackathon_id, user_id, team_name) VALUES (%s, %s, %s)"
-    reg_id = execute_insert(query, (hackathon_id, user_id, team_name))
-    
-    if reg_id:
-        return True, reg_id
+    try:
+        reg_id = execute_insert(query, (hackathon_id, user_id, team_name))
+        
+        if reg_id:
+            return True, reg_id
+    except Exception as e:
+        return False, f"Database error: {str(e)}"
+        
     return False, "Registration failed"
 
 
