@@ -21,9 +21,14 @@ def create_job():
             'salary_range': request.form.get('salary_range'),
             'description': request.form.get('description'),
             'requirements': request.form.get('requirements'),
-            'deadline': request.form.get('deadline'),
             'openings': request.form.get('openings', 1)
         }
+        
+        # Validation
+        required_fields = ['title', 'location', 'job_type', 'work_mode', 'salary_range', 'description', 'deadline', 'openings', 'skills_required']
+        if any(not data.get(k) for k in required_fields):
+            flash('All fields marked with * are required.', 'danger')
+            return render_template('recruiter/job_form.html')
         
         try:
             job_id = recruiter_post_service.create_job(recruiter_id, data)
@@ -54,6 +59,12 @@ def create_internship():
             'requirements': request.form.get('requirements'),
             'deadline': request.form.get('deadline')
         }
+
+        # Validation
+        required_fields = ['title', 'location', 'duration', 'stipend', 'work_mode', 'description', 'deadline', 'skills_required']
+        if any(not data.get(k) for k in required_fields):
+            flash('All fields marked with * are required.', 'danger')
+            return render_template('recruiter/internship_form.html')
         
         try:
             internship_id = recruiter_post_service.create_internship(recruiter_id, data)
@@ -81,6 +92,12 @@ def create_competition():
             'prize_details': request.form.get('prize_details'),
             'max_participants': request.form.get('max_participants')
         }
+
+        # Validation
+        required_fields = ['title', 'description', 'rules', 'start_date', 'end_date', 'prize_details', 'max_participants']
+        if any(not data.get(k) for k in required_fields):
+            flash('All fields marked with * are required.', 'danger')
+            return render_template('recruiter/competition_form.html')
         
         try:
             competition_id = recruiter_post_service.create_competition(recruiter_id, data)
@@ -110,6 +127,12 @@ def create_hackathon():
             'team_size': request.form.get('team_size'),
             'prize_details': request.form.get('prize_details')
         }
+
+        # Validation
+        required_fields = ['title', 'description', 'theme', 'start_date', 'end_date', 'venue', 'mode', 'team_size', 'prize_details']
+        if any(not data.get(k) for k in required_fields):
+            flash('All fields marked with * are required.', 'danger')
+            return render_template('recruiter/hackathon_form.html')
         
         try:
             hackathon_id = recruiter_post_service.create_hackathon(recruiter_id, data)

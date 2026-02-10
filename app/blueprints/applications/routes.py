@@ -86,6 +86,12 @@ def apply():
     
     if item_type not in ['job', 'internship']:
         return jsonify({'error': 'Invalid item type'}), 400
+
+    if not resume:
+        return jsonify({'error': 'Resume is required'}), 400
+        
+    if not cover_letter or not cover_letter.strip():
+        return jsonify({'error': 'Cover letter is required'}), 400
     
     success, result = application_service.apply_to_opportunity(
         user_id, item_type, item_id, resume, cover_letter

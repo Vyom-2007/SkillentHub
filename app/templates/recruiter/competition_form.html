@@ -30,8 +30,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Rules & Guidelines</label>
-                            <textarea class="form-control" name="rules" rows="4"
+                            <label class="form-label">Rules & Guidelines <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="rules" rows="4" required
                                 placeholder="Enter competition rules..."></textarea>
                         </div>
 
@@ -51,13 +51,13 @@
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label">Prize Details</label>
-                                <input type="text" class="form-control" name="prize_details"
+                                <label class="form-label">Prize Details <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="prize_details" required
                                     placeholder="e.g. $5000 First Prize">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Max Participants</label>
-                                <input type="number" class="form-control" name="max_participants" min="1"
+                                <label class="form-label">Max Participants <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="max_participants" min="1" required
                                     placeholder="Optional">
                             </div>
                         </div>

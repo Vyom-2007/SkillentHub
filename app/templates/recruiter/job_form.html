@@ -65,14 +65,14 @@
                         <h6 class="text-uppercase text-muted fw-bold mb-3 mt-4 fs-7">Job Details</h6>
 
                         <div class="mb-3">
-                            <label class="form-label">Skills Required</label>
-                            <input type="text" class="form-control" name="skills_required"
+                            <label class="form-label">Skills Required <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="skills_required" required
                                 placeholder="e.g. Python, Flask, React (Comma separated)">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Salary Range</label>
-                            <input type="text" class="form-control" name="salary_range"
+                            <label class="form-label">Salary Range <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="salary_range" required
                                 placeholder="e.g. $80k - $100k or Market Rate">
                         </div>
 
@@ -93,12 +93,13 @@
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label">Application Deadline</label>
-                                <input type="date" class="form-control" name="deadline" id="deadlineInput">
+                                <label class="form-label">Application Deadline <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" name="deadline" id="deadlineInput" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Number of Openings</label>
-                                <input type="number" class="form-control" name="openings" value="1" min="1">
+                                <label class="form-label">Number of Openings <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="openings" value="1" min="1" required>
                             </div>
                         </div>
 

@@ -30,8 +30,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Theme / Problem Statement</label>
-                            <input type="text" class="form-control" name="theme" placeholder="e.g. Sustainable Energy">
+                            <label class="form-label">Theme / Problem Statement <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="theme" required
+                                placeholder="e.g. Sustainable Energy">
                         </div>
 
                         <!-- Logistics -->
@@ -66,12 +68,13 @@
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label class="form-label">Team Size</label>
-                                <input type="text" class="form-control" name="team_size" placeholder="e.g. 2-4 Members">
+                                <label class="form-label">Team Size <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="team_size" required
+                                    placeholder="e.g. 2-4 Members">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Prizes</label>
-                                <input type="text" class="form-control" name="prize_details"
+                                <label class="form-label">Prizes <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="prize_details" required
                                     placeholder="e.g. Total Pool $10k">
                             </div>
                         </div>
