@@ -1,0 +1,119 @@
+<!-- Navbar Notifications Component -->
+<li class="nav-item dropdown">
+    <a class="nav-link position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown"
+        aria-expanded="false" data-bs-auto-close="outside">
+        <i class="bi bi-bell fs-5"></i>
+        <span class="notification-badge d-none" id="notificationBadge">0</span>
+    </a>
+    <div class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationsDropdown">
+        <div class="dropdown-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Notifications</span>
+            <button class="btn btn-sm btn-link p-0" id="markAllReadBtn" style="font-size: 0.8rem;">
+                Mark all read
+            </button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <div class="text-center py-3 text-muted">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+            </div>
+        </div>
+        <div class="dropdown-footer text-center">
+            <a href="/notifications" class="text-primary">View All Notifications</a>
+        </div>
+    </div>
+</li>
+
+<style>
+    .notification-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #ef4444;
+        color: white;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 1rem;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    .notification-dropdown {
+        width: 320px;
+        max-height: 400px;
+        padding: 0;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        border-radius: 0.75rem;
+    }
+
+    .notification-dropdown .dropdown-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .notification-dropdown .dropdown-footer {
+        padding: 0.75rem;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .notification-list {
+        max-height: 280px;
+        overflow-y: auto;
+    }
+
+    .notification-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .notification-item:hover {
+        background: #f8fafc;
+    }
+
+    .notification-item.unread {
+        background: #eff6ff;
+    }
+
+    .notification-item .icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .notification-item .content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .notification-item .content p {
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .notification-item.unread .content p {
+        font-weight: 500;
+    }
+
+    .notification-item .time {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin-top: 0.25rem;
+    }
+</style>

@@ -1,241 +1,269 @@
+"""
+Post management service.
+Handles post CRUD, likes, comments, and feed queries.
+"""
 import os
 import uuid
-from PIL import Image
+from datetime import datetime
 from flask import current_app
-from app.database.connection import get_db_connection
+from app.database.connection import execute_query, execute_insert, get_db_connection
 
 
-ALLOWED_POST_IMG_EXT = {'jpg', 'jpeg', 'png', 'gif'}
-MAX_POST_IMG_SIZE = 10 * 1024 * 1024  # 10 MB
+# ========== FILE UPLOAD HELPERS ==========
+
+ALLOWED_POST_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
+MAX_POST_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
 
-# ── Feed ──────────────────────────────────────────────────────
+def save_post_image(file):
+    """Save uploaded post image. Returns (success, filename_or_error)."""
+    if not file or not file.filename:
+        return True, None  # No file is OK
+    
+    # Check extension
+    ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
+    if ext not in ALLOWED_POST_EXTENSIONS:
+        return False, 'Only JPG, PNG, GIF allowed'
+    
+    # Check size
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    
+    if size > MAX_POST_IMAGE_SIZE:
+        return False, 'File size exceeds 10MB limit'
+    
+    # Generate unique filename
+    filename = f"post_{uuid.uuid4().hex[:12]}.{ext}"
+    
+    # Ensure upload directory exists
+    upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'posts')
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Save file
+    filepath = os.path.join(upload_dir, filename)
+    file.save(filepath)
+    
+    return True, filename
 
-def get_feed(offset, current_user_id):
+
+def delete_post_image(filename):
+    """Delete post image from disk."""
+    if not filename:
+        return
+    
+    filepath = os.path.join(current_app.root_path, 'static', 'uploads', 'posts', filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
+
+# ========== POST CRUD ==========
+
+def create_post(author_id, content, image_file=None):
+    """Create a new post. Returns (success, post_id_or_error)."""
+    if not content or len(content.strip()) == 0:
+        return False, 'Content is required'
+    
+    if len(content) > 5000:
+        return False, 'Content exceeds 5000 characters'
+    
+    # Handle image upload
+    image_path = None
+    if image_file and image_file.filename:
+        success, result = save_post_image(image_file)
+        if not success:
+            return False, result
+        image_path = result
+    
+    # Insert post
+    query = """
+        INSERT INTO posts (author_id, content, image_path)
+        VALUES (%s, %s, %s)
     """
-    Fetch paginated feed: UNION ALL of user-posts + recruiter-posts.
-    Returns list of dicts with author info and is_liked flag.
+    post_id = execute_insert(query, (author_id, content.strip(), image_path))
+    
+    return True, post_id
+
+
+def get_post(post_id):
+    """Get single post by ID."""
+    query = """
+        SELECT p.*, u.email, pr.full_name, pr.profile_picture, pr.headline
+        FROM posts p
+        JOIN users u ON p.author_id = u.user_id
+        LEFT JOIN profiles pr ON p.author_id = pr.user_id
+        WHERE p.post_id = %s
     """
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            sql = """
-                SELECT
-                    p.post_id, p.content, p.image_path, p.created_at,
-                    p.likes_count, p.author_id, p.author_type,
-                    u.full_name  AS author_name,
-                    pr.profile_picture AS author_pic,
-                    (SELECT COUNT(*) FROM post_likes pl
-                     WHERE pl.post_id = p.post_id AND pl.user_id = %s) AS is_liked
-                FROM posts p
-                JOIN users u ON p.author_id = u.user_id
-                LEFT JOIN profiles pr ON p.author_id = pr.user_id
-                WHERE p.author_type = 'user'
-
-                UNION ALL
-
-                SELECT
-                    p.post_id, p.content, p.image_path, p.created_at,
-                    p.likes_count, p.author_id, p.author_type,
-                    r.full_name  AS author_name,
-                    rp.profile_picture AS author_pic,
-                    (SELECT COUNT(*) FROM post_likes pl
-                     WHERE pl.post_id = p.post_id AND pl.user_id = %s) AS is_liked
-                FROM posts p
-                JOIN recruiters r ON p.author_id = r.recruiter_id
-                LEFT JOIN recruiter_profiles rp ON p.author_id = rp.recruiter_id
-                WHERE p.author_type = 'recruiter'
-
-                ORDER BY created_at DESC
-                LIMIT 10 OFFSET %s
-            """
-            cur.execute(sql, (current_user_id, current_user_id, offset))
-            return cur.fetchall()
-    finally:
-        conn.close()
-
-
-def get_new_posts_count(since_id):
-    """Count posts created after the given post_id."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT COUNT(*) AS cnt FROM posts WHERE post_id > %s",
-                (since_id,),
-            )
-            row = cur.fetchone()
-            return row['cnt'] if row else 0
-    finally:
-        conn.close()
-
-
-# ── Create / Delete ───────────────────────────────────────────
-
-def create_post(author_id, author_type, content, image_path=None):
-    """Insert a new post and return the post_id."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO posts (author_id, author_type, content, image_path) "
-                "VALUES (%s, %s, %s, %s)",
-                (author_id, author_type, content, image_path),
-            )
-            return cur.lastrowid
-    finally:
-        conn.close()
+    return execute_query(query, (post_id,), fetch_one=True)
 
 
 def delete_post(post_id, user_id):
-    """Delete a post only if the current user is the author."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "DELETE FROM posts WHERE post_id = %s "
-                "AND author_id = %s AND author_type = 'user'",
-                (post_id, user_id),
-            )
-            return cur.rowcount > 0
-    finally:
-        conn.close()
+    """Delete a post. Only author can delete. Returns (success, message)."""
+    # Check ownership
+    post = execute_query(
+        "SELECT author_id, image_path FROM posts WHERE post_id = %s",
+        (post_id,), fetch_one=True
+    )
+    
+    if not post:
+        return False, 'Post not found'
+    
+    if post['author_id'] != user_id:
+        return False, 'Unauthorized'
+    
+    # Delete image file
+    if post.get('image_path'):
+        delete_post_image(post['image_path'])
+    
+    # Delete comments and likes first
+    execute_query("DELETE FROM post_comments WHERE post_id = %s", (post_id,))
+    execute_query("DELETE FROM post_likes WHERE post_id = %s", (post_id,))
+    
+    # Delete post
+    execute_query("DELETE FROM posts WHERE post_id = %s", (post_id,))
+    
+    return True, 'Post deleted'
 
 
-# ── Likes ─────────────────────────────────────────────────────
+# ========== FEED QUERIES ==========
+
+def get_feed(page=1, per_page=50, current_user_id=None):
+    """Get global feed with pagination."""
+    offset = (page - 1) * per_page
+    
+    query = """
+        SELECT 
+            p.post_id, p.author_id, p.content, p.image_path, 
+            p.created_at, p.likes_count,
+            u.email,
+            pr.full_name, pr.profile_picture, pr.headline,
+            (SELECT COUNT(*) FROM post_comments WHERE post_id = p.post_id) as comments_count,
+            EXISTS(
+                SELECT 1 FROM post_likes 
+                WHERE post_id = p.post_id AND user_id = %s
+            ) as liked_by_current_user
+        FROM posts p
+        JOIN users u ON p.author_id = u.user_id
+        LEFT JOIN profiles pr ON p.author_id = pr.user_id
+        ORDER BY p.created_at DESC
+        LIMIT %s OFFSET %s
+    """
+    
+    posts = execute_query(query, (current_user_id or 0, per_page, offset), fetch_all=True)
+    return posts or []
+
+
+def get_new_posts(since_id, current_user_id=None):
+    """Get posts newer than given ID."""
+    query = """
+        SELECT 
+            p.post_id, p.author_id, p.content, p.image_path, 
+            p.created_at, p.likes_count,
+            u.email,
+            pr.full_name, pr.profile_picture, pr.headline,
+            (SELECT COUNT(*) FROM post_comments WHERE post_id = p.post_id) as comments_count,
+            EXISTS(
+                SELECT 1 FROM post_likes 
+                WHERE post_id = p.post_id AND user_id = %s
+            ) as liked_by_current_user
+        FROM posts p
+        JOIN users u ON p.author_id = u.user_id
+        LEFT JOIN profiles pr ON p.author_id = pr.user_id
+        WHERE p.post_id > %s
+        ORDER BY p.created_at DESC
+        LIMIT 50
+    """
+    
+    posts = execute_query(query, (current_user_id or 0, since_id), fetch_all=True)
+    return posts or []
+
+
+# ========== LIKES ==========
 
 def toggle_like(post_id, user_id):
-    """
-    Like if not already liked, unlike if already liked.
-    Returns { 'liked': bool, 'count': int }.
-    """
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            # Check current state
-            cur.execute(
-                "SELECT like_id FROM post_likes "
-                "WHERE post_id = %s AND user_id = %s",
-                (post_id, user_id),
+    """Toggle like on a post. Returns (liked, new_likes_count)."""
+    # Check if already liked
+    existing = execute_query(
+        "SELECT like_id FROM post_likes WHERE post_id = %s AND user_id = %s",
+        (post_id, user_id), fetch_one=True
+    )
+    
+    connection = get_db_connection()
+    with connection.cursor() as cursor:
+        if existing:
+            # Unlike
+            cursor.execute(
+                "DELETE FROM post_likes WHERE post_id = %s AND user_id = %s",
+                (post_id, user_id)
             )
-            existing = cur.fetchone()
-
-            if existing:
-                # Unlike
-                cur.execute(
-                    "DELETE FROM post_likes WHERE post_id = %s AND user_id = %s",
-                    (post_id, user_id),
-                )
-                cur.execute(
-                    "UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) "
-                    "WHERE post_id = %s",
-                    (post_id,),
-                )
-                liked = False
-            else:
-                # Like
-                cur.execute(
-                    "INSERT INTO post_likes (post_id, user_id) VALUES (%s, %s)",
-                    (post_id, user_id),
-                )
-                cur.execute(
-                    "UPDATE posts SET likes_count = likes_count + 1 WHERE post_id = %s",
-                    (post_id,),
-                )
-                liked = True
-
-            # Get updated count
-            cur.execute(
-                "SELECT likes_count FROM posts WHERE post_id = %s",
-                (post_id,),
+            cursor.execute(
+                "UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE post_id = %s",
+                (post_id,)
             )
-            row = cur.fetchone()
-            count = row['likes_count'] if row else 0
-
-            return {'liked': liked, 'count': count}
-    finally:
-        conn.close()
-
-
-# ── Comments ──────────────────────────────────────────────────
-
-def get_comments(post_id):
-    """Fetch all comments for a post, oldest first, with user info."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT c.comment_id, c.content, c.created_at, "
-                "       u.full_name, p.profile_picture "
-                "FROM comments c "
-                "JOIN users u ON c.user_id = u.user_id "
-                "LEFT JOIN profiles p ON c.user_id = p.user_id "
-                "WHERE c.post_id = %s "
-                "ORDER BY c.created_at ASC",
-                (post_id,),
+            liked = False
+        else:
+            # Like
+            cursor.execute(
+                "INSERT INTO post_likes (post_id, user_id) VALUES (%s, %s)",
+                (post_id, user_id)
             )
-            return cur.fetchall()
-    finally:
-        conn.close()
+            cursor.execute(
+                "UPDATE posts SET likes_count = likes_count + 1 WHERE post_id = %s",
+                (post_id,)
+            )
+            liked = True
+    
+    # Get updated count
+    result = execute_query(
+        "SELECT likes_count FROM posts WHERE post_id = %s",
+        (post_id,), fetch_one=True
+    )
+    
+    return liked, result['likes_count'] if result else 0
 
+
+# ========== COMMENTS ==========
 
 def add_comment(post_id, user_id, content):
-    """Insert a comment and return the new comment with user details."""
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "INSERT INTO comments (post_id, user_id, content) "
-                "VALUES (%s, %s, %s)",
-                (post_id, user_id, content),
-            )
-            comment_id = cur.lastrowid
-
-            # Fetch the newly created comment with user info
-            cur.execute(
-                "SELECT c.comment_id, c.content, c.created_at, "
-                "       u.full_name, p.profile_picture "
-                "FROM comments c "
-                "JOIN users u ON c.user_id = u.user_id "
-                "LEFT JOIN profiles p ON c.user_id = p.user_id "
-                "WHERE c.comment_id = %s",
-                (comment_id,),
-            )
-            return cur.fetchone()
-    finally:
-        conn.close()
-
-
-# ── Image Handling ────────────────────────────────────────────
-
-def save_post_image(file):
-    """Validate and save a post image. Returns relative path."""
-    if not file or not file.filename:
+    """Add a comment to a post. Returns comment dict or None."""
+    if not content or len(content.strip()) == 0:
         return None
+    
+    if len(content) > 5000:
+        content = content[:5000]
+    
+    comment_id = execute_insert(
+        "INSERT INTO post_comments (post_id, user_id, content) VALUES (%s, %s, %s)",
+        (post_id, user_id, content.strip())
+    )
+    
+    # Get the comment with author info
+    query = """
+        SELECT c.*, pr.full_name, pr.profile_picture
+        FROM post_comments c
+        LEFT JOIN profiles pr ON c.user_id = pr.user_id
+        WHERE c.comment_id = %s
+    """
+    return execute_query(query, (comment_id,), fetch_one=True)
 
-    ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
-    if ext not in ALLOWED_POST_IMG_EXT:
-        raise ValueError('Only JPG, PNG, and GIF images are allowed.')
 
-    file.seek(0, os.SEEK_END)
-    size = file.tell()
-    file.seek(0)
-    if size > MAX_POST_IMG_SIZE:
-        raise ValueError('Image must be under 10 MB.')
+def get_comments(post_id, limit=50):
+    """Get comments for a post."""
+    query = """
+        SELECT c.*, pr.full_name, pr.profile_picture
+        FROM post_comments c
+        LEFT JOIN profiles pr ON c.user_id = pr.user_id
+        WHERE c.post_id = %s
+        ORDER BY c.created_at ASC
+        LIMIT %s
+    """
+    return execute_query(query, (post_id, limit), fetch_all=True) or []
 
-    # Validate with Pillow
-    try:
-        img = Image.open(file)
-        img.verify()
-        file.seek(0)
-    except Exception:
-        raise ValueError('Invalid image file.')
 
-    filename = f"post_{uuid.uuid4().hex[:12]}.{ext}"
-    upload_dir = os.path.join(current_app.root_path, '..', 'uploads', 'posts')
-    os.makedirs(upload_dir, exist_ok=True)
-
-    filepath = os.path.join(upload_dir, filename)
-    file.save(filepath)
-
-    return f"uploads/posts/{filename}"
+def get_comment_count(post_id):
+    """Get comment count for a post."""
+    result = execute_query(
+        "SELECT COUNT(*) as count FROM post_comments WHERE post_id = %s",
+        (post_id,), fetch_one=True
+    )
+    return result['count'] if result else 0

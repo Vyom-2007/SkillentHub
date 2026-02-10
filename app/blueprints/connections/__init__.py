@@ -1,5 +1,1 @@
-from flask import Blueprint
-
-connections_bp = Blueprint('connections', __name__)
-
-from . import routes
+from .routes import connections_bp

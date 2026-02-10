@@ -1,53 +1,56 @@
-from app.database.connection import get_db
-import bcrypt
+"""
+Recruiter model.
+Handles recruiter data operations using raw SQL.
+"""
+from app.database.connection import execute_query, execute_insert
 
-class Recruiter:
-    @staticmethod
-    def create(email, password, full_name):
-        db = get_db()
-        cursor = db.cursor()
-        
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        
-        try:
-            cursor.execute(
-                "INSERT INTO recruiters (email, password_hash, full_name) VALUES (%s, %s, %s)",
-                (email, password_hash, full_name)
-            )
-            recruiter_id = cursor.lastrowid
-            
-            # Create empty profile
-            cursor.execute(
-                "INSERT INTO recruiter_profiles (recruiter_id) VALUES (%s)",
-                (recruiter_id,)
-            )
-            
-            db.commit()
-            return recruiter_id
-        except Exception as e:
-            db.rollback()
-            raise e
-        finally:
-            cursor.close()
 
-    @staticmethod
-    def get_by_email(email):
-        db = get_db()
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM recruiters WHERE email = %s", (email,))
-        recruiter = cursor.fetchone()
-        cursor.close()
-        return recruiter
+def create(company_name, email, password_hash):
+    """Create a new recruiter."""
+    query = """
+        INSERT INTO recruiters (company_name, company_email, password_hash)
+        VALUES (%s, %s, %s)
+    """
+    try:
+        recruiter_id = execute_insert(query, (company_name, email, password_hash))
+        return recruiter_id, None
+    except Exception as e:
+        if 'Duplicate' in str(e):
+            return None, "Email already registered"
+        return None, str(e)
 
-    @staticmethod
-    def get_by_id(recruiter_id):
-        db = get_db()
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM recruiters WHERE recruiter_id = %s", (recruiter_id,))
-        recruiter = cursor.fetchone()
-        cursor.close()
-        return recruiter
 
-    @staticmethod
-    def verify_password(stored_hash, password):
-        return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+def get_by_email(email):
+    """Get recruiter by email."""
+    query = """
+        SELECT recruiter_id, company_name, company_email, password_hash, 
+               created_at, is_active
+        FROM recruiters 
+        WHERE company_email = %s
+    """
+    return execute_query(query, (email,), fetch_one=True)
+
+
+def get_by_id(recruiter_id):
+    """Get recruiter by ID."""
+    query = """
+        SELECT recruiter_id, company_name, company_email, password_hash, 
+               created_at, is_active
+        FROM recruiters 
+        WHERE recruiter_id = %s
+    """
+    return execute_query(query, (recruiter_id,), fetch_one=True)
+
+
+def email_exists(email):
+    """Check if email is already registered."""
+    query = "SELECT 1 FROM recruiters WHERE company_email = %s"
+    result = execute_query(query, (email,), fetch_one=True)
+    return result is not None
+
+
+def update_password(recruiter_id, password_hash):
+    """Update recruiter password."""
+    from app.database.connection import execute_update
+    query = "UPDATE recruiters SET password_hash = %s WHERE recruiter_id = %s"
+    return execute_update(query, (password_hash, recruiter_id))

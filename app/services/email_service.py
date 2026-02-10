@@ -1,25 +1,108 @@
+"""
+Email Service.
+Handles sending emails using Flask-Mail.
+"""
 from flask_mail import Message
-from flask import current_app
-from app import mail
+from flask import current_app, render_template_string
 
-def send_otp_email(to_email, otp):
-    msg = Message("Password Reset OTP - SkillentHub",
-                  recipients=[to_email])
-    msg.body = f"Your OTP for password reset is: {otp}. It expires in 5 minutes."
+def send_otp_email(to_email, user_name, otp):
+    """
+    Send Password Reset OTP email.
+    """
+    # Import mail here to avoid circular dependency
+    from app import mail
+    subject = "[SkillentHub] Password Reset OTP"
+    
+    body_template = """
+Hi {{ user_name }},
+
+You requested to reset your password. Your One-Time Password (OTP) is:
+
+{{ otp }}
+
+This OTP is valid for 5 minutes only.
+
+If you didn't request this, please ignore this email and your password will remain unchanged.
+
+Never share this OTP with anyone.
+
+Thanks,
+SkillentHub Team
+    """
+    
+    body = render_template_string(body_template, user_name=user_name, otp=otp)
+    
     try:
+        msg = Message(
+            subject=subject,
+            recipients=[to_email],
+            body=body,
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER')
+        )
         mail.send(msg)
         return True
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        current_app.logger.error(f"Failed to send email to {to_email}: {e}")
         return False
 
-def send_application_status_email(to_email, status, job_title):
-    msg = Message(f"Application Update: {status} - SkillentHub",
-                  recipients=[to_email])
-    msg.body = f"Your application for {job_title} has been updated to: {status}."
+
+def send_status_update_email(to_email, candidate_name, item_title, company_name, status, application_id):
+    """
+    Send Application Status Update email (Shortlisted/Accepted).
+    """
+    # Import mail here to avoid circular dependency
+    from app import mail
+    
+    if status == 'shortlisted':
+        subject = f"[SkillentHub] Application Update - {item_title}"
+        body_template = """
+Hi {{ candidate_name }},
+
+Great news! Your application for the position of "{{ item_title }}" at {{ company_name }} has been SHORTLISTED.
+
+This means you've been selected for the next round of the hiring process.
+
+Login to your SkillentHub account to view complete details:
+https://skillenthub.com/applications/{{ application_id }}
+
+Best of luck for the next steps!
+
+Thanks,
+SkillentHub Team
+        """
+    elif status == 'accepted':
+        subject = f"[SkillentHub] Congratulations - Application Accepted for {item_title}"
+        body_template = """
+Hi {{ candidate_name }},
+
+Congratulations! We're excited to inform you that your application for "{{ item_title }}" at {{ company_name }} has been ACCEPTED.
+
+Login to your SkillentHub account for next steps:
+https://skillenthub.com/applications/{{ application_id }}
+
+Welcome aboard!
+
+Thanks,
+SkillentHub Team
+        """
+    else:
+        return False # No email for other statuses
+
+    body = render_template_string(body_template, 
+                                  candidate_name=candidate_name, 
+                                  item_title=item_title,
+                                  company_name=company_name,
+                                  application_id=application_id)
+    
     try:
+        msg = Message(
+            subject=subject,
+            recipients=[to_email],
+            body=body,
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER')
+        )
         mail.send(msg)
         return True
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        current_app.logger.error(f"Failed to send status email to {to_email}: {e}")
         return False

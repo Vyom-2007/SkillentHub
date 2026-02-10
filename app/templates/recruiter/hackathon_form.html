@@ -1,0 +1,94 @@
+{% extends "base_recruiter.html" %}
+
+{% block title %}Host Hackathon - Recruiter Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                    <h4 class="fw-bold text-danger"><i class="bi bi-code-slash me-2"></i>Host Hackathon</h4>
+                    <p class="text-muted small">Organize a coding or innovation hackathon</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('recruiter.create_hackathon') }}" class="needs-validation"
+                        novalidate id="postForm">
+
+                        <!-- Basic Info -->
+                        <div class="mb-3">
+                            <label class="form-label">Hackathon Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" required
+                                placeholder="e.g. AI Innovation Hackathon">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="description" rows="4" required maxlength="5000"
+                                id="descInput"></textarea>
+                            <div class="form-text text-end"><span id="descCount">0</span>/5000 characters</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Theme / Problem Statement</label>
+                            <input type="text" class="form-control" name="theme" placeholder="e.g. Sustainable Energy">
+                        </div>
+
+                        <!-- Logistics -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Start Date & Time <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" name="start_date" required
+                                    id="startDateInput">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">End Date & Time <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" name="end_date" required
+                                    id="endDateInput">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mode <span class="text-danger">*</span></label>
+                                <select class="form-select" name="mode" required>
+                                    <option value="online">Online</option>
+                                    <option value="offline">Offline</option>
+                                    <option value="hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Venue</label>
+                                <input type="text" class="form-control" name="venue" required
+                                    placeholder="e.g. Zoom or Campus Auditorium">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Team Size</label>
+                                <input type="text" class="form-control" name="team_size" placeholder="e.g. 2-4 Members">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Prizes</label>
+                                <input type="text" class="form-control" name="prize_details"
+                                    placeholder="e.g. Total Pool $10k">
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-light">Cancel</a>
+                            <button type="submit" class="btn btn-danger text-white px-4">Create Hackathon</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/recruiter_forms.js') }}"></script>
+{% endblock %}

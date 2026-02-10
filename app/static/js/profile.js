@@ -1,276 +1,196 @@
 /**
- * SkillentHub — Profile JS (ES6+)
- * Features:
- *   - Profile picture upload + preview
- *   - Skill tag input (add / remove)
- *   - Dynamic education rows (add / remove)
- *   - Phone validation
- *   - Connect button AJAX
+ * Profile Management JavaScript
+ * Handles image preview, dynamic education forms, validation, and bio counter
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // ── Profile Picture Upload & Preview ─────────────────────
-    const picInput = document.getElementById('profile_picture');
-    const picBtn = document.getElementById('upload-pic-btn');
-    const avatarPreview = document.getElementById('avatar-preview');
-
-    if (picBtn && picInput) {
-        picBtn.addEventListener('click', () => picInput.click());
-        if (avatarPreview) {
-            avatarPreview.addEventListener('click', () => picInput.click());
-        }
-
-        picInput.addEventListener('change', () => {
-            const file = picInput.files[0];
-            if (!file) return;
-
-            // Validate type
-            if (!['image/jpeg', 'image/png'].includes(file.type)) {
-                alert('Only JPG and PNG images are allowed.');
-                picInput.value = '';
-                return;
-            }
-            // Validate size
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Image must be under 5 MB.');
-                picInput.value = '';
-                return;
-            }
-
-            // Preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                avatarPreview.style.backgroundImage = `url(${e.target.result})`;
-                avatarPreview.style.backgroundSize = 'cover';
-                avatarPreview.innerHTML = ''; // Remove placeholder icon/text
-            };
-            reader.readAsDataURL(file);
-        });
+function initProfileForm() {
+    // Image preview
+    const pictureInput = document.getElementById('profilePicture');
+    if (pictureInput) {
+        pictureInput.addEventListener('change', handleImagePreview);
     }
 
-    // ── Skill Tag Management ─────────────────────────────────
-    const skillInput = document.getElementById('skill-input');
-    const proficiencySelect = document.getElementById('skill-proficiency');
-    const addSkillBtn = document.getElementById('add-skill-btn');
-    const skillTagsContainer = document.getElementById('skill-tags');
-    const skillsJsonInput = document.getElementById('skills-json');
+    // Skills toggle
+    initSkillsToggle();
 
-    let skills = [];
-
-    // Load existing skills (from edit page)
-    if (skillsJsonInput && skillsJsonInput.value) {
-        try {
-            const existing = JSON.parse(skillsJsonInput.value);
-            if (Array.isArray(existing)) {
-                existing.forEach(s => {
-                    // Handle both formats: {name, proficiency} and {skill_name, proficiency_level}
-                    const name = s.name || s.skill_name || '';
-                    const prof = s.proficiency || s.proficiency_level || 'beginner';
-                    if (name) {
-                        skills.push({ name, proficiency: prof });
-                    }
-                });
-            }
-        } catch (e) { /* ignore parse errors */ }
+    // Bio counter
+    const bioTextarea = document.getElementById('bio');
+    if (bioTextarea) {
+        bioTextarea.addEventListener('input', updateBioCounter);
+        updateBioCounter();
     }
 
-    const renderSkillTags = () => {
-        if (!skillTagsContainer) return;
-        skillTagsContainer.innerHTML = '';
-        skills.forEach((skill, index) => {
-            const tag = document.createElement('span');
-            tag.className = `skill-tag ${skill.proficiency}`;
-            tag.innerHTML = `
-                ${skill.name}
-                <span class="remove-skill" data-index="${index}" title="Remove">
-                    <i class="bi bi-x-lg"></i>
-                </span>
-            `;
-            skillTagsContainer.appendChild(tag);
-        });
-
-        // Update hidden JSON
-        if (skillsJsonInput) {
-            skillsJsonInput.value = JSON.stringify(skills);
-        }
-    };
-
-    const addSkill = () => {
-        if (!skillInput) return;
-        const name = skillInput.value.trim();
-        if (!name) return;
-
-        // Check duplicate (case-insensitive)
-        if (skills.some(s => s.name.toLowerCase() === name.toLowerCase())) {
-            skillInput.value = '';
-            return;
-        }
-
-        const proficiency = proficiencySelect ? proficiencySelect.value : 'intermediate';
-        skills.push({ name, proficiency });
-        renderSkillTags();
-        skillInput.value = '';
-        skillInput.focus();
-    };
-
-    if (addSkillBtn) addSkillBtn.addEventListener('click', addSkill);
-    if (skillInput) {
-        skillInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addSkill();
-            }
-        });
+    // Add education button
+    const addBtn = document.getElementById('addEducation');
+    if (addBtn) {
+        addBtn.addEventListener('click', function () { addEducationEntry(); });
     }
 
-    // Remove skill (delegated)
-    if (skillTagsContainer) {
-        skillTagsContainer.addEventListener('click', (e) => {
-            const removeBtn = e.target.closest('.remove-skill');
-            if (removeBtn) {
-                const index = parseInt(removeBtn.dataset.index, 10);
-                skills.splice(index, 1);
-                renderSkillTags();
-            }
-        });
-    }
-
-    // Render initial skill tags
-    renderSkillTags();
-
-    // ── Dynamic Education Rows ───────────────────────────────
-    const eduContainer = document.getElementById('education-container');
-    const addEduBtn = document.getElementById('add-education-btn');
-
-    if (addEduBtn && eduContainer) {
-        addEduBtn.addEventListener('click', () => {
-            const index = eduContainer.children.length;
-            const row = document.createElement('div');
-            row.className = 'education-row';
-            row.dataset.index = index;
-            row.innerHTML = `
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="institution[]" placeholder="Institution">
-                            <label>Institution</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="degree[]" placeholder="Degree">
-                            <label>Degree</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" name="field_of_study[]" placeholder="Field">
-                            <label>Field of Study</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="date" class="form-control" name="start_date[]" placeholder=" ">
-                            <label>Start Date</label>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-floating">
-                            <input type="date" class="form-control" name="end_date[]" placeholder=" ">
-                            <label>End Date</label>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-floating">
-                            <textarea class="form-control" name="edu_description[]"
-                                      placeholder="Description" style="height:70px"></textarea>
-                            <label>Description (optional)</label>
-                        </div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-sm btn-outline-danger remove-edu-btn mt-2">
-                    <i class="bi bi-trash me-1"></i>Remove
-                </button>
-            `;
-            eduContainer.appendChild(row);
-            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        });
-
-        // Remove education row (delegated)
-        eduContainer.addEventListener('click', (e) => {
-            const removeBtn = e.target.closest('.remove-edu-btn');
-            if (removeBtn) {
-                const row = removeBtn.closest('.education-row');
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(-20px)';
-                row.style.transition = 'all 0.3s ease';
-                setTimeout(() => row.remove(), 300);
-            }
-        });
-    }
-
-    // ── Phone Validation ─────────────────────────────────────
+    // Phone validation
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
-        phoneInput.addEventListener('input', () => {
-            // Only allow digits
-            phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
-
-            if (phoneInput.value.length > 0 && phoneInput.value.length !== 10) {
-                phoneInput.classList.add('is-invalid');
-            } else {
-                phoneInput.classList.remove('is-invalid');
-            }
+        phoneInput.addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 10);
         });
     }
 
-    // ── Form Submit — Loading State ──────────────────────────
-    const profileForm = document.getElementById('profile-form');
-    if (profileForm) {
-        profileForm.addEventListener('submit', (e) => {
-            // Validate phone if provided
-            if (phoneInput && phoneInput.value.length > 0 && phoneInput.value.length !== 10) {
+    // Form validation
+    const form = document.getElementById('profileForm');
+    if (form) {
+        form.addEventListener('submit', validateForm);
+    }
+}
+
+function handleImagePreview(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('picturePreview');
+
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+        alert('Please select a JPG or PNG image.');
+        event.target.value = '';
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('File size exceeds 5MB limit.');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        preview.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function initSkillsToggle() {
+    document.querySelectorAll('.skill-badge').forEach(badge => {
+        const checkbox = badge.querySelector('input[type="checkbox"]');
+        const label = badge.querySelector('label');
+        if (!checkbox) return;
+
+        // Set initial visual state
+        if (checkbox.checked) {
+            badge.classList.add('selected');
+        }
+
+        // Prevent label from triggering checkbox (we'll handle it manually)
+        if (label) {
+            label.addEventListener('click', function (e) {
                 e.preventDefault();
-                phoneInput.classList.add('is-invalid');
-                phoneInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
+            });
+        }
 
-            const btn = document.getElementById('submit-btn');
-            if (btn) {
-                btn.disabled = true;
-                btn.querySelector('.btn-text').classList.add('d-none');
-                btn.querySelector('.btn-loader').classList.remove('d-none');
-            }
+        // Handle click on the entire badge div
+        badge.addEventListener('click', function (e) {
+            // Toggle checkbox manually
+            checkbox.checked = !checkbox.checked;
+            badge.classList.toggle('selected', checkbox.checked);
         });
+    });
+}
+
+function updateBioCounter() {
+    const bio = document.getElementById('bio');
+    const count = document.getElementById('bioCount');
+    if (bio && count) {
+        count.textContent = bio.value.length;
+    }
+}
+
+let eduIndex = 0;
+
+function addEducationEntry(prefilled = null) {
+    const container = document.getElementById('educationContainer');
+    if (!container) return;
+
+    eduIndex++;
+
+    const html = `
+        <div class="education-entry" data-index="${eduIndex}">
+            <button type="button" class="remove-btn" onclick="removeEducation(this)">
+                <i class="bi bi-x-circle"></i>
+            </button>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <input type="text" class="form-control" name="edu_institution[]"
+                           value="${prefilled?.institution_name || ''}" placeholder="Institution *" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <input type="text" class="form-control" name="edu_degree[]"
+                           value="${prefilled?.degree || ''}" placeholder="Degree *" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input type="text" class="form-control" name="edu_field[]"
+                           value="${prefilled?.field_of_study || ''}" placeholder="Field of Study">
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input type="number" class="form-control" name="edu_start[]"
+                           value="${prefilled?.start_year || ''}" placeholder="Start Year" min="1950" max="2030">
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input type="number" class="form-control" name="edu_end[]"
+                           value="${prefilled?.end_year || ''}" placeholder="End Year" min="1950" max="2030">
+                </div>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', html);
+}
+
+function removeEducation(button) {
+    const entry = button.closest('.education-entry');
+    const educationId = entry.dataset.id;
+
+    if (educationId) {
+        fetch(`/profile/education/delete/${educationId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        }).catch(console.error);
     }
 
-    // ── Connect Button AJAX ──────────────────────────────────
-    const connectBtn = document.getElementById('connect-btn');
-    if (connectBtn) {
-        connectBtn.addEventListener('click', async () => {
-            const targetUserId = connectBtn.dataset.userId;
-            connectBtn.disabled = true;
-            connectBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sending...';
+    entry.remove();
+}
 
-            try {
-                const response = await fetch('/api/connections/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: parseInt(targetUserId) }),
-                });
+function validateForm(event) {
+    const form = event.target;
+    let valid = true;
+    const errors = [];
 
-                if (response.ok) {
-                    connectBtn.innerHTML = '<i class="bi bi-clock me-1"></i>Request Sent';
-                    connectBtn.classList.replace('btn-primary', 'btn-secondary');
-                } else {
-                    connectBtn.innerHTML = '<i class="bi bi-person-plus me-1"></i>Connect';
-                    connectBtn.disabled = false;
-                }
-            } catch (err) {
-                connectBtn.innerHTML = '<i class="bi bi-person-plus me-1"></i>Connect';
-                connectBtn.disabled = false;
-            }
-        });
+    const fullName = form.querySelector('[name="full_name"]');
+    const headline = form.querySelector('[name="headline"]');
+    const phone = form.querySelector('[name="phone"]');
+
+    if (!fullName.value.trim()) {
+        errors.push('Full name is required');
+        valid = false;
     }
-});
+
+    if (!headline.value.trim()) {
+        errors.push('Headline is required');
+        valid = false;
+    }
+
+    if (phone && phone.value && phone.value.length !== 10) {
+        errors.push('Phone must be 10 digits');
+        valid = false;
+    }
+
+    if (!valid) {
+        event.preventDefault();
+        alert(errors.join('\n'));
+    }
+
+    return valid;
+}
+
+// Global exports
+window.initProfileForm = initProfileForm;
+window.addEducationEntry = addEducationEntry;
+window.removeEducation = removeEducation;
+window.updateBioCounter = updateBioCounter;

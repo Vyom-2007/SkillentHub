@@ -1,178 +1,243 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .skill-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        border-radius: 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .skill-badge:hover {
+        border-color: var(--primary-color);
+    }
+
+    .skill-badge.selected {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-color: transparent;
+        color: white;
+    }
+
+    .skill-badge input[type="checkbox"] {
+        display: none;
+    }
+
+    .skill-badge label {
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .education-entry {
+        background: #f8fafc;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .education-entry .remove-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1.25rem;
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e2e8f0;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <h2 class="mb-4 fw-bold">Edit Profile</h2>
-
-            <!-- Basic Info Form -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold">Basic Information</div>
-                <div class="card-body">
-                    <form action="{{ url_for('profile.edit_profile') }}" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="existing_profile_picture"
-                            value="{{ profile.profile_picture if profile else '' }}">
-                        <input type="hidden" name="existing_resume_path"
-                            value="{{ profile.resume_path if profile else '' }}">
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Headline</label>
-                                <input type="text" class="form-control" name="headline"
-                                    value="{{ profile.headline if profile else '' }}" maxlength="500">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Location</label>
-                                <input type="text" class="form-control" name="location"
-                                    value="{{ profile.location if profile else '' }}" maxlength="100">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Bio (Summary)</label>
-                            <textarea class="form-control" name="bio" rows="4"
-                                maxlength="5000">{{ profile.bio if profile else '' }}</textarea>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" name="phone"
-                                    value="{{ profile.phone if profile else '' }}" maxlength="15">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Profile Picture</label>
-                                <input type="file" class="form-control" name="profile_picture" accept="image/*">
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Resume (PDF)</label>
-                            <input type="file" class="form-control" name="resume" accept=".pdf">
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary px-4">Save Basic Info</button>
-                        </div>
-                    </form>
+        <div class="col-12 col-lg-8">
+            <div class="auth-card" style="max-width: 100%;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="auth-title mb-1">Edit Profile</h1>
+                        <p class="auth-subtitle mb-0">Update your information</p>
+                    </div>
+                    <a href="{{ url_for('profile.view', user_id=session.user_id) }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back
+                    </a>
                 </div>
-            </div>
 
-            <!-- Skills Section -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold">Skills</div>
-                <div class="card-body">
-                    <!-- Current Skills -->
-                    <div class="mb-3">
-                        {% if skills %}
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for skill in skills %}
-                            <form action="{{ url_for('profile.remove_skill', skill_id=skill.skill_id) }}" method="POST"
-                                class="d-inline">
-                                <button type="submit"
-                                    class="badge bg-light text-dark border p-2 d-flex align-items-center gap-2"
-                                    style="border: none; cursor: pointer;">
-                                    {{ skill.skill_name }}
-                                    <span class="text-secondary small">({{ skill.proficiency_level }})</span>
-                                    <span class="text-danger fw-bold">&times;</span>
-                                </button>
-                            </form>
+                <form method="POST" enctype="multipart/form-data" id="profileForm">
+                    <!-- Profile Picture -->
+                    <div class="text-center mb-4">
+                        {% if profile.profile_picture %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' + profile.profile_picture) }}"
+                            alt="Profile" class="profile-picture-preview mb-3" id="picturePreview">
+                        {% else %}
+                        <img src="https://via.placeholder.com/150?text=Photo" alt="Profile"
+                            class="profile-picture-preview mb-3" id="picturePreview">
+                        {% endif %}
+                        <div class="file-input-wrapper">
+                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-camera me-1"></i>Change Photo
+                            </button>
+                            <input type="file" name="profile_picture" id="profilePicture" accept=".jpg,.jpeg,.png">
+                        </div>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="full_name"
+                                value="{{ profile.full_name or '' }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Headline <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="headline" value="{{ profile.headline or '' }}"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location"
+                                value="{{ profile.location or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone" id="phone"
+                                value="{{ profile.phone or '' }}" maxlength="10">
+                        </div>
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="mb-4">
+                        <label class="form-label">Bio</label>
+                        <textarea class="form-control" name="bio" id="bio" rows="4"
+                            maxlength="5000">{{ profile.bio or '' }}</textarea>
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="char-counter"><span id="bioCount">{{ (profile.bio or '')|length
+                                    }}</span>/5000</span>
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="mb-4">
+                        <label class="form-label">Skills</label>
+                        <div class="skills-container" id="skillsContainer">
+                            {% set user_skill_ids = profile.skills|map(attribute='skill_id')|list %}
+                            {% for skill in all_skills %}
+                            <div class="skill-badge {% if skill.skill_id in user_skill_ids %}selected{% endif %}">
+                                <input type="checkbox" name="skills" value="{{ skill.skill_id }}"
+                                    id="skill_{{ skill.skill_id }}" {% if skill.skill_id in user_skill_ids %}checked{%
+                                    endif %}>
+                                <label for="skill_{{ skill.skill_id }}">{{ skill.skill_name }}</label>
+                            </div>
                             {% endfor %}
                         </div>
-                        {% else %}
-                        <p class="text-muted small">No skills added yet.</p>
-                        {% endif %}
                     </div>
 
-                    <!-- Add Skill Form -->
-                    <form action="{{ url_for('profile.add_skill') }}" method="POST" class="row g-2 align-items-center">
-                        <div class="col-auto">
-                            <select class="form-select" name="skill_id" required>
-                                <option value="" selected disabled>Select Skill...</option>
-                                {% for s in all_skills %}
-                                <option value="{{ s.skill_id }}">{{ s.skill_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <select class="form-select" name="proficiency">
-                                <option value="beginner">Beginner</option>
-                                <option value="intermediate">Intermediate</option>
-                                <option value="advanced">Advanced</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-outline-primary">Add Skill</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Education Section -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold">Education</div>
-                <div class="card-body">
-                    <!-- List Education -->
-                    {% if education %}
-                    <div class="list-group mb-4">
-                        {% for edu in education %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-0">{{ edu.institution }}</h6>
-                                <small class="text-muted">{{ edu.degree }} - {{ edu.field_of_study }}</small>
+                    <!-- Education -->
+                    <div class="mb-4">
+                        <label class="form-label">Education</label>
+                        <div id="educationContainer">
+                            {% for edu in profile.education %}
+                            <div class="education-entry" data-id="{{ edu.education_id }}">
+                                <button type="button" class="remove-btn" onclick="removeEducation(this)">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <input type="text" class="form-control" name="edu_institution[]"
+                                            value="{{ edu.institution_name }}" placeholder="Institution" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <input type="text" class="form-control" name="edu_degree[]"
+                                            value="{{ edu.degree }}" placeholder="Degree" required>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <input type="text" class="form-control" name="edu_field[]"
+                                            value="{{ edu.field_of_study or '' }}" placeholder="Field of Study">
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <input type="number" class="form-control" name="edu_start[]"
+                                            value="{{ edu.start_year or '' }}" placeholder="Start Year" min="1950"
+                                            max="2030">
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <input type="number" class="form-control" name="edu_end[]"
+                                            value="{{ edu.end_year or '' }}" placeholder="End Year (blank=ongoing)"
+                                            min="1950" max="2030">
+                                    </div>
+                                </div>
                             </div>
-                            <form action="{{ url_for('profile.delete_education', edu_id=edu.education_id) }}"
-                                method="POST">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="addEducation">
+                            <i class="bi bi-plus-lg me-1"></i>Add Education
+                        </button>
                     </div>
-                    {% endif %}
 
-                    <!-- Add Education Form -->
-                    <h6 class="text-muted mb-3">Add New Education</h6>
-                    <form action="{{ url_for('profile.add_education') }}" method="POST">
-                        <div class="row mb-2">
-                            <div class="col-md-6 mb-2">
-                                <input type="text" class="form-control" name="institution" placeholder="Institution"
-                                    required>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <input type="text" class="form-control" name="degree" placeholder="Degree" required>
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-6 mb-2">
-                                <input type="text" class="form-control" name="field_of_study"
-                                    placeholder="Field of Study">
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-md-6 mb-2">
-                                <label class="small text-muted">Start Date</label>
-                                <input type="date" class="form-control" name="start_date" required>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="small text-muted">End Date (Leave empty if current)</label>
-                                <input type="date" class="form-control" name="end_date">
-                            </div>
-                        </div>
-                        <div class="mb-2">
-                            <textarea class="form-control" name="description" placeholder="Description/Activities"
-                                rows="2"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-outline-primary">Add Education</button>
-                    </form>
-                </div>
+                    <hr class="my-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-check-circle me-2"></i>Save Changes
+                        </button>
+                        <a href="{{ url_for('profile.view', user_id=session.user_id) }}"
+                            class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
             </div>
-
-            <div class="text-center mb-5">
-                <a href="{{ url_for('profile.own_profile') }}" class="btn btn-success btn-lg px-5">Done</a>
-            </div>
-
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        initProfileForm();
+        updateBioCounter();
+    });
+</script>
 {% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base_recruiter.html" %}
+
+{% block title %}Application Details - Recruiter Portal{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <a href="{{ url_for('recruiter.applications') }}" class="btn btn-outline-secondary mb-4">
+        <i class="bi bi-arrow-left"></i> Back to Applications
+    </a>
+
+    <div class="row g-4">
+        <!-- Candidate Profile (Left) -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center pt-5">
+                    <img src="{{ app.profile_picture or url_for('static', filename='images/default_profile.png') }}"
+                        class="rounded-circle mb-3 border shadow-sm" width="120" height="120" alt="Profile">
+                    <h5 class="fw-bold mb-1">{{ app.first_name }} {{ app.last_name }}</h5>
+                    <p class="text-muted small mb-2">{{ app.headline or 'No headline provided' }}</p>
+                    <div class="mb-3">
+                        <i class="bi bi-geo-alt-fill text-danger small"></i> {{ app.city }}, {{ app.state }}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="mailto:{{ app.email }}" class="btn btn-outline-primary">
+                            <i class="bi bi-envelope"></i> Contact Candidate
+                        </a>
+                        <a href="{{ url_for('profile.view_profile', user_id=app.applicant_id) }}" class="btn btn-light"
+                            target="_blank">
+                            View Full Profile <i class="bi bi-box-arrow-up-right small"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white p-3">
+                    <h6 class="small fw-bold text-uppercase text-muted">Skills</h6>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% if app.skills %}
+                        {% for skill in app.skills.split(',') %}
+                        <span class="badge bg-light text-dark border">{{ skill.strip() }}</span>
+                        {% endfor %}
+                        {% else %}
+                        <span class="text-muted small">No skills listed</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Details (Right) -->
+        <div class="col-lg-8">
+            <!-- Header & Status -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted small mb-1">Applied for {{ app.item_type|capitalize }}</h6>
+                        <h4 class="fw-bold mb-0">{{ app.item_title }}</h4>
+                        <small class="text-muted">Applied on {{ app.applied_at.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                    <div class="text-end">
+                        <label class="small text-muted d-block mb-1">Current Status</label>
+                        <form method="POST"
+                            action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                            class="d-inline-flex gap-2">
+                            <select name="status" class="form-select form-select-sm" style="width: 140px;">
+                                <option value="applied" {% if app.status=='applied' %}selected{% endif %}>Applied
+                                </option>
+                                <option value="reviewing" {% if app.status=='reviewing' %}selected{% endif %}>Reviewing
+                                </option>
+                                <option value="shortlisted" {% if app.status=='shortlisted' %}selected{% endif %}>
+                                    Shortlisted</option>
+                                <option value="rejected" {% if app.status=='rejected' %}selected{% endif %}>Rejected
+                                </option>
+                                <option value="accepted" {% if app.status=='accepted' %}selected{% endif %}>Accepted
+                                </option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-dark">Update</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold py-3">Application Documents</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded bg-light d-flex align-items-center">
+                                <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
+                                <div>
+                                    <h6 class="mb-0">Resume/CV</h6>
+                                    <a href="#" class="small text-decoration-none">Download PDF</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="mt-4 mb-2">Cover Letter</h6>
+                    <div class="p-3 border rounded bg-light text-muted small">
+                        {{ app.cover_letter or 'No cover letter provided.' }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Internal Notes -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold py-3 d-flex justify-content-between">
+                    <span>Internal Notes</span>
+                    <span class="badge bg-warning text-dark">Private</span>
+                </div>
+                <div class="card-body">
+                    <form method="POST"
+                        action="{{ url_for('recruiter.add_application_note', application_id=app.application_id) }}"
+                        class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="content" class="form-control"
+                                placeholder="Add a private note about this candidate..." required>
+                            <button class="btn btn-primary" type="submit">Add Note</button>
+                        </div>
+                    </form>
+
+                    <div class="notes-list">
+                        {% for note in notes %}
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <div class="avatar bg-light rounded-circle text-center pt-1"
+                                    style="width: 35px; height: 35px;">
+                                    <i class="bi bi-person text-secondary"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="bg-light p-3 rounded">
+                                    <p class="mb-1 text-dark">{{ note.content }}</p>
+                                    <small class="text-muted">
+                                        {{ note.recruiter_name }} &bull; {{ note.created_at.strftime('%b %d, %I:%M %p')
+                                        }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-muted text-center py-3 small">No internal notes yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

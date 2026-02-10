@@ -1,5 +1,1 @@
-from flask import Blueprint
-
-settings_bp = Blueprint('settings', __name__)
-
-from . import routes
+from .routes import settings_bp

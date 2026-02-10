@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}My Teams - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .teams-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .team-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+        transition: transform 0.2s;
+    }
+
+    .team-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .invitation-card {
+        background: #fef9c3;
+        border-radius: 1rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .invitation-card .info {
+        flex: 1;
+    }
+
+    .invitation-card .actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .role-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+    }
+
+    .role-leader {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+    }
+
+    .role-member {
+        background: #e2e8f0;
+        color: #475569;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="teams-header">
+        <h4><i class="bi bi-people-fill me-2"></i>My Teams</h4>
+        <a href="{{ url_for('teams.create_team_page') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Create Team
+        </a>
+    </div>
+
+    <!-- Pending Invitations -->
+    {% if invitations %}
+    <div class="mb-4">
+        <h5 class="mb-3"><i class="bi bi-envelope me-2"></i>Team Invitations</h5>
+        {% for inv in invitations %}
+        <div class="invitation-card" id="invitation-{{ inv.invitation_id }}">
+            <div class="info">
+                <h6 class="mb-0">{{ inv.team_name }}</h6>
+                <small class="text-muted">
+                    {{ inv.item_type | capitalize }} | Invited by {{ inv.invited_by_name }}
+                </small>
+            </div>
+            <div class="actions">
+                <button class="btn btn-sm btn-success" onclick="acceptInvitation({{ inv.invitation_id }})">
+                    <i class="bi bi-check me-1"></i>Accept
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="rejectInvitation({{ inv.invitation_id }})">
+                    Decline
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Teams List -->
+    {% if teams %}
+    <div class="row">
+        {% for team in teams %}
+        <div class="col-md-6 col-lg-4">
+            <div class="team-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="mb-0">{{ team.team_name }}</h5>
+                    <span class="role-badge {{ 'role-leader' if team.role == 'leader' else 'role-member' }}">
+                        {{ team.role | capitalize }}
+                    </span>
+                </div>
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-calendar-event me-1"></i>{{ team.item_type | capitalize }}
+                </p>
+                <p class="mb-3">
+                    <i class="bi bi-people me-1"></i>{{ team.member_count }} member{% if team.member_count != 1 %}s{%
+                    endif %}
+                </p>
+                <a href="{{ url_for('teams.team_detail', team_id=team.team_id) }}"
+                    class="btn btn-outline-primary btn-sm">
+                    View Team
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-people display-1"></i>
+        <p class="mt-3">You're not in any teams yet.</p>
+        <a href="{{ url_for('teams.create_team_page') }}" class="btn btn-primary">Create Your First Team</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function acceptInvitation(invitationId) {
+        const card = document.getElementById('invitation-' + invitationId);
+
+        fetch(`/api/teams/invitations/${invitationId}/accept`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    card.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-2"></i>Joined!</span>';
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert(data.error || 'Failed to accept');
+                }
+            });
+    }
+
+    function rejectInvitation(invitationId) {
+        const card = document.getElementById('invitation-' + invitationId);
+
+        fetch(`/api/teams/invitations/${invitationId}/reject`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    card.remove();
+                } else {
+                    alert(data.error || 'Failed');
+                }
+            });
+    }
+</script>
+{% endblock %}

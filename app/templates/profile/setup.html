@@ -1,194 +1,202 @@
 {% extends "base.html" %}
-{% block title %}Set Up Your Profile — SkillentHub{% endblock %}
 
-{% block head %}
-<!-- Cropper.js CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% block title %}Profile Setup - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .skill-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: #f1f5f9;
+        border: 2px solid #e2e8f0;
+        border-radius: 2rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .skill-badge:hover {
+        border-color: var(--primary-color);
+    }
+
+    .skill-badge.selected {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-color: transparent;
+        color: white;
+    }
+
+    .skill-badge input {
+        display: none;
+    }
+
+    .education-entry {
+        background: #f8fafc;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+
+    .education-entry .remove-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1.25rem;
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #e2e8f0;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .char-counter {
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .char-counter.warning {
+        color: #d97706;
+    }
+
+    .char-counter.danger {
+        color: #dc3545;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="profile-wrapper">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="auth-card" style="max-width: 100%;">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-badge fs-1" style="color: var(--primary-color);"></i>
+                    <h1 class="auth-title mt-2">Complete Your Profile</h1>
+                    <p class="auth-subtitle">Tell us about yourself to get started</p>
+                </div>
 
-    <div class="container py-5">
-        <div class="profile-setup-card animate-in">
-            <div class="setup-header">
-                <h1><i class="bi bi-person-gear me-2"></i>Set Up Your Profile</h1>
-                <p class="text-secondary">Complete your profile to stand out to recruiters and peers</p>
-            </div>
-
-            <form id="profile-form" action="{{ url_for('profile.setup') }}" method="POST" enctype="multipart/form-data"
-                novalidate>
-
-                <!-- ── Section 1: Personal Info ──────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-person-circle me-2"></i>Personal Information</h3>
-
+                <form method="POST" enctype="multipart/form-data" id="profileForm">
                     <!-- Profile Picture -->
-                    <div class="picture-upload-area mb-4">
-                        <div class="avatar-preview" id="avatar-preview">
-                            <i class="bi bi-camera-fill"></i>
-                            <span>Upload Photo</span>
-                        </div>
-                        <input type="file" id="profile_picture" name="profile_picture" accept="image/jpeg,image/png"
-                            class="d-none">
-                        <div class="picture-info">
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="upload-pic-btn">
-                                <i class="bi bi-upload me-1"></i>Choose Image
+                    <div class="text-center mb-4">
+                        <img src="https://via.placeholder.com/150?text=Photo" alt="Profile"
+                            class="profile-picture-preview mb-3" id="picturePreview">
+                        <div class="file-input-wrapper">
+                            <button type="button" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-camera me-1"></i>Upload Photo
                             </button>
-                            <small class="text-muted d-block mt-1">JPG or PNG, max 5 MB</small>
+                            <input type="file" name="profile_picture" id="profilePicture" accept=".jpg,.jpeg,.png">
+                        </div>
+                        <p class="small text-muted mt-2">Max 5MB, JPG or PNG</p>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="full_name" value="{{ data.full_name or '' }}"
+                                required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Headline <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="headline" value="{{ data.headline or '' }}"
+                                placeholder="e.g., Full Stack Developer" required>
                         </div>
                     </div>
 
-                    <div class="row g-3">
-                        <div class="col-md-12">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="headline" name="headline"
-                                    placeholder="e.g. Computer Science Student | Web Developer" maxlength="500">
-                                <label for="headline"><i class="bi bi-megaphone me-1"></i>Headline</label>
-                            </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" name="location" value="{{ data.location or '' }}"
+                                placeholder="City, State">
                         </div>
-                        <div class="col-md-12">
-                            <div class="form-floating">
-                                <textarea class="form-control" id="bio" name="bio" placeholder="Bio"
-                                    style="height:100px"></textarea>
-                                <label for="bio"><i class="bi bi-card-text me-1"></i>Bio</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="location" name="location"
-                                    placeholder="City, Country">
-                                <label for="location"><i class="bi bi-geo-alt me-1"></i>Location</label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <input type="tel" class="form-control" id="phone" name="phone"
-                                    placeholder="10-digit phone" maxlength="10" pattern="[0-9]{10}">
-                                <label for="phone"><i class="bi bi-telephone me-1"></i>Phone (10 digits)</label>
-                                <div class="invalid-feedback" id="phone-error">Phone must be exactly 10 digits.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── Section 2: Skills ─────────────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-star me-2"></i>Skills</h3>
-
-                    <div class="skill-input-area">
-                        <div class="row g-2 align-items-end">
-                            <div class="col">
-                                <input type="text" class="form-control" id="skill-input"
-                                    placeholder="Type a skill and press Enter (e.g. Python)">
-                            </div>
-                            <div class="col-auto">
-                                <select class="form-select" id="skill-proficiency">
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate" selected>Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                </select>
-                            </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-primary" id="add-skill-btn">
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="skill-tags" id="skill-tags"></div>
-                        <input type="hidden" name="skills_json" id="skills-json" value="[]">
-                    </div>
-                </div>
-
-                <!-- ── Section 3: Education ──────────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-mortarboard me-2"></i>Education</h3>
-
-                    <div id="education-container">
-                        <!-- First education row (default) -->
-                        <div class="education-row" data-index="0">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="institution[]"
-                                            placeholder="University / College">
-                                        <label>Institution</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="degree[]"
-                                            placeholder="B.Tech, M.Sc, etc.">
-                                        <label>Degree</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="text" class="form-control" name="field_of_study[]"
-                                            placeholder="Computer Science">
-                                        <label>Field of Study</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="date" class="form-control" name="start_date[]" placeholder=" ">
-                                        <label>Start Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-floating">
-                                        <input type="date" class="form-control" name="end_date[]" placeholder=" ">
-                                        <label>End Date</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-floating">
-                                        <textarea class="form-control" name="edu_description[]"
-                                            placeholder="Description" style="height:70px"></textarea>
-                                        <label>Description (optional)</label>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" class="form-control" name="phone" id="phone"
+                                value="{{ data.phone or '' }}" placeholder="10 digit number" maxlength="10">
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="add-education-btn">
-                        <i class="bi bi-plus-circle me-1"></i>Add Another Education
+                    <!-- Bio -->
+                    <div class="mb-4">
+                        <label class="form-label">Bio</label>
+                        <textarea class="form-control" name="bio" id="bio" rows="4" maxlength="5000"
+                            placeholder="Tell us about yourself...">{{ data.bio or '' }}</textarea>
+                        <div class="d-flex justify-content-end mt-1">
+                            <span class="char-counter"><span id="bioCount">0</span>/5000</span>
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="mb-4">
+                        <label class="form-label">Skills</label>
+                        <div class="skills-container" id="skillsContainer">
+                            {% for skill in skills %}
+                            <div class="skill-badge">
+                                <input type="checkbox" name="skills" value="{{ skill.skill_id }}"
+                                    id="skill_{{ skill.skill_id }}">
+                                <label for="skill_{{ skill.skill_id }}">{{ skill.skill_name }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if not skills %}
+                        <p class="text-muted small">No skills available.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Education -->
+                    <div class="mb-4">
+                        <label class="form-label">Education</label>
+                        <div id="educationContainer"></div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="addEducation">
+                            <i class="bi bi-plus-lg me-1"></i>Add Education
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-check-circle me-2"></i>Complete Profile
                     </button>
-                </div>
-
-                <!-- ── Section 4: Documents ──────────────────── -->
-                <div class="form-section">
-                    <h3 class="section-title"><i class="bi bi-file-earmark-text me-2"></i>Documents</h3>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Resume (PDF / DOCX)</label>
-                            <input type="file" class="form-control" name="resume" accept=".pdf,.docx">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-light">Cover Letter (PDF / DOCX)</label>
-                            <input type="file" class="form-control" name="cover_letter" accept=".pdf,.docx">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit -->
-                <button type="submit" class="btn btn-primary btn-auth w-100 mt-4" id="submit-btn">
-                    <span class="btn-text"><i class="bi bi-check-lg me-2"></i>Save Profile</span>
-                    <span class="btn-loader d-none">
-                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving...
-                    </span>
-                </button>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+{% block extra_js %}
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        initProfileForm();
+        addEducationEntry();
+    });
+</script>
 {% endblock %}

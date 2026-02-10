@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-section {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-section h5 {
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #64748b;
+    }
+
+    .password-wrapper {
+        position: relative;
+    }
+
+    .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .strength-weak {
+        background: #ef4444;
+        width: 33%;
+    }
+
+    .strength-medium {
+        background: #f59e0b;
+        width: 66%;
+    }
+
+    .strength-strong {
+        background: #10b981;
+        width: 100%;
+    }
+
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+    }
+
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+
+    .setting-info {
+        flex: 1;
+    }
+
+    .setting-info p {
+        margin: 0;
+        color: #64748b;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h4 class="mb-4"><i class="bi bi-gear me-2"></i>Settings</h4>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Account Section -->
+            <div class="settings-section">
+                <h5><i class="bi bi-person-lock me-2"></i>Account</h5>
+
+                <!-- Email (Read Only) -->
+                <div class="mb-4">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" value="{{ user.email if user else '' }}" readonly disabled>
+                    <small class="text-muted">Contact support to change your email address.</small>
+                </div>
+
+                <!-- Password Change Form -->
+                <h6 class="mb-3">Change Password</h6>
+                <form action="{{ url_for('settings.change_password') }}" method="POST" id="passwordForm">
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" name="current_password" id="currentPassword"
+                                required>
+                            <i class="bi bi-eye password-toggle" onclick="togglePassword('currentPassword', this)"></i>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" name="new_password" id="newPassword" required
+                                minlength="8" oninput="checkPasswordStrength()">
+                            <i class="bi bi-eye password-toggle" onclick="togglePassword('newPassword', this)"></i>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <small class="text-muted">At least 8 characters, 1 uppercase, 1 number</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" name="confirm_password" id="confirmPassword"
+                                required oninput="checkPasswordMatch()">
+                            <i class="bi bi-eye password-toggle" onclick="togglePassword('confirmPassword', this)"></i>
+                        </div>
+                        <div id="passwordMatchMsg" class="small mt-1"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                        <i class="bi bi-shield-check me-1"></i>Change Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Privacy Section -->
+            <div class="settings-section">
+                <h5><i class="bi bi-shield-lock me-2"></i>Privacy</h5>
+
+                <form action="{{ url_for('settings.update_privacy') }}" method="POST" id="privacyForm">
+                    <!-- Profile Visibility -->
+                    <div class="mb-4">
+                        <label class="form-label">Profile Visibility</label>
+                        <select class="form-select" name="visibility" id="visibility">
+                            <option value="public" {% if privacy.visibility=='public' %}selected{% endif %}>
+                                Public - Anyone can view
+                            </option>
+                            <option value="registered_only" {% if privacy.visibility=='registered_only' %}selected{%
+                                endif %}>
+                                Registered Users Only
+                            </option>
+                        </select>
+                        <small class="text-muted">Control who can see your profile.</small>
+                    </div>
+
+                    <!-- Contact Info Toggles -->
+                    <h6 class="mb-3">Contact Information</h6>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="form-label mb-0">Show Email on Profile</label>
+                            <p>Allow visitors to see your email address</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="show_email" id="showEmail" {% if
+                                privacy.show_email %}checked{% endif %}>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <label class="form-label mb-0">Show Phone on Profile</label>
+                            <p>Allow visitors to see your phone number</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="show_phone" id="showPhone" {% if
+                                privacy.show_phone %}checked{% endif %}>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="bi bi-check me-1"></i>Save Privacy Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="settings-section">
+                <h6><i class="bi bi-info-circle me-2"></i>Tips</h6>
+                <ul class="small text-muted mb-0">
+                    <li class="mb-2">Use a strong, unique password</li>
+                    <li class="mb-2">Never share your password</li>
+                    <li class="mb-2">Set visibility to control who sees your profile</li>
+                    <li>Toggle contact info based on your preference</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

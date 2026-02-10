@@ -1,5 +1,6 @@
-from flask import Blueprint
+"""
+Profile blueprint package.
+"""
+from app.blueprints.profile.routes import profile_bp
 
-profile_bp = Blueprint('profile', __name__)
-
-from . import routes
+__all__ = ['profile_bp']

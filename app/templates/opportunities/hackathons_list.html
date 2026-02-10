@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Hackathons - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 4px solid transparent;
+    }
+
+    .event-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .event-card.upcoming {
+        border-left-color: #8b5cf6;
+    }
+
+    .event-card.ongoing {
+        border-left-color: #10b981;
+    }
+
+    .event-card.completed {
+        border-left-color: #9ca3af;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-upcoming {
+        background: #ede9fe;
+        color: #7c3aed;
+    }
+
+    .status-ongoing {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .status-completed {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .mode-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .mode-online {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .mode-offline {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .mode-hybrid {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .event-title {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .event-meta {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0.5rem 0;
+    }
+
+    .theme-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        color: white;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+    }
+
+    .event-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .event-tab {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        background: #f1f5f9;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .event-tab:hover,
+    .event-tab.active {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .event-tab .count {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-code-slash me-2"></i>Hackathons</h4>
+        <a href="{{ url_for('hackathons.my_registrations') }}" class="btn btn-outline-primary">
+            <i class="bi bi-calendar-check me-1"></i>My Registrations
+        </a>
+    </div>
+
+    <!-- Event Type Tabs -->
+    <div class="event-tabs">
+        <a href="{{ url_for('competitions.competitions_list') }}" class="event-tab">
+            <i class="bi bi-trophy me-1"></i>Competitions
+            <span class="count">({{ counts.competitions }})</span>
+        </a>
+        <a href="{{ url_for('hackathons.hackathons_list') }}" class="event-tab active">
+            <i class="bi bi-code-slash me-1"></i>Hackathons
+            <span class="count">({{ counts.hackathons }})</span>
+        </a>
+    </div>
+
+    <!-- Events List -->
+    {% if events %}
+    {% for event in events %}
+    <div class="event-card {{ event.status }}">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <span class="status-badge status-{{ event.status }}">
+                    {{ event.status|capitalize }}
+                </span>
+                <span class="mode-badge mode-{{ event.mode }} ms-2">
+                    <i
+                        class="bi bi-{% if event.mode == 'online' %}globe{% elif event.mode == 'offline' %}building{% else %}diagram-3{% endif %} me-1"></i>
+                    {{ event.mode|capitalize }}
+                </span>
+                {% if event.theme %}
+                <span class="theme-badge ms-2">{{ event.theme }}</span>
+                {% endif %}
+            </div>
+            <small class="text-muted">
+                {{ event.registration_count or 0 }} registered
+            </small>
+        </div>
+        <h5 class="event-title mt-2">{{ event.title }}</h5>
+        <p class="text-muted mb-2">{{ event.company_name or 'SkillentHub' }}</p>
+        <p class="event-meta">
+            <i class="bi bi-calendar me-1"></i>
+            {{ event.start_date.strftime('%b %d, %Y • %I:%M %p') if event.start_date else '' }}
+            <span class="mx-2">→</span>
+            {{ event.end_date.strftime('%b %d, %Y • %I:%M %p') if event.end_date else '' }}
+        </p>
+        <p class="event-meta">
+            <i class="bi bi-geo-alt me-1"></i>{{ event.venue or 'TBA' }}
+            {% if event.team_size %}
+            <span class="ms-3"><i class="bi bi-people me-1"></i>Team Size: {{ event.team_size }}</span>
+            {% endif %}
+        </p>
+        <p class="text-muted small mb-3">{{ event.description[:150] if event.description else '' }}...</p>
+        <a href="{{ url_for('hackathons.hackathon_detail', hackathon_id=event.hackathon_id) }}"
+            class="btn btn-primary btn-sm">View Details</a>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-code-slash display-1 text-muted"></i>
+        <p class="mt-3 text-muted">No hackathons found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/events.js') }}"></script>
+{% endblock %}

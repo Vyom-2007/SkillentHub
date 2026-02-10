@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Create Post - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-post-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .char-counter {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        text-align: right;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 0.75rem;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="create-post-container">
+        <div class="auth-card">
+            <h2 class="auth-title mb-4"><i class="bi bi-pencil-square me-2"></i>Create Post</h2>
+
+            <form action="{{ url_for('posts.create_post') }}" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">What's on your mind?</label>
+                    <textarea class="form-control" name="content" id="postContent" rows="6" maxlength="5000" required
+                        placeholder="Share your thoughts...">{{ content or '' }}</textarea>
+                    <div class="char-counter"><span id="charCount">{{ (content or '')|length }}</span>/5000</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Add Photo (Optional)</label>
+                    <input type="file" class="form-control" name="image" id="postImage" accept=".jpg,.jpeg,.png,.gif">
+                    <p class="text-muted small mt-1">Max 10MB. JPG, PNG, or GIF.</p>
+                    <div id="imagePreviewContainer" style="display: none;">
+                        <img id="imagePreview" class="image-preview" src="">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-send me-2"></i>Post
+                    </button>
+                    <a href="{{ url_for('posts.feed') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Character counter
+        const content = document.getElementById('postContent');
+        const count = document.getElementById('charCount');
+
+        content.addEventListener('input', function () {
+            count.textContent = this.value.length;
+        });
+
+        // Image preview
+        const imageInput = document.getElementById('postImage');
+        const preview = document.getElementById('imagePreview');
+        const container = document.getElementById('imagePreviewContainer');
+
+        imageInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    container.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                container.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
