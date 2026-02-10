@@ -107,6 +107,7 @@ def login():
             session['user_id'] = result['user_id']
             session['email'] = result['email']
             session['full_name'] = result.get('full_name')
+            session['profile_picture'] = result.get('profile_picture')
             session.permanent = False  # 30-minute session as per config
             
             flash(f'Welcome back, {result.get("full_name", "User")}!', 'success')

@@ -181,7 +181,8 @@ def verify_user(email, password):
     return True, {
         'user_id': user['user_id'],
         'email': user['email'],
-        'full_name': profile.get('full_name') if profile else None
+        'full_name': profile.get('full_name') if profile else None,
+        'profile_picture': profile.get('profile_picture') if profile else None
     }
 
 

@@ -208,8 +208,13 @@
                 <form id="createPostForm" action="{{ url_for('posts.create_post') }}" method="POST"
                     enctype="multipart/form-data">
                     <div class="d-flex gap-3">
+                        {% if session.get('profile_picture') %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' + session.get('profile_picture')) }}"
+                            alt="You" class="post-author-pic">
+                        {% else %}
                         <img src="https://ui-avatars.com/api/?name={{ session.get('full_name', 'U') }}&size=48&background=random"
                             alt="You" class="post-author-pic">
+                        {% endif %}
                         <div class="flex-grow-1">
                             <textarea class="form-control" name="content" id="postContent"
                                 placeholder="What's on your mind?" rows="3" maxlength="5000" required></textarea>

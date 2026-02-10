@@ -128,8 +128,28 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('profile.view', user_id=session.user_id) }}">
-                            <i class="bi bi-person"></i> My Profile
+                        <a class="nav-link" href="{{ url_for('posts.feed') }}">
+                            <i class="bi bi-rss"></i> Feed
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('network.network') }}">
+                            <i class="bi bi-people"></i> Network
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('opportunities.opportunities') }}">
+                            <i class="bi bi-briefcase"></i> Jobs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('competitions.competitions_list') }}">
+                            <i class="bi bi-trophy"></i> Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('messages.messages') }}">
+                            <i class="bi bi-chat-dots"></i> Messages
                         </a>
                     </li>
                 </ul>

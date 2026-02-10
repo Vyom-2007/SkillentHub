@@ -77,6 +77,9 @@ def setup():
         
         # Update session
         session['full_name'] = data['full_name']
+        updated_profile = profile_service.get_profile(user_id)
+        if updated_profile:
+            session['profile_picture'] = updated_profile.get('profile_picture')
         
         flash('Profile saved successfully!', 'success')
         return redirect(url_for('profile.view', user_id=user_id))
@@ -179,6 +182,9 @@ def edit():
         profile_service.save_education_entries(user_id, education_list)
         
         session['full_name'] = data['full_name']
+        updated_profile = profile_service.get_profile(user_id)
+        if updated_profile:
+            session['profile_picture'] = updated_profile.get('profile_picture')
         
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('profile.view', user_id=user_id))
