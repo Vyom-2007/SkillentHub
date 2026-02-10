@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Verify OTP — SkillentHub{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <div class="auth-card animate-in">
+        <div class="auth-header">
+            <a href="/" class="auth-brand">
+                <i class="bi bi-rocket-takeoff-fill"></i> SkillentHub
+            </a>
+            <h1 class="auth-title">Verify OTP</h1>
+            <p class="auth-subtitle">Enter the 6-digit code sent to <strong id="display-email">{{ email }}</strong></p>
+        </div>
+
+        <input type="hidden" id="otp-email" value="{{ email }}">
+
+        <!-- OTP Inputs -->
+        <div class="otp-container" id="otp-container">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="0"
+                aria-label="Digit 1" id="otp-0">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="1"
+                aria-label="Digit 2" id="otp-1">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="2"
+                aria-label="Digit 3" id="otp-2">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="3"
+                aria-label="Digit 4" id="otp-3">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="4"
+                aria-label="Digit 5" id="otp-4">
+            <input type="text" class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="5"
+                aria-label="Digit 6" id="otp-5">
+        </div>
+
+        <!-- Status message -->
+        <div class="otp-status" id="otp-status"></div>
+
+        <!-- Timer & Resend -->
+        <div class="otp-timer-section">
+            <div class="otp-timer" id="otp-timer">
+                <i class="bi bi-clock me-1"></i> Code expires in <span id="countdown">5:00</span>
+            </div>
+            <button type="button" class="btn btn-link resend-btn" id="resend-btn" disabled>
+                <i class="bi bi-arrow-repeat me-1"></i>Resend Code
+            </button>
+        </div>
+
+        <!-- Verify Button -->
+        <button type="button" class="btn btn-primary btn-auth w-100" id="verify-btn">
+            <span class="btn-text">Verify Code</span>
+            <span class="btn-loader d-none">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>Verifying...
+            </span>
+        </button>
+
+        <div class="auth-footer">
+            <a href="{{ url_for('auth.forgot_password_page') }}"><i class="bi bi-arrow-left me-1"></i>Try a different
+                email</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/otp.js') }}"></script>
+{% endblock %}

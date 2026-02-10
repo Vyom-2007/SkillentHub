@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Register — SkillentHub{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <div class="auth-card animate-in">
+        <div class="auth-header">
+            <a href="/" class="auth-brand">
+                <i class="bi bi-rocket-takeoff-fill"></i> SkillentHub
+            </a>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Start your career journey today</p>
+        </div>
+
+        <form id="register-form" action="{{ url_for('auth.register') }}" method="POST" novalidate>
+            <!-- Full Name -->
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="John Doe" required
+                    autocomplete="name">
+                <label for="full_name"><i class="bi bi-person me-2"></i>Full Name</label>
+                <div class="invalid-feedback" id="name-error"></div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required
+                    autocomplete="email">
+                <label for="email"><i class="bi bi-envelope me-2"></i>Email Address</label>
+                <div class="invalid-feedback" id="email-error"></div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-floating mb-3 position-relative">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                    required autocomplete="new-password">
+                <label for="password"><i class="bi bi-lock me-2"></i>Password</label>
+                <button type="button" class="password-toggle" id="toggle-password" tabindex="-1">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <div class="invalid-feedback" id="password-error"></div>
+            </div>
+
+            <!-- Password strength indicators -->
+            <div class="password-rules mb-3" id="password-rules">
+                <div class="rule" id="rule-length">
+                    <i class="bi bi-circle"></i> At least 8 characters
+                </div>
+                <div class="rule" id="rule-upper">
+                    <i class="bi bi-circle"></i> 1 uppercase letter
+                </div>
+                <div class="rule" id="rule-number">
+                    <i class="bi bi-circle"></i> 1 number
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-auth w-100" id="submit-btn">
+                <span class="btn-text">Create Account</span>
+                <span class="btn-loader d-none">
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>Creating...
+                </span>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{{ url_for('auth.login_page') }}">Log In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/validation.js') }}"></script>
+{% endblock %}
