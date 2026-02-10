@@ -101,7 +101,8 @@ def get_applications(recruiter_id, filters=None):
     query = """
     SELECT 
         a.application_id, a.item_type, a.item_id, a.status, a.applied_at,
-        u.first_name, u.last_name, u.email,
+        a.application_id, a.item_type, a.item_id, a.status, a.applied_at,
+        p.full_name, u.email,
         p.profile_picture,
         COALESCE(j.title, i.title, c.title, h.title) as item_title
     FROM applications a
@@ -134,7 +135,7 @@ def get_applications(recruiter_id, filters=None):
             
     query += " ORDER BY a.applied_at DESC"
     
-    return execute_query(query, tuple(params))
+    return execute_query(query, tuple(params), fetch_all=True)
 
 def get_application_detail(application_id, recruiter_id):
     """
@@ -144,7 +145,7 @@ def get_application_detail(application_id, recruiter_id):
     query = """
     SELECT 
         a.*,
-        u.first_name, u.last_name, u.email, u.user_id as applicant_id,
+        p.full_name, u.email, u.user_id as applicant_id,
         p.profile_picture, p.headline, p.skills, p.city, p.state,
         COALESCE(j.title, i.title, c.title, h.title) as item_title
     FROM applications a
