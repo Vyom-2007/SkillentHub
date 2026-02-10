@@ -1,0 +1,83 @@
+{% extends "recruiter/base.html" %}
+
+{% block title %}Search Candidates - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-gray-800">Candiadates</h2>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('recruiter_candidates.list_candidates') }}" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" name="q" placeholder="Search by name or headline..."
+                            value="{{ request.args.get('q', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                        <input type="text" class="form-control" name="location" placeholder="Location"
+                            value="{{ request.args.get('location', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-code-slash"></i></span>
+                        <input type="text" class="form-control" name="skill" placeholder="Skill (e.g. Python)"
+                            value="{{ request.args.get('skill', '') }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Candidates Grid -->
+    <div class="row">
+        {% for candidate in candidates %}
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + (candidate.profile_picture if candidate.profile_picture else 'default.png')) }}"
+                        class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                    <h5 class="font-weight-bold text-primary mb-1">{{ candidate.full_name }}</h5>
+                    <p class="text-muted small mb-2">{{ candidate.headline or 'No headline' }}</p>
+                    <div class="mb-3">
+                        <i class="bi bi-geo-alt-fill text-gray-400"></i> {{ candidate.location or 'Unknown' }}
+                    </div>
+
+                    {% if candidate.skills %}
+                    <div class="mb-3">
+                        {% for skill in candidate.skills.split(', ')[:3] %}
+                        <span class="badge bg-light text-dark border me-1">{{ skill }}</span>
+                        {% endfor %}
+                        {% if candidate.skills.split(', ')|length > 3 %}
+                        <span class="badge bg-light text-dark border">+{{ candidate.skills.split(', ')|length - 3
+                            }}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"
+                        class="btn btn-outline-primary btn-sm">View Profile</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No candidates found matching your criteria.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

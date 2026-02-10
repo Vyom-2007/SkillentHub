@@ -109,6 +109,14 @@ def register_blueprints(app):
     from app.blueprints.recruiter.routes import recruiter_bp
     app.register_blueprint(recruiter_bp)
 
+    # Recruiter Candidates blueprint
+    from app.blueprints.recruiter.candidates import candidates_bp
+    app.register_blueprint(candidates_bp)
+
+    # Recruiter Messages blueprint
+    from app.blueprints.recruiter.messages import recruiter_messages_bp
+    app.register_blueprint(recruiter_messages_bp)
+
 
 def register_error_handlers(app):
     """Register error handlers for the application."""

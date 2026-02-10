@@ -35,44 +35,77 @@ def get_dashboard_stats(recruiter_id):
         stats['total_hackathons'] = result['count'] if result else 0
         
         # Total Applications (across all items belonging to this recruiter)
+        # We need to count from applications AND registrations tables
         query = """
-            SELECT COUNT(*) as count FROM applications a
-            WHERE (
-                (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
-                OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
-                OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
-                OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
-            )
+            SELECT (
+                (SELECT COUNT(*) FROM applications a
+                 WHERE (
+                    (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
+                    OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
+                    OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
+                    OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
+                 ))
+                +
+                (SELECT COUNT(*) FROM hackathon_registrations hr
+                 JOIN hackathons h ON hr.hackathon_id = h.hackathon_id
+                 WHERE h.recruiter_id = %s)
+                +
+                (SELECT COUNT(*) FROM competition_registrations cr
+                 JOIN competitions c ON cr.competition_id = c.competition_id
+                 WHERE c.recruiter_id = %s)
+            ) as count
         """
-        result = execute_query(query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+        # Params: 4 for app, 1 for hack, 1 for comp
+        params = (recruiter_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id)
+        result = execute_query(query, params, fetch_one=True)
         stats['total_applications'] = result['count'] if result else 0
         
         # Applications this week
         query = """
-            SELECT COUNT(*) as count FROM applications a
-            WHERE a.applied_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
-            AND (
-                (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
-                OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
-                OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
-                OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
-            )
+            SELECT (
+                (SELECT COUNT(*) FROM applications a
+                 WHERE a.applied_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK)
+                 AND (
+                    (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
+                    OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
+                    OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
+                    OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
+                 ))
+                +
+                (SELECT COUNT(*) FROM hackathon_registrations hr
+                 JOIN hackathons h ON hr.hackathon_id = h.hackathon_id
+                 WHERE hr.registered_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK) AND h.recruiter_id = %s)
+                +
+                (SELECT COUNT(*) FROM competition_registrations cr
+                 JOIN competitions c ON cr.competition_id = c.competition_id
+                 WHERE cr.registered_at >= DATE_SUB(NOW(), INTERVAL 1 WEEK) AND c.recruiter_id = %s)
+            ) as count
         """
-        result = execute_query(query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+        result = execute_query(query, params, fetch_one=True)
         stats['applications_this_week'] = result['count'] if result else 0
         
         # New applications in last 24 hours
         query = """
-            SELECT COUNT(*) as count FROM applications a
-            WHERE a.applied_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-            AND (
-                (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
-                OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
-                OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
-                OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
-            )
+            SELECT (
+                (SELECT COUNT(*) FROM applications a
+                 WHERE a.applied_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                 AND (
+                    (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
+                    OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
+                    OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
+                    OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
+                 ))
+                +
+                (SELECT COUNT(*) FROM hackathon_registrations hr
+                 JOIN hackathons h ON hr.hackathon_id = h.hackathon_id
+                 WHERE hr.registered_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND h.recruiter_id = %s)
+                +
+                (SELECT COUNT(*) FROM competition_registrations cr
+                 JOIN competitions c ON cr.competition_id = c.competition_id
+                 WHERE cr.registered_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND c.recruiter_id = %s)
+            ) as count
         """
-        result = execute_query(query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+        result = execute_query(query, params, fetch_one=True)
         stats['new_applications_24h'] = result['count'] if result else 0
         
         # Recent applications (last 5)
@@ -96,38 +129,85 @@ def get_dashboard_stats(recruiter_id):
 
 def get_recent_applications(recruiter_id, limit=5):
     """
-    Get recent applications for recruiter's postings.
-    Retrieves candidate info and item details.
+    Get recent applications AND registrations for recruiter's postings.
+    Unions data from:
+    1. applications table
+    2. hackathon_registrations table
+    3. competition_registrations table
     """
     query = """
-        SELECT 
-            a.application_id,
-            a.item_type,
-            a.item_id,
-            a.status,
-            a.applied_at,
-            u.user_id,
-            p.full_name as candidate_name,
-            p.profile_picture as profile_photo
-        FROM applications a
-        JOIN users u ON a.user_id = u.user_id
-        LEFT JOIN profiles p ON u.user_id = p.user_id
-        WHERE (
-            (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
-            OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
-            OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
-            OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
-        )
-        ORDER BY a.applied_at DESC
+        SELECT * FROM (
+            -- 1. Applications
+            SELECT 
+                a.application_id as id,
+                a.item_type,
+                a.item_id,
+                a.status,
+                a.applied_at as date,
+                u.user_id,
+                p.full_name as candidate_name,
+                p.profile_picture as profile_photo
+            FROM applications a
+            JOIN users u ON a.user_id = u.user_id
+            LEFT JOIN profiles p ON u.user_id = p.user_id
+            WHERE (
+                (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
+                OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
+                OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
+                OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
+            )
+
+            UNION ALL
+
+            -- 2. Hackathon Registrations
+            SELECT 
+                hr.registration_id as id,
+                'hackathon' as item_type,
+                hr.hackathon_id as item_id,
+                'registered' as status,
+                hr.registered_at as date,
+                u.user_id,
+                COALESCE(hr.name, p.full_name, 'Unknown') as candidate_name,
+                p.profile_picture as profile_photo
+            FROM hackathon_registrations hr
+            JOIN hackathons h ON hr.hackathon_id = h.hackathon_id
+            LEFT JOIN users u ON hr.user_id = u.user_id
+            LEFT JOIN profiles p ON u.user_id = p.user_id
+            WHERE h.recruiter_id = %s
+
+            UNION ALL
+
+            -- 3. Competition Registrations
+            SELECT 
+                cr.registration_id as id,
+                'competition' as item_type,
+                cr.competition_id as item_id,
+                'registered' as status,
+                cr.registered_at as date,
+                u.user_id,
+                p.full_name as candidate_name,
+                p.profile_picture as profile_photo
+            FROM competition_registrations cr
+            JOIN competitions c ON cr.competition_id = c.competition_id
+            LEFT JOIN users u ON cr.user_id = u.user_id
+            LEFT JOIN profiles p ON u.user_id = p.user_id
+            WHERE c.recruiter_id = %s
+
+        ) AS combined_activity
+        ORDER BY date DESC
         LIMIT %s
     """
-    applications = execute_query(query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id, limit), fetch_all=True)
+    
+    # Params: 4 for applications, 1 for hackathons, 1 for competitions, 1 for limit
+    params = (recruiter_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id, limit)
+    
+    applications = execute_query(query, params, fetch_all=True)
     
     # Enrich with item titles
     if applications:
         for app in applications:
             app['item_title'] = get_item_title(app['item_type'], app['item_id'])
-            app['time_ago'] = get_time_ago(app['applied_at'])
+            app['time_ago'] = get_time_ago(app['date'])
     else:
         applications = []
     

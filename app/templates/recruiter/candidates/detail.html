@@ -1,0 +1,204 @@
+{% extends "recruiter/base.html" %}
+
+{% block title %}{{ profile.full_name }} - Candidate{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-gray-800">Candidate Profile</h2>
+        <a href="{{ url_for('recruiter_candidates.list_candidates') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Search
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar: Profile Summary -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + (profile.profile_picture if profile.profile_picture else 'default.png')) }}"
+                        class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    <h4 class="font-weight-bold text-primary mb-1">{{ profile.full_name }}</h4>
+                    <p class="text-muted mb-2">{{ profile.headline or 'No headline' }}</p>
+
+                    <div class="d-flex justify-content-center mb-3">
+                        <span class="badge bg-secondary me-2"><i class="bi bi-geo-alt-fill"></i> {{ profile.location or
+                            'Unknown' }}</span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#messageModal">
+                            <i class="bi bi-chat-dots"></i> Message
+                        </button>
+                        {% if profile.show_email or 1 %}
+                        <!-- Recruiters might see email by default? For now, respect visibility or show because 'recruiter' -->
+                        <a href="mailto:{{ profile.email }}" class="btn btn-outline-info">
+                            <i class="bi bi-envelope"></i> Email
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Skills</h6>
+                </div>
+                <div class="card-body">
+                    {% for skill in skills %}
+                    <div class="mb-2">
+                        <span
+                            class="badge bg-light text-dark border p-2 w-100 d-flex justify-content-between align-items-center">
+                            {{ skill.skill_name }}
+                            <small class="text-muted">{{ skill.proficiency_level|title }}</small>
+                        </span>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No skills listed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Bio, Experience, Education -->
+        <div class="col-lg-8">
+            <!-- About -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">About</h6>
+                </div>
+                <div class="card-body">
+                    <p>{{ profile.bio or 'No bio provided.' }}</p>
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Experience</h6>
+                </div>
+                <div class="card-body">
+                    {% for exp in experience %}
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold">{{ exp.position }}</h5>
+                        <h6 class="text-primary">{{ exp.company_name }}</h6>
+                        <small class="text-muted">
+                            {{ exp.start_date.strftime('%b %Y') }} -
+                            {% if exp.is_current %}Present{% else %}{{ exp.end_date.strftime('%b %Y') if exp.end_date
+                            else '?' }}{% endif %}
+                            | {{ exp.location }}
+                        </small>
+                        <p class="mt-2">{{ exp.description }}</p>
+                    </div>
+                    {% if not loop.last %}
+                    <hr>{% endif %}
+                    {% else %}
+                    <p class="text-muted">No experience listed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Education</h6>
+                </div>
+                <div class="card-body">
+                    {% for edu in education %}
+                    <div class="mb-3">
+                        <h5 class="font-weight-bold">{{ edu.institution_name }}</h5>
+                        <div class="text-muted">{{ edu.degree }} in {{ edu.field_of_study }}</div>
+                        <small class="text-muted">{{ edu.start_year }} - {{ edu.end_year }}</small>
+                    </div>
+                    {% if not loop.last %}
+                    <hr>{% endif %}
+                    {% else %}
+                    <p class="text-muted">No education listed.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Message Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Message {{ profile.full_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="messageForm">
+                    <input type="hidden" id="receiver_id" value="{{ profile.user_id }}">
+                    <div class="mb-3">
+                        <textarea class="form-control" id="messageContent" rows="4"
+                            placeholder="Type your message here..." required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="sendMessage()">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function sendMessage() {
+        const receiverId = document.getElementById('receiver_id').value;
+        const content = document.getElementById('messageContent').value;
+        const btn = document.querySelector('#messageModal .btn-primary');
+
+        if (!content.trim()) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
+
+        // Call the generic messages API, but since we are logged in as Recruiter, 
+        // we need to make sure the endpoint supports recruiter authentication.
+        // The previous update to `routes.py` in `messages` blueprint uses `session.get('user_id')`.
+        // Recruiters use `session.get('recruiter_id')`.
+        // Wait... `message_service.send_message` supports types, but the API route `/api/messages/send`
+        // was updated to take `receiver_type` but heavily relies on `user_id = session.get('user_id')` for SENDER.
+
+        // PROBLEM: Recruiters don't have `user_id` in session. They have `recruiter_id`.
+        // I need a NEW endpoint for Recruiters to send messages, OR update the existing one to handle recruiter session.
+        // Given `messages_bp` is protected by `login_required` which checks `user_id`, I should create a separate endpoint 
+        // or update the decorator/route to handle both.
+
+        // For now, I'll direct this to a new endpoint I'll creating in `candidates.py` or `recruiter/routes.py` 
+        // specifically for recruiter messaging.
+
+        fetch('/recruiter/api/messages/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                receiver_id: receiverId,
+                content: content
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Message sent successfully!');
+                    bootstrap.Modal.getInstance(document.getElementById('messageModal')).hide();
+                } else {
+                    alert(data.error || 'Failed to send message');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('An error occurred');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = 'Send Message';
+            });
+    }
+</script>
+{% endblock %}
