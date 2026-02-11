@@ -1,0 +1,28 @@
+{#
+Reusable avatar macro.
+Shows profile picture if available, otherwise shows first 2 letters of name
+on a gradient background.
+
+Usage:
+{% from '_avatar.html' import avatar %}
+{{ avatar(name='John Doe', picture='profile_1.png', size=48) }}
+{{ avatar(name='John Doe', size=80) }} {# No picture, shows initials #}
+#}
+
+{% macro avatar(name='User', picture=None, size=48, extra_class='') %}
+{% if picture %}
+<img src="{{ url_for('static', filename='uploads/profiles/' + picture) }}" alt="{{ name }}"
+    class="avatar-img {{ extra_class }}"
+    style="width: {{ size }}px; height: {{ size }}px; border-radius: 50%; object-fit: cover;"
+    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+<div class="avatar-initials {{ extra_class }}"
+    style="display: none; width: {{ size }}px; height: {{ size }}px; font-size: {{ (size * 0.36)|int }}px;">
+    {{ name[:2].upper() if name else 'U' }}
+</div>
+{% else %}
+<div class="avatar-initials {{ extra_class }}"
+    style="width: {{ size }}px; height: {{ size }}px; font-size: {{ (size * 0.36)|int }}px;">
+    {{ name[:2].upper() if name else 'U' }}
+</div>
+{% endif %}
+{% endmacro %}
