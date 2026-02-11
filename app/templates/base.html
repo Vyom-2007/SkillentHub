@@ -177,7 +177,23 @@
                     {% include 'components/navbar_notifications.html' %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{ session.get('full_name', 'User') }}
+                            <div class="d-inline-block position-relative me-1"
+                                style="width: 24px; height: 24px; vertical-align: middle;">
+                                {% if session.get('profile_picture') %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + session.get('profile_picture')) }}"
+                                    alt="User" class="rounded-circle w-100 h-100 object-fit-cover"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="avatar-initials w-100 h-100 rounded-circle"
+                                    style="font-size: 0.7rem; display: none;">
+                                    {{ session.get('full_name', 'U')[:2].upper() }}
+                                </div>
+                                {% else %}
+                                <div class="avatar-initials w-100 h-100 rounded-circle" style="font-size: 0.7rem;">
+                                    {{ session.get('full_name', 'U')[:2].upper() }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {{ session.get('full_name', 'User') }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>

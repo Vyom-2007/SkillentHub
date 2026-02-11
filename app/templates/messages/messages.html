@@ -249,14 +249,20 @@
                 <a href="{{ url_for('messages.messages', user=conv.other_id) }}"
                     class="conversation-item {% if target_user and target_user.id == conv.other_id %}active{% endif %}"
                     data-user-id="{{ conv.other_id }}" data-name="{{ conv.name|default('')|lower }}">
-                    {% if conv.picture %}
-                    <img src="{{ url_for('static', filename='uploads/profiles/' + conv.picture) }}"
-                        alt="{{ conv.name }}" class="conv-avatar">
-                    {% else %}
-                    <div class="conv-avatar avatar-initials" style="font-size: 1rem;">
-                        {{ conv.name[:2].upper() if conv.name else 'U' }}
+                    <div class="position-relative">
+                        {% if conv.picture %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' + conv.picture) }}"
+                            alt="{{ conv.name }}" class="conv-avatar"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="conv-avatar avatar-initials" style="font-size: 1rem; display: none;">
+                            {{ conv.name[:2].upper() if conv.name else 'U' }}
+                        </div>
+                        {% else %}
+                        <div class="conv-avatar avatar-initials" style="font-size: 1rem;">
+                            {{ conv.name[:2].upper() if conv.name else 'U' }}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                     <div class="conv-info">
                         <div class="conv-name">
                             <span>{{ conv.name or 'User' }}</span>
@@ -291,14 +297,20 @@
                 <a href="{{ url_for('messages.messages') }}" class="btn btn-link text-muted d-md-none">
                     <i class="bi bi-arrow-left"></i>
                 </a>
-                {% if target_user.picture %}
-                <img src="{{ url_for('static', filename='uploads/profiles/' + target_user.picture) }}"
-                    alt="{{ target_user.name }}" class="chat-avatar">
-                {% else %}
-                <div class="chat-avatar avatar-initials" style="font-size: 0.9rem;">
-                    {{ target_user.name[:2].upper() if target_user.name else 'U' }}
+                <div class="position-relative">
+                    {% if target_user.picture %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + target_user.picture) }}"
+                        alt="{{ target_user.name }}" class="chat-avatar"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="chat-avatar avatar-initials" style="font-size: 0.9rem; display: none;">
+                        {{ target_user.name[:2].upper() if target_user.name else 'U' }}
+                    </div>
+                    {% else %}
+                    <div class="chat-avatar avatar-initials" style="font-size: 0.9rem;">
+                        {{ target_user.name[:2].upper() if target_user.name else 'U' }}
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
                 <div>
                     <h6 class="mb-0">{{ target_user.name or 'User' }}</h6>
                     <small class="text-muted">{{ target_user.headline or '' }}</small>
