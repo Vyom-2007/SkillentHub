@@ -312,6 +312,28 @@ def reset_password():
     return render_template('auth/reset_password.html')
 
 
+@auth_bp.route('/my-applications')
+def my_applications():
+    """View user's applications and registrations."""
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    
+    user_id = session['user_id']
+    from app.services import application_service, event_service
+    
+    # Fetch applications (Jobs & Internships)
+    # Get all without pagination for now, or implement simple pagination
+    # For MVP, let's fetch a reasonable limit or all
+    applications = application_service.get_user_applications(user_id, per_page=100)
+    
+    # Fetch registrations (Competitions & Hackathons)
+    registrations = event_service.get_user_registrations(user_id)
+    
+    return render_template('auth/my_applications.html', 
+                           applications=applications, 
+                           registrations=registrations)
+
+
 # Helper functions
 def _is_valid_email(email):
     """Basic email validation."""

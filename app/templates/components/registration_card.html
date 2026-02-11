@@ -1,0 +1,37 @@
+<div class="card h-100 shadow-sm hover-shadow transition-all">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <span
+                class="badge {% if reg.event_type == 'hackathon' %}bg-purple{% else %}bg-orange{% endif %} bg-opacity-10 text-dark px-3 py-2 rounded-pill"
+                style="{% if reg.event_type == 'hackathon' %}background-color: #e9d5ff; color: #6b21a8;{% else %}background-color: #ffedd5; color: #c2410c;{% endif %}">
+                {{ reg.event_type|title }}
+            </span>
+            <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                Registered
+            </span>
+        </div>
+
+        <h5 class="card-title fw-bold mb-1">{{ reg.title }}</h5>
+        <p class="text-muted small mb-3">
+            <i class="bi bi-trophy me-1"></i> Organized by {{ reg.company_name }}
+        </p>
+
+        <div class="d-flex align-items-center text-muted small mb-3">
+            <i class="bi bi-calendar-event me-1"></i> {{ reg.start_date.strftime('%b %d') }} - {{
+            reg.end_date.strftime('%b %d, %Y') }}
+        </div>
+
+        <div class="border-top pt-3 mt-auto">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">Reg Date: {{ reg.registered_at.strftime('%b %d, %Y') }}</small>
+                {% if reg.event_type == 'hackathon' %}
+                <a href="{{ url_for('hackathons.hackathon_detail', hackathon_id=reg.event_id) }}"
+                    class="btn btn-sm btn-outline-secondary">View Event</a>
+                {% else %}
+                <a href="{{ url_for('competitions.competition_detail', competition_id=reg.event_id) }}"
+                    class="btn btn-sm btn-outline-secondary">View Event</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
