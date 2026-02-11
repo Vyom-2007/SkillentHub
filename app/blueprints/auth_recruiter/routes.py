@@ -134,3 +134,216 @@ def logout():
     clear_recruiter_session()
     flash("You have been logged out.", 'info')
     return redirect(url_for('auth_recruiter.login'))
+
+
+# ========== FORGOT PASSWORD ==========
+
+@auth_recruiter_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    """Forgot password - request OTP."""
+    from app.services import otp_service, email_service
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        
+        if not email:
+            flash('Please enter your company email address', 'danger')
+            return render_template('recruiter/forgot_password.html')
+        
+        # Check if recruiter exists
+        recruiter = recruiter_model.get_by_email(email)
+        
+        if not recruiter:
+            # Don't reveal if email exists - security best practice
+            flash('If an account exists with this email, you will receive an OTP shortly.', 'info')
+            return redirect(url_for('auth_recruiter.forgot_password'))
+        
+        # Check resend cooldown
+        can_resend, seconds_remaining = otp_service.can_resend_otp(email)
+        if not can_resend:
+            flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
+            return render_template('recruiter/forgot_password.html', email=email)
+        
+        # Generate and send OTP
+        # Pass recruiter_id explicitly
+        otp, expires_at = otp_service.create_otp(
+            user_id=None, 
+            email=email, 
+            recruiter_id=recruiter['recruiter_id']
+        )
+        
+        email_service.send_otp_email(email, recruiter['company_name'], otp)
+        
+        # Store email in session for OTP verification
+        session['recruiter_reset_email'] = email
+        
+        flash('OTP has been sent to your email address.', 'success')
+        return redirect(url_for('auth_recruiter.verify_otp'))
+    
+    return render_template('recruiter/forgot_password.html')
+
+
+@auth_recruiter_bp.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp():
+    """Verify OTP for password reset."""
+    from app.services import otp_service
+    
+    email = session.get('recruiter_reset_email')
+    
+    if not email:
+        flash('Please request a password reset first.', 'warning')
+        return redirect(url_for('auth_recruiter.forgot_password'))
+    
+    # Get expiry time for countdown
+    expiry_seconds = otp_service.get_otp_expiry_seconds(email)
+    
+    if request.method == 'POST':
+        # Collect OTP from 6 separate inputs
+        otp_digits = []
+        for i in range(1, 7):
+            digit = request.form.get(f'otp{i}', '')
+            otp_digits.append(digit)
+        
+        otp_input = ''.join(otp_digits)
+        
+        if len(otp_input) != 6 or not otp_input.isdigit():
+            flash('Please enter a valid 6-digit OTP', 'danger')
+            return render_template('recruiter/verify_otp.html', 
+                                   email=email, 
+                                   expiry_seconds=expiry_seconds)
+        
+        # Verify OTP
+        success, message, otp_record = otp_service.verify_otp(email, otp_input)
+        
+        if success:
+            session['recruiter_otp_verified'] = True
+            session['recruiter_otp_id'] = otp_record['otp_id']
+            flash('OTP verified successfully. Please set your new password.', 'success')
+            return redirect(url_for('auth_recruiter.reset_password'))
+        else:
+            flash(message, 'danger')
+            # Refresh expiry time
+            expiry_seconds = otp_service.get_otp_expiry_seconds(email)
+            return render_template('recruiter/verify_otp.html', 
+                                   email=email, 
+                                   expiry_seconds=expiry_seconds)
+    
+    return render_template('recruiter/verify_otp.html', 
+                           email=email, 
+                           expiry_seconds=expiry_seconds)
+
+
+@auth_recruiter_bp.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    """Resend OTP for password reset."""
+    from app.services import otp_service, email_service
+    
+    email = session.get('recruiter_reset_email')
+    
+    if not email:
+        flash('Please request a password reset first.', 'warning')
+        return redirect(url_for('auth_recruiter.forgot_password'))
+    
+    # Check resend cooldown
+    can_resend, seconds_remaining = otp_service.can_resend_otp(email)
+    if not can_resend:
+        flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
+        return redirect(url_for('auth_recruiter.verify_otp'))
+    
+    # Get recruiter
+    recruiter = recruiter_model.get_by_email(email)
+    if not recruiter:
+        flash('An error occurred. Please try again.', 'danger')
+        return redirect(url_for('auth_recruiter.forgot_password'))
+    
+    # Generate and send new OTP
+    otp, expires_at = otp_service.create_otp(
+        user_id=None, 
+        email=email, 
+        recruiter_id=recruiter['recruiter_id']
+    )
+    email_service.send_otp_email(email, recruiter['company_name'], otp)
+    
+    flash('A new OTP has been sent to your email.', 'success')
+    return redirect(url_for('auth_recruiter.verify_otp'))
+
+
+@auth_recruiter_bp.route('/reset-password', methods=['GET', 'POST'])
+def reset_password():
+    """Reset password after OTP verification."""
+    from app.services import otp_service
+    
+    email = session.get('recruiter_reset_email')
+    otp_verified = session.get('recruiter_otp_verified')
+    
+    if not email or not otp_verified:
+        flash('Please verify your OTP first.', 'warning')
+        return redirect(url_for('auth_recruiter.forgot_password'))
+    
+    # Verify OTP is still valid
+    otp_record = otp_service.get_verified_otp(email)
+    if not otp_record:
+        session.pop('recruiter_reset_email', None)
+        session.pop('recruiter_otp_verified', None)
+        flash('OTP has expired. Please request a new one.', 'danger')
+        return redirect(url_for('auth_recruiter.forgot_password'))
+    
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        # Validation
+        errors = []
+        
+        if not password:
+            errors.append("Password is required")
+        elif len(password) < 8:
+            errors.append("Password must be at least 8 characters")
+            
+        if password != confirm_password:
+            errors.append("Passwords do not match")
+        
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
+            return render_template('recruiter/reset_password.html')
+        
+        # Hash password and update
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        
+        # Use recruiter_id from OTP record if available, or fetch by email
+        recruiter_id = otp_record.get('recruiter_id')
+        if not recruiter_id:
+             # Fallback if recruiter_id wasn't in OTP (legacy?)
+             recruiter = recruiter_model.get_by_email(email)
+             if recruiter:
+                 recruiter_id = recruiter['recruiter_id']
+        
+        if recruiter_id:
+            # Import execute_update to call update_password if model function doesn't work as expected
+            # But we should use model function
+            try:
+                recruiter_model.update_password(recruiter_id, password_hash)
+                success = True
+            except Exception as e:
+                current_app.logger.error(f"Failed to update password: {e}")
+                success = False
+        else:
+            success = False
+        
+        if success:
+            # Mark OTP as used
+            otp_service.mark_otp_used(otp_record['otp_id'])
+            
+            # Clear reset session data
+            session.pop('recruiter_reset_email', None)
+            session.pop('recruiter_otp_verified', None)
+            session.pop('recruiter_otp_id', None)
+            
+            flash('Password reset successful! Please log in with your new password.', 'success')
+            return redirect(url_for('auth_recruiter.login'))
+        else:
+            flash('An error occurred. Please try again.', 'danger')
+            return render_template('recruiter/reset_password.html')
+    
+    return render_template('recruiter/reset_password.html')

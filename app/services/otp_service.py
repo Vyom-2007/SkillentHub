@@ -22,18 +22,22 @@ def generate_otp(length=6):
     return ''.join(random.choices(string.digits, k=length))
 
 
-def create_otp(user_id, email):
+def create_otp(user_id=None, email=None, recruiter_id=None):
     """
     Create a new OTP for password reset.
     Invalidates any existing unused OTPs for this email.
     
     Args:
-        user_id: User's ID
+        user_id: User's ID (optional if recruiter_id provided)
         email: User's email address
+        recruiter_id: Recruiter's ID (optional)
     
     Returns:
         Tuple (otp_string, expires_at_datetime)
     """
+    # Determine user type
+    user_type = 'recruiter' if recruiter_id else 'user'
+    
     # Invalidate existing unused OTPs for this email
     invalidate_query = """
         UPDATE password_reset_otps 
@@ -50,10 +54,10 @@ def create_otp(user_id, email):
     # Insert new OTP
     insert_query = """
         INSERT INTO password_reset_otps 
-        (user_id, email, otp, created_at, expires_at, is_verified, is_used, attempts)
-        VALUES (%s, %s, %s, NOW(), %s, 0, 0, 0)
+        (user_id, recruiter_id, email, user_type, otp, created_at, expires_at, is_verified, is_used, attempts)
+        VALUES (%s, %s, %s, %s, %s, NOW(), %s, 0, 0, 0)
     """
-    execute_insert(insert_query, (user_id, email, otp, expires_at))
+    execute_insert(insert_query, (user_id, recruiter_id, email, user_type, otp, expires_at))
     
     return otp, expires_at
 
@@ -69,7 +73,7 @@ def get_active_otp(email):
         OTP record dict or None
     """
     query = """
-        SELECT otp_id, user_id, email, otp, created_at, expires_at, 
+        SELECT otp_id, user_id, recruiter_id, email, user_type, otp, created_at, expires_at, 
                is_verified, is_used, attempts
         FROM password_reset_otps
         WHERE email = %s 
@@ -145,7 +149,7 @@ def get_verified_otp(email):
         OTP record dict or None
     """
     query = """
-        SELECT otp_id, user_id, email, otp, created_at, expires_at, 
+        SELECT otp_id, user_id, recruiter_id, email, user_type, otp, created_at, expires_at, 
                is_verified, is_used, attempts
         FROM password_reset_otps
         WHERE email = %s 
