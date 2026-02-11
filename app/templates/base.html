@@ -104,6 +104,20 @@
             color: var(--text-muted);
             font-size: 0.875rem;
         }
+
+        /* Default Avatar Initials */
+        .avatar-initials {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
     </style>
 
     {% block extra_css %}{% endblock %}

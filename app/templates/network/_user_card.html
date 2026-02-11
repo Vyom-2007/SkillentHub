@@ -4,8 +4,9 @@
         <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_picture) }}"
             alt="{{ user.full_name }}" class="user-avatar">
         {% else %}
-        <img src="https://ui-avatars.com/api/?name={{ user.full_name or 'U' }}&size=80&background=random"
-            alt="{{ user.full_name }}" class="user-avatar">
+        <div class="user-avatar avatar-initials" style="font-size: 1.5rem;">
+            {{ user.full_name[:2].upper() if user.full_name else 'U' }}
+        </div>
         {% endif %}
 
         <h6 class="user-name">{{ user.full_name or 'User' }}</h6>

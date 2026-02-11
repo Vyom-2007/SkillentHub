@@ -5,8 +5,9 @@
         <img src="{{ url_for('static', filename='uploads/profiles/' + post.profile_picture) }}"
             alt="{{ post.full_name }}" class="post-author-pic">
         {% else %}
-        <img src="https://ui-avatars.com/api/?name={{ post.full_name or 'U' }}&size=48&background=random"
-            alt="{{ post.full_name }}" class="post-author-pic">
+        <div class="post-author-pic avatar-initials" style="width: 48px; height: 48px; font-size: 1rem;">
+            {{ post.full_name[:2].upper() if post.full_name else 'U' }}
+        </div>
         {% endif %}
         <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start">

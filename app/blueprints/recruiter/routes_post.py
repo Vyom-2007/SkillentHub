@@ -21,11 +21,12 @@ def create_job():
             'salary_range': request.form.get('salary_range'),
             'description': request.form.get('description'),
             'requirements': request.form.get('requirements'),
-            'openings': request.form.get('openings', 1)
+            'openings': request.form.get('openings', 1),
+            'deadline': request.form.get('deadline')
         }
         
         # Validation
-        required_fields = ['title', 'location', 'job_type', 'work_mode', 'salary_range', 'description', 'deadline', 'openings', 'skills_required']
+        required_fields = ['title', 'location', 'job_type', 'work_mode', 'salary_range', 'description', 'openings', 'skills_required', 'deadline']
         if any(not data.get(k) for k in required_fields):
             flash('All fields marked with * are required.', 'danger')
             return render_template('recruiter/job_form.html')
