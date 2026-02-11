@@ -153,9 +153,17 @@ def forgot_password():
             flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
             return render_template('auth/forgot_password.html', email=email)
         
+        # Get user profile for name
+        profile = auth_service.get_user_profile(user['user_id'])
+        user_name = profile['full_name'] if profile else "User"
+        
         # Generate and send OTP
-        otp, expires_at = otp_service.create_otp(user['user_id'], email)
-        email_service.send_otp_email(email, otp)
+        # Pass user_id explicitly
+        otp, expires_at = otp_service.create_otp(
+            user_id=user['user_id'], 
+            email=email
+        )
+        email_service.send_otp_email(email, user_name, otp)
         
         # Store email in session for OTP verification
         session['reset_email'] = email
