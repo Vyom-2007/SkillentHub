@@ -56,11 +56,17 @@ def messages():
                 last_message_id = chat_history[-1]['message_id']
             target_user = target_info
     
+    from datetime import date, timedelta
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+
     return render_template('messages/messages.html',
                            conversations=conversations,
                            chat_history=chat_history,
                            target_user=target_user,
-                           last_message_id=last_message_id)
+                           last_message_id=last_message_id,
+                           today=today,
+                           yesterday=yesterday)
 
 
 @messages_bp.route('/api/messages/send', methods=['POST'])

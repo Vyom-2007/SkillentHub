@@ -246,29 +246,29 @@
             <div class="conversation-list" id="conversationList">
                 {% if conversations %}
                 {% for conv in conversations %}
-                <a href="{{ url_for('messages.messages', user=conv.user_id) }}"
-                    class="conversation-item {% if target_user and target_user.user_id == conv.user_id %}active{% endif %}"
-                    data-user-id="{{ conv.user_id }}" data-name="{{ conv.full_name|lower }}">
-                    {% if conv.profile_picture %}
-                    <img src="{{ url_for('static', filename='uploads/profiles/' + conv.profile_picture) }}"
-                        alt="{{ conv.full_name }}" class="conv-avatar">
+                <a href="{{ url_for('messages.messages', user=conv.other_id) }}"
+                    class="conversation-item {% if target_user and target_user.id == conv.other_id %}active{% endif %}"
+                    data-user-id="{{ conv.other_id }}" data-name="{{ conv.name|default('')|lower }}">
+                    {% if conv.picture %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + conv.picture) }}"
+                        alt="{{ conv.name }}" class="conv-avatar">
                     {% else %}
-                    <img src="https://ui-avatars.com/api/?name={{ conv.full_name or 'U' }}&size=48&background=random"
-                        alt="{{ conv.full_name }}" class="conv-avatar">
+                    <img src="https://ui-avatars.com/api/?name={{ conv.name or 'U' }}&size=48&background=random"
+                        alt="{{ conv.name }}" class="conv-avatar">
                     {% endif %}
                     <div class="conv-info">
                         <div class="conv-name">
-                            <span>{{ conv.full_name or 'User' }}</span>
+                            <span>{{ conv.name or 'User' }}</span>
                             <span class="conv-time"
-                                data-time="{{ conv.last_message_time.isoformat() if conv.last_message_time else '' }}">
-                                {{ conv.last_message_time.strftime('%I:%M %p') if conv.last_message_time else '' }}
+                                data-time="{{ conv.last_msg_time.isoformat() if conv.last_msg_time else '' }}">
+                                {{ conv.last_msg_time.strftime('%I:%M %p') if conv.last_msg_time else '' }}
                             </span>
                         </div>
                         <div class="conv-preview">{{ conv.last_message[:40] if conv.last_message else 'No messages'
                             }}...</div>
                     </div>
                     {% if conv.unread_count > 0 %}
-                    <span class="unread-badge" id="unread-{{ conv.user_id }}">{{ conv.unread_count }}</span>
+                    <span class="unread-badge" id="unread-{{ conv.other_id }}">{{ conv.unread_count }}</span>
                     {% endif %}
                 </a>
                 {% endfor %}
@@ -290,18 +290,18 @@
                 <a href="{{ url_for('messages.messages') }}" class="btn btn-link text-muted d-md-none">
                     <i class="bi bi-arrow-left"></i>
                 </a>
-                {% if target_user.profile_picture %}
-                <img src="{{ url_for('static', filename='uploads/profiles/' + target_user.profile_picture) }}"
-                    alt="{{ target_user.full_name }}" class="chat-avatar">
+                {% if target_user.picture %}
+                <img src="{{ url_for('static', filename='uploads/profiles/' + target_user.picture) }}"
+                    alt="{{ target_user.name }}" class="chat-avatar">
                 {% else %}
-                <img src="https://ui-avatars.com/api/?name={{ target_user.full_name or 'U' }}&size=40&background=random"
-                    alt="{{ target_user.full_name }}" class="chat-avatar">
+                <img src="https://ui-avatars.com/api/?name={{ target_user.name or 'U' }}&size=40&background=random"
+                    alt="{{ target_user.name }}" class="chat-avatar">
                 {% endif %}
                 <div>
-                    <h6 class="mb-0">{{ target_user.full_name or 'User' }}</h6>
+                    <h6 class="mb-0">{{ target_user.name or 'User' }}</h6>
                     <small class="text-muted">{{ target_user.headline or '' }}</small>
                 </div>
-                <a href="{{ url_for('profile.view', user_id=target_user.user_id) }}"
+                <a href="{{ url_for('profile.view', user_id=target_user.id) }}"
                     class="btn btn-sm btn-outline-primary ms-auto">
                     <i class="bi bi-person"></i> View Profile
                 </a>
@@ -355,7 +355,7 @@
 </div>
 
 {% if target_user %}
-<input type="hidden" id="targetUserId" value="{{ target_user.user_id }}">
+<input type="hidden" id="targetUserId" value="{{ target_user.id }}">
 <input type="hidden" id="lastMessageId" value="{{ last_message_id }}">
 <input type="hidden" id="currentUserId" value="{{ session.user_id }}">
 {% endif %}
