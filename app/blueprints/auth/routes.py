@@ -11,10 +11,12 @@ auth_bp = Blueprint('auth', __name__, url_prefix='')
 
 @auth_bp.route('/')
 def landing():
-    """Landing page - redirect to login or dashboard based on auth status."""
+    """Landing page - redirect to dashboard if logged in, otherwise show landing."""
     if session.get('user_id'):
         return redirect(url_for('auth.dashboard'))
-    return redirect(url_for('auth.login'))
+    if session.get('recruiter_id'):
+        return redirect(url_for('recruiter.dashboard'))
+    return render_template('auth/landing.html')
 
 
 @auth_bp.route('/dashboard')

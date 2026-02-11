@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="SkillentHub — The all-in-one career platform for students and recruiters. Find jobs, join hackathons, compete, and grow your professional network.">
+    <title>SkillentHub — Launch Your Career</title>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ===== Design Tokens ===== */
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --accent: #f093fb;
+            --dark: #0f172a;
+            --dark-soft: #1e293b;
+            --text: #334155;
+            --text-muted: #94a3b8;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --radius-lg: 1.25rem;
+            --radius-xl: 1.5rem;
+            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+            --shadow-glow: 0 0 60px rgba(102, 126, 234, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+            background: var(--surface);
+        }
+
+        /* ===== Navbar ===== */
+        .landing-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: background .35s, box-shadow .35s, padding .35s;
+        }
+
+        .landing-nav.scrolled {
+            background: rgba(255, 255, 255, .92);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 1px 12px rgba(0, 0, 0, .06);
+            padding: .65rem 0;
+        }
+
+        .landing-nav .nav-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .landing-nav .nav-links a {
+            color: var(--dark-soft);
+            font-weight: 500;
+            text-decoration: none;
+            padding: .5rem 1rem;
+            border-radius: .5rem;
+            transition: color .2s, background .2s;
+            font-size: .925rem;
+        }
+
+        .landing-nav .nav-links a:hover {
+            color: var(--primary);
+            background: rgba(102, 126, 234, .06);
+        }
+
+        /* ===== Buttons ===== */
+        .btn-gradient {
+            background: var(--gradient-main);
+            color: #fff;
+            border: none;
+            padding: .75rem 2rem;
+            border-radius: .75rem;
+            font-weight: 600;
+            transition: transform .2s, box-shadow .2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, .35);
+            color: #fff;
+        }
+
+        .btn-gradient-lg {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: .875rem;
+        }
+
+        .btn-outline-landing {
+            border: 2px solid rgba(102, 126, 234, .25);
+            color: var(--primary);
+            padding: .75rem 2rem;
+            border-radius: .75rem;
+            font-weight: 600;
+            transition: all .2s;
+            text-decoration: none;
+            cursor: pointer;
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-outline-landing:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, .04);
+            color: var(--primary);
+        }
+
+        /* ===== Hero ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 7rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -35%;
+            right: -15%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(102, 126, 234, .08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -25%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(240, 147, 251, .06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .5rem 1.25rem;
+            border-radius: 2rem;
+            background: rgba(102, 126, 234, .08);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: .85rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(102, 126, 234, .12);
+        }
+
+        .hero-badge i {
+            font-size: .7rem;
+        }
+
+        .hero h1 {
+            font-weight: 900;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.1;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            letter-spacing: -.02em;
+        }
+
+        .hero h1 .gradient-text {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p.lead {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 520px;
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+
+        /* Hero Stats */
+        .hero-stats {
+            display: flex;
+            gap: 2.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0, 0, 0, .06);
+        }
+
+        .hero-stats .stat-item .stat-number {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--dark);
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-stats .stat-item .stat-label {
+            font-size: .8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-card), var(--shadow-glow);
+            padding: 2rem;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, .04);
+        }
+
+        .hero-card-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .hero-card .card-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .85rem 1.1rem;
+            border-radius: var(--radius-lg);
+            background: var(--surface-2);
+            transition: transform .2s;
+        }
+
+        .hero-card .card-row:hover {
+            transform: translateX(6px);
+        }
+
+        .hero-card .card-row .icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: .75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .hero-card .card-row .row-text h6 {
+            font-weight: 600;
+            margin: 0;
+            font-size: .9rem;
+            color: var(--dark);
+        }
+
+        .hero-card .card-row .row-text small {
+            color: var(--text-muted);
+            font-size: .78rem;
+        }
+
+        /* Floating badges around hero card */
+        .floating-badge {
+            position: absolute;
+            padding: .55rem 1rem;
+            border-radius: 2rem;
+            background: var(--surface);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+            font-size: .78rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            animation: float 3s ease-in-out infinite;
+            border: 1px solid rgba(0, 0, 0, .04);
+            z-index: 2;
+        }
+
+        .floating-badge.fb-1 {
+            top: 8%;
+            right: -10%;
+            animation-delay: 0s;
+            color: #059669;
+        }
+
+        .floating-badge.fb-2 {
+            bottom: 15%;
+            left: -8%;
+            animation-delay: 1s;
+            color: var(--primary);
+        }
+
+        .floating-badge.fb-3 {
+            top: 45%;
+            right: -15%;
+            animation-delay: 2s;
+            color: #d97706;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ===== Sections Common ===== */
+        section {
+            padding: 6rem 0;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .4rem 1rem;
+            border-radius: 2rem;
+            background: rgba(102, 126, 234, .07);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: .8rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .section-title {
+            font-weight: 800;
+            font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+            color: var(--dark);
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.7;
+        }
+
+        /* ===== Features ===== */
+        .features-section {
+            background: var(--surface-2);
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            height: 100%;
+            border: 1px solid rgba(0, 0, 0, .04);
+            transition: transform .25s, box-shadow .25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .08);
+        }
+
+        .feature-card .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-card h5 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: .5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: .925rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* ===== How It Works ===== */
+        .step-card {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gradient-main);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, .25);
+        }
+
+        .step-card h5 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: .5rem;
+        }
+
+        .step-card p {
+            color: var(--text-muted);
+            font-size: .9rem;
+            line-height: 1.6;
+        }
+
+        .step-connector {
+            position: relative;
+        }
+
+        .step-connector::after {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: 60%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(102, 126, 234, .3), rgba(118, 75, 162, .1));
+        }
+
+        /* ===== Testimonials ===== */
+        .testimonial-card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            border: 1px solid rgba(0, 0, 0, .04);
+            height: 100%;
+            transition: transform .25s;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .testimonial-card .stars {
+            color: #f59e0b;
+            margin-bottom: .75rem;
+        }
+
+        .testimonial-card blockquote {
+            font-size: .95rem;
+            color: var(--text);
+            line-height: 1.7;
+            font-style: italic;
+            margin-bottom: 1.25rem;
+        }
+
+        .testimonial-card .author {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .testimonial-card .author-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--gradient-main);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .testimonial-card .author-info .name {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: .9rem;
+        }
+
+        .testimonial-card .author-info .role {
+            color: var(--text-muted);
+            font-size: .8rem;
+        }
+
+        /* ===== CTA ===== */
+        .cta-section {
+            background: var(--gradient-dark);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(102, 126, 234, .15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cta-section h2 {
+            font-weight: 800;
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+        }
+
+        .cta-section p {
+            color: rgba(255, 255, 255, .7);
+            font-size: 1.1rem;
+        }
+
+        .btn-white {
+            background: #fff;
+            color: var(--primary);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: .875rem;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: transform .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-white:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, .2);
+            color: var(--secondary);
+        }
+
+        /* ===== Footer ===== */
+        .landing-footer {
+            background: var(--dark);
+            color: rgba(255, 255, 255, .6);
+            padding: 4rem 0 2rem;
+        }
+
+        .landing-footer .footer-brand {
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: #fff;
+            margin-bottom: .5rem;
+        }
+
+        .landing-footer .footer-desc {
+            font-size: .9rem;
+            max-width: 300px;
+            line-height: 1.6;
+        }
+
+        .landing-footer h6 {
+            color: #fff;
+            font-weight: 700;
+            font-size: .85rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 1rem;
+        }
+
+        .landing-footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .landing-footer ul li {
+            margin-bottom: .5rem;
+        }
+
+        .landing-footer ul li a {
+            color: rgba(255, 255, 255, .6);
+            text-decoration: none;
+            font-size: .9rem;
+            transition: color .2s;
+        }
+
+        .landing-footer ul li a:hover {
+            color: #fff;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, .08);
+            padding-top: 1.5rem;
+            margin-top: 3rem;
+            text-align: center;
+            font-size: .8rem;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 991.98px) {
+            .hero-visual {
+                margin-top: 3rem;
+            }
+
+            .hero-stats {
+                gap: 1.5rem;
+            }
+
+            .floating-badge {
+                display: none;
+            }
+
+            .step-connector::after {
+                display: none;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .hero-stats {
+                flex-direction: column;
+                gap: .75rem;
+            }
+
+            section {
+                padding: 4rem 0;
+            }
+        }
+
+        /* ===== Entrance Animations ===== */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity .6s ease-out, transform .6s ease-out;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===== Navbar ===== -->
+    <nav class="landing-nav" id="landingNav">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a class="nav-brand" href="/"><i class="bi bi-lightning-charge-fill"></i> SkillentHub</a>
+            <div class="d-none d-md-flex nav-links align-items-center gap-1">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#testimonials">Testimonials</a>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ url_for('auth.login') }}" class="btn-outline-landing"
+                    style="padding: .55rem 1.5rem; font-size: .9rem;">Log In</a>
+                <a href="{{ url_for('auth.register') }}" class="btn-gradient"
+                    style="padding: .55rem 1.5rem; font-size: .9rem;">
+                    Sign Up Free <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== Hero ===== -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="fade-up visible">
+                        <div class="hero-badge">
+                            <i class="bi bi-circle-fill" style="color: #22c55e;"></i>
+                            Now Open for Students & Recruiters
+                        </div>
+                        <h1>
+                            Build Skills.<br>
+                            Win Competitions.<br>
+                            <span class="gradient-text">Land Your Dream Job.</span>
+                        </h1>
+                        <p class="lead">
+                            The all-in-one career platform where students showcase talent,
+                            join hackathons, and connect with top recruiters — all in one place.
+                        </p>
+                        <div class="hero-actions">
+                            <a href="{{ url_for('auth.register') }}" class="btn-gradient btn-gradient-lg">
+                                Get Started — It's Free <i class="bi bi-arrow-right"></i>
+                            </a>
+                            <a href="#features" class="btn-outline-landing"
+                                style="padding: 1rem 2rem; font-size: 1.05rem;">
+                                <i class="bi bi-play-circle"></i> See How It Works
+                            </a>
+                        </div>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">500+</div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">50+</div>
+                                <div class="stat-label">Companies Hiring</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">100+</div>
+                                <div class="stat-label">Events Hosted</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-visual fade-up visible" style="transition-delay: .15s;">
+                        <div class="hero-card">
+                            <div class="hero-card-inner">
+                                <div class="card-row">
+                                    <div class="icon-box" style="background: var(--gradient-main);">
+                                        <i class="bi bi-briefcase-fill"></i>
+                                    </div>
+                                    <div class="row-text">
+                                        <h6>Senior Frontend Developer</h6>
+                                        <small>Google · Remote · $120k – $180k</small>
+                                    </div>
+                                </div>
+                                <div class="card-row">
+                                    <div class="icon-box"
+                                        style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                                        <i class="bi bi-code-slash"></i>
+                                    </div>
+                                    <div class="row-text">
+                                        <h6>AI Innovation Hackathon</h6>
+                                        <small>48 hrs · $10k Prize Pool · 120 teams</small>
+                                    </div>
+                                </div>
+                                <div class="card-row">
+                                    <div class="icon-box"
+                                        style="background: linear-gradient(135deg, #10b981, #059669);">
+                                        <i class="bi bi-trophy-fill"></i>
+                                    </div>
+                                    <div class="row-text">
+                                        <h6>DSA Challenge — Round 3</h6>
+                                        <small>250 participants · Ends in 2 days</small>
+                                    </div>
+                                </div>
+                                <div class="card-row">
+                                    <div class="icon-box"
+                                        style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <div class="row-text">
+                                        <h6>Connect with 500+ Peers</h6>
+                                        <small>Build your professional network</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Floating Badges -->
+                        <div class="floating-badge fb-1"><i class="bi bi-check-circle-fill"></i> Hired at Amazon</div>
+                        <div class="floating-badge fb-2"><i class="bi bi-award-fill"></i> 1st Place Winner</div>
+                        <div class="floating-badge fb-3"><i class="bi bi-star-fill"></i> Top 10 Developer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Features ===== -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="text-center mb-5 fade-up">
+                <div class="section-label"><i class="bi bi-grid-fill"></i> Platform Features</div>
+                <h2 class="section-title">Everything you need to <span class="gradient-text">level&nbsp;up</span></h2>
+                <p class="section-subtitle mx-auto">From job hunting to competitive coding, SkillentHub has all the
+                    tools you need under one roof.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4 fade-up">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: var(--gradient-main);"><i
+                                class="bi bi-briefcase-fill"></i></div>
+                        <h5>Jobs & Internships</h5>
+                        <p>Browse curated opportunities from verified recruiters. Apply with one click using your
+                            profile and resume.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-up" style="transition-delay: .1s;">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);"><i
+                                class="bi bi-code-slash"></i></div>
+                        <h5>Hackathons</h5>
+                        <p>Register as a team, build innovative projects, and compete against the best minds for
+                            exciting prizes.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-up" style="transition-delay: .2s;">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i
+                                class="bi bi-trophy-fill"></i></div>
+                        <h5>Competitions</h5>
+                        <p>Prove your skills in coding challenges, quizzes, and tech competitions hosted by top
+                            companies.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-up">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);"><i
+                                class="bi bi-people-fill"></i></div>
+                        <h5>Professional Network</h5>
+                        <p>Connect with peers, mentors, and industry professionals. Grow your career network
+                            organically.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-up" style="transition-delay: .1s;">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #ec4899, #be185d);"><i
+                                class="bi bi-chat-dots-fill"></i></div>
+                        <h5>Direct Messaging</h5>
+                        <p>Chat directly with recruiters and fellow students. Get instant feedback and collaboration
+                            opportunities.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 fade-up" style="transition-delay: .2s;">
+                    <div class="feature-card">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);"><i
+                                class="bi bi-bar-chart-fill"></i></div>
+                        <h5>ATS for Recruiters</h5>
+                        <p>Powerful applicant tracking system to manage applications, shortlist candidates, and
+                            communicate seamlessly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== How It Works ===== -->
+    <section id="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5 fade-up">
+                <div class="section-label"><i class="bi bi-signpost-split-fill"></i> How It Works</div>
+                <h2 class="section-title">Get started in <span class="gradient-text">3 easy steps</span></h2>
+                <p class="section-subtitle mx-auto">Whether you're a student or a recruiter, the process is simple.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4 fade-up step-connector">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h5>Create Your Profile</h5>
+                        <p>Sign up for free and build a rich profile showcasing your skills, projects, and experience.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-up step-connector" style="transition-delay: .15s;">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h5>Explore & Participate</h5>
+                        <p>Browse jobs, join hackathons, enter competitions, and connect with your professional
+                            community.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-up" style="transition-delay: .3s;">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h5>Get Hired & Grow</h5>
+                        <p>Apply to opportunities, get noticed by recruiters, and launch the career you've always
+                            wanted.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Testimonials ===== -->
+    <section class="features-section" id="testimonials">
+        <div class="container">
+            <div class="text-center mb-5 fade-up">
+                <div class="section-label"><i class="bi bi-star-fill"></i> Testimonials</div>
+                <h2 class="section-title">Loved by <span class="gradient-text">students & recruiters</span></h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4 fade-up">
+                    <div class="testimonial-card">
+                        <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                class="bi bi-star-fill"></i></div>
+                        <blockquote>"I found my dream internship through SkillentHub within two weeks of signing up. The
+                            platform is incredibly intuitive!"</blockquote>
+                        <div class="author">
+                            <div class="author-avatar">A</div>
+                            <div class="author-info">
+                                <div class="name">Aisha Patel</div>
+                                <div class="role">CS Student, IIT Delhi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-up" style="transition-delay: .1s;">
+                    <div class="testimonial-card">
+                        <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                class="bi bi-star-fill"></i></div>
+                        <blockquote>"As a recruiter, the ATS dashboard saves me hours. I can track every applicant and
+                            communicate directly — it's a game changer."</blockquote>
+                        <div class="author">
+                            <div class="author-avatar">R</div>
+                            <div class="author-info">
+                                <div class="name">Rahul Mehta</div>
+                                <div class="role">HR Lead, TechCorp</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 fade-up" style="transition-delay: .2s;">
+                    <div class="testimonial-card">
+                        <div class="stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                                class="bi bi-star-fill"></i></div>
+                        <blockquote>"Our hackathon had 120+ teams register through SkillentHub. The registration and
+                            team management was seamless."</blockquote>
+                        <div class="author">
+                            <div class="author-avatar">S</div>
+                            <div class="author-info">
+                                <div class="name">Sneha Rao</div>
+                                <div class="role">Event Coordinator</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section" style="padding: 5rem 0;">
+        <div class="container text-center position-relative" style="z-index: 1;">
+            <div class="fade-up">
+                <h2 class="mb-3">Ready to launch your career?</h2>
+                <p class="mb-4 mx-auto" style="max-width: 500px;">Join thousands of students and recruiters who are
+                    already building the future on SkillentHub.</p>
+                <a href="{{ url_for('auth.register') }}" class="btn-white">
+                    Create Free Account <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="landing-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand"><i class="bi bi-lightning-charge-fill"></i> SkillentHub</div>
+                    <p class="footer-desc">The all-in-one career platform connecting students with opportunities and
+                        recruiters with talent.</p>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6>Platform</h6>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#testimonials">Reviews</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6>For Students</h6>
+                    <ul>
+                        <li><a href="{{ url_for('auth.register') }}">Sign Up</a></li>
+                        <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6>For Recruiters</h6>
+                    <ul>
+                        <li><a href="{{ url_for('auth_recruiter.register') }}">Register</a></li>
+                        <li><a href="{{ url_for('auth_recruiter.login') }}">Log In</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6>Connect</h6>
+                    <ul>
+                        <li><a href="#"><i class="bi bi-github me-1"></i> GitHub</a></li>
+                        <li><a href="#"><i class="bi bi-linkedin me-1"></i> LinkedIn</a></li>
+                        <li><a href="#"><i class="bi bi-twitter-x me-1"></i> Twitter</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 SkillentHub. All rights reserved. Built with <i class="bi bi-heart-fill"
+                    style="color: #ef4444;"></i> for developers.
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== Scripts ===== -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            document.getElementById('landingNav')
+                .classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // Scroll-triggered fade-up animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    </script>
+</body>
+
+</html>
