@@ -212,8 +212,10 @@
                         <img src="{{ url_for('static', filename='uploads/profiles/' + session.get('profile_picture')) }}"
                             alt="You" class="post-author-pic">
                         {% else %}
-                        <img src="https://ui-avatars.com/api/?name={{ session.get('full_name', 'U') }}&size=48&background=random"
-                            alt="You" class="post-author-pic">
+                        <div class="post-author-pic avatar-initials"
+                            style="width: 48px; height: 48px; font-size: 1rem;">
+                            {{ session.get('full_name', 'U')[:2].upper() }}
+                        </div>
                         {% endif %}
                         <div class="flex-grow-1">
                             <textarea class="form-control" name="content" id="postContent"

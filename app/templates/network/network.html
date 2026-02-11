@@ -291,10 +291,8 @@
                                         <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_picture) }}"
                                             class="user-avatar" alt="{{ user.full_name }}">
                                         {% else %}
-                                        <div class="user-avatar bg-gradient d-flex align-items-center justify-content-center"
-                                            style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
-                                            <span class="text-white fs-4">{{ user.full_name[0] if user.full_name else
-                                                'U' }}</span>
+                                        <div class="user-avatar avatar-initials" style="font-size: 1.5rem;">
+                                            {{ user.full_name[:2].upper() if user.full_name else 'U' }}
                                         </div>
                                         {% endif %}
                                     </a>
@@ -358,10 +356,8 @@
                                     <img src="{{ url_for('static', filename='uploads/profiles/' + conn.profile_picture) }}"
                                         class="user-avatar" alt="{{ conn.full_name }}">
                                     {% else %}
-                                    <div class="user-avatar bg-gradient d-flex align-items-center justify-content-center"
-                                        style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
-                                        <span class="text-white fs-4">{{ conn.full_name[0] if conn.full_name else 'U'
-                                            }}</span>
+                                    <div class="user-avatar avatar-initials" style="font-size: 1.5rem;">
+                                        {{ conn.full_name[:2].upper() if conn.full_name else 'U' }}
                                     </div>
                                     {% endif %}
                                 </a>
@@ -392,10 +388,9 @@
                                 <img src="{{ url_for('static', filename='uploads/profiles/' + req.profile_picture) }}"
                                     class="avatar" alt="{{ req.full_name }}">
                                 {% else %}
-                                <div class="avatar bg-gradient d-flex align-items-center justify-content-center"
-                                    style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); width: 60px; height: 60px; border-radius: 50%;">
-                                    <span class="text-white fs-5">{{ req.full_name[0] if req.full_name else 'U'
-                                        }}</span>
+                                <div class="avatar avatar-initials"
+                                    style="width: 60px; height: 60px; font-size: 1.1rem;">
+                                    {{ req.full_name[:2].upper() if req.full_name else 'U' }}
                                 </div>
                                 {% endif %}
                             </a>

@@ -111,8 +111,12 @@
                         <img src="{{ url_for('static', filename='uploads/profiles/' + profile.profile_picture) }}"
                             alt="Profile" class="profile-picture-preview mb-3" id="picturePreview">
                         {% else %}
-                        <img src="https://via.placeholder.com/150?text=Photo" alt="Profile"
-                            class="profile-picture-preview mb-3" id="picturePreview">
+                        <div class="profile-picture-preview avatar-initials mb-3" id="picturePreviewDiv"
+                            style="font-size: 3rem;">
+                            {{ profile.full_name[:2].upper() if profile.full_name else 'U' }}
+                        </div>
+                        <img src="" alt="Profile" class="profile-picture-preview mb-3" id="picturePreview"
+                            style="display: none;">
                         {% endif %}
                         <div class="file-input-wrapper">
                             <button type="button" class="btn btn-outline-primary btn-sm">

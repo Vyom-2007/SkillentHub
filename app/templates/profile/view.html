@@ -139,8 +139,9 @@
                 <img src="{{ url_for('static', filename='uploads/profiles/' + profile.profile_picture) }}"
                     alt="{{ profile.full_name }}" class="profile-picture">
                 {% else %}
-                <img src="https://ui-avatars.com/api/?name={{ profile.full_name }}&size=120&background=random"
-                    alt="{{ profile.full_name }}" class="profile-picture">
+                <div class="profile-picture avatar-initials" style="font-size: 2.5rem;">
+                    {{ profile.full_name[:2].upper() if profile.full_name else 'U' }}
+                </div>
                 {% endif %}
             </div>
             <div class="col">

@@ -253,8 +253,9 @@
                     <img src="{{ url_for('static', filename='uploads/profiles/' + conv.picture) }}"
                         alt="{{ conv.name }}" class="conv-avatar">
                     {% else %}
-                    <img src="https://ui-avatars.com/api/?name={{ conv.name or 'U' }}&size=48&background=random"
-                        alt="{{ conv.name }}" class="conv-avatar">
+                    <div class="conv-avatar avatar-initials" style="font-size: 1rem;">
+                        {{ conv.name[:2].upper() if conv.name else 'U' }}
+                    </div>
                     {% endif %}
                     <div class="conv-info">
                         <div class="conv-name">
@@ -294,8 +295,9 @@
                 <img src="{{ url_for('static', filename='uploads/profiles/' + target_user.picture) }}"
                     alt="{{ target_user.name }}" class="chat-avatar">
                 {% else %}
-                <img src="https://ui-avatars.com/api/?name={{ target_user.name or 'U' }}&size=40&background=random"
-                    alt="{{ target_user.name }}" class="chat-avatar">
+                <div class="chat-avatar avatar-initials" style="font-size: 0.9rem;">
+                    {{ target_user.name[:2].upper() if target_user.name else 'U' }}
+                </div>
                 {% endif %}
                 <div>
                     <h6 class="mb-0">{{ target_user.name or 'User' }}</h6>

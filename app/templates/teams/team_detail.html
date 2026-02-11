@@ -142,9 +142,8 @@
                             <img src="{{ url_for('static', filename='uploads/profiles/' + member.profile_picture) }}"
                                 class="avatar" alt="{{ member.full_name }}">
                             {% else %}
-                            <div class="avatar bg-gradient d-flex align-items-center justify-content-center"
-                                style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
-                                <span class="text-white">{{ member.full_name[0] }}</span>
+                            <div class="avatar avatar-initials" style="width: 50px; height: 50px; font-size: 1rem;">
+                                {{ member.full_name[:2].upper() if member.full_name else 'U' }}
                             </div>
                             {% endif %}
                         </a>
@@ -173,8 +172,8 @@
                     <img src="{{ url_for('static', filename='uploads/profiles/' + inv.profile_picture) }}"
                         class="avatar" alt="{{ inv.full_name }}">
                     {% else %}
-                    <div class="avatar bg-secondary d-flex align-items-center justify-content-center">
-                        <span class="text-white">{{ inv.full_name[0] }}</span>
+                    <div class="avatar avatar-initials" style="width: 50px; height: 50px; font-size: 1rem;">
+                        {{ inv.full_name[:2].upper() if inv.full_name else 'U' }}
                     </div>
                     {% endif %}
                     <div class="info">
@@ -213,8 +212,8 @@
                         <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_picture) }}"
                             class="avatar" alt="{{ user.full_name }}">
                         {% else %}
-                        <div class="avatar bg-secondary d-flex align-items-center justify-content-center">
-                            <span class="text-white small">{{ user.full_name[0] }}</span>
+                        <div class="avatar avatar-initials" style="width: 40px; height: 40px; font-size: 0.85rem;">
+                            {{ user.full_name[:2].upper() if user.full_name else 'U' }}
                         </div>
                         {% endif %}
                         <div class="info" style="flex:1;">

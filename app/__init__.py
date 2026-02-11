@@ -37,6 +37,10 @@ def create_app(config_name='development'):
     session.init_app(app)
     mail.init_app(app)
     
+    # Initialize database connection management
+    from app.database.connection import init_app as init_db
+    init_db(app)
+    
     # Register blueprints
     register_blueprints(app)
     

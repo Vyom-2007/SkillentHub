@@ -73,8 +73,15 @@
                         <tr>
                             <td class="ps-4">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_picture) if app.profile_picture else url_for('static', filename='images/default_profile.png') }}"
+                                    {% if app.profile_picture %}
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_picture) }}"
                                         class="rounded-circle me-3 border" width="40" height="40" alt="Profile">
+                                    {% else %}
+                                    <div class="avatar-initials me-3"
+                                        style="width: 40px; height: 40px; font-size: 0.85rem;">
+                                        {{ app.full_name[:2].upper() if app.full_name else 'U' }}
+                                    </div>
+                                    {% endif %}
                                     <div>
                                         <h6 class="mb-0 fw-bold">{{ app.full_name }}</h6>
                                         <small class="text-muted">{{ app.email }}</small>

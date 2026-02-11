@@ -63,6 +63,12 @@ function handleImagePreview(event) {
     const reader = new FileReader();
     reader.onload = function (e) {
         preview.src = e.target.result;
+        preview.style.display = '';  // Make the img visible
+        // Hide the initials avatar div if present
+        const initialsDiv = document.getElementById('picturePreviewDiv');
+        if (initialsDiv) {
+            initialsDiv.style.display = 'none';
+        }
     };
     reader.readAsDataURL(file);
 }
