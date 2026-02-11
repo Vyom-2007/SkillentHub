@@ -106,3 +106,44 @@ SkillentHub Team
     except Exception as e:
         current_app.logger.error(f"Failed to send status email to {to_email}: {e}")
         return False
+
+
+def send_welcome_email(to_email, user_name):
+    """
+    Send a welcome email after successful registration.
+    """
+    from app import mail
+    subject = "[SkillentHub] Welcome to SkillentHub!"
+
+    body_template = """
+Hi {{ user_name }},
+
+Welcome to SkillentHub! 🎉
+
+Your account has been created successfully. Here's what you can do next:
+
+• Complete your profile to stand out
+• Browse jobs and internships
+• Join hackathons and competitions
+• Connect with peers and recruiters
+
+Login to get started: https://skillenthub.com/login
+
+Thanks,
+SkillentHub Team
+    """
+
+    body = render_template_string(body_template, user_name=user_name)
+
+    try:
+        msg = Message(
+            subject=subject,
+            recipients=[to_email],
+            body=body,
+            sender=current_app.config.get('MAIL_DEFAULT_SENDER')
+        )
+        mail.send(msg)
+        return True
+    except Exception as e:
+        current_app.logger.error(f"Failed to send welcome email to {to_email}: {e}")
+        return False
