@@ -167,6 +167,13 @@
                     <!-- Skills -->
                     <div class="mb-4">
                         <label class="form-label">Skills</label>
+                        <div class="d-flex gap-2 mb-3">
+                            <input type="text" class="form-control" id="customSkillInput"
+                                placeholder="Add a custom skill...">
+                            <button type="button" class="btn btn-outline-primary" id="addSkillBtn">
+                                <i class="bi bi-plus-lg"></i>
+                            </button>
+                        </div>
                         <div class="skills-container" id="skillsContainer">
                             {% set user_skill_ids = profile.skills|map(attribute='skill_id')|list %}
                             {% for skill in all_skills %}
@@ -182,8 +189,9 @@
 
                     <!-- Education -->
                     <div class="mb-4">
-                        <label class="form-label">Education</label>
+                        <label class="form-label">Education details</label>
                         <div id="educationContainer">
+                            {% if profile.education %}
                             {% for edu in profile.education %}
                             <div class="education-entry" data-id="{{ edu.education_id }}">
                                 <button type="button" class="remove-btn" onclick="removeEducation(this)">
@@ -209,16 +217,39 @@
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <input type="number" class="form-control" name="edu_end[]"
-                                            value="{{ edu.end_year or '' }}" placeholder="End Year (blank=ongoing)"
-                                            min="1950" max="2030">
+                                            value="{{ edu.end_year or '' }}" placeholder="End Year" min="1950"
+                                            max="2030">
                                     </div>
                                 </div>
                             </div>
                             {% endfor %}
+                            {% else %}
+                            <div class="education-entry">
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <input type="text" class="form-control" name="edu_institution[]"
+                                            placeholder="Institution" required>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <input type="text" class="form-control" name="edu_degree[]" placeholder="Degree"
+                                            required>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <input type="text" class="form-control" name="edu_field[]"
+                                            placeholder="Field of Study">
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <input type="number" class="form-control" name="edu_start[]"
+                                            placeholder="Start Year" min="1950" max="2030">
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <input type="number" class="form-control" name="edu_end[]"
+                                            placeholder="End Year" min="1950" max="2030">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" id="addEducation">
-                            <i class="bi bi-plus-lg me-1"></i>Add Education
-                        </button>
                     </div>
 
                     <hr class="my-4">
@@ -226,8 +257,6 @@
                         <button type="submit" class="btn btn-primary flex-grow-1">
                             <i class="bi bi-check-circle me-2"></i>Save Changes
                         </button>
-                        <a href="{{ url_for('profile.view', user_id=session.user_id) }}"
-                            class="btn btn-outline-secondary">Cancel</a>
                     </div>
                 </form>
             </div>

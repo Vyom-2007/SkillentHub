@@ -39,6 +39,87 @@ function initProfileForm() {
     if (form) {
         form.addEventListener('submit', validateForm);
     }
+
+    // Custom skills
+    const addSkillBtn = document.getElementById('addSkillBtn');
+    if (addSkillBtn) {
+        addSkillBtn.addEventListener('click', addCustomSkill);
+    }
+
+    // Allow Enter key to add skill
+    const skillInput = document.getElementById('customSkillInput');
+    if (skillInput) {
+        skillInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addCustomSkill();
+            }
+        });
+    }
+}
+
+function addCustomSkill() {
+    const input = document.getElementById('customSkillInput');
+    const container = document.getElementById('skillsContainer');
+
+    if (!input || !container) return;
+
+    const skillName = input.value.trim();
+    if (!skillName) return;
+
+    // Check if duplicate
+    const existingLabels = Array.from(container.querySelectorAll('label')).map(l => l.innerText.toLowerCase());
+    if (existingLabels.includes(skillName.toLowerCase())) {
+        alert('Skill already added!');
+        return;
+    }
+
+    // Create new badge
+    const badge = document.createElement('div');
+    badge.className = 'skill-badge selected';
+
+    // Add hidden input for custom skill name
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'custom_skills[]';
+    hiddenInput.value = skillName;
+
+    // Use a checkbox just for visual consistency with existing CSS/JS (or just bypass)
+    // Actually, existing JS toggle relies on checkbox. Let's add a dummy checked checkbox so it stays "selected"
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = true;
+    checkbox.style.display = 'none';
+
+    const label = document.createElement('label');
+    label.innerText = skillName;
+    label.style.cursor = 'pointer';
+
+    // Delete button (x)
+    const removeSpan = document.createElement('span');
+    removeSpan.innerHTML = '<i class="bi bi-x ms-2"></i>';
+    removeSpan.style.cursor = 'pointer';
+    removeSpan.onclick = function (e) {
+        e.stopPropagation(); // Prevent toggling
+        badge.remove();
+    };
+
+    badge.appendChild(hiddenInput);
+    badge.appendChild(checkbox);
+    badge.appendChild(label);
+    badge.appendChild(removeSpan);
+
+    container.appendChild(badge);
+    input.value = '';
+
+    // Re-bind toggle logic? No, these are always selected custom skills. 
+    // But if clicked, they might toggle off? 
+    // Let's make them fixed as selected for now, or just allow toggling off (which effectively removes them?)
+    // Simpler: If clicked, do nothing or remove? 
+    // Let's attach the click listener to toggle "selected" class but keep the hidden input?
+    // Actually, if unselected, they probably shouldn't be submitted.
+    // Better: Allow them to be removed via the 'x'. Clicking otherwise does nothing or toggles?
+    // Let's stick to the 'x' to remove.
 }
 
 function handleImagePreview(event) {

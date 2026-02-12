@@ -174,6 +174,16 @@ def edit():
         
         # Handle skills
         skill_ids = request.form.getlist('skills')
+        
+        # Handle custom skills
+        custom_skills = request.form.getlist('custom_skills[]')
+        if custom_skills:
+            for skill_name in custom_skills:
+                if skill_name.strip():
+                    new_skill_id = profile_service.add_skill_if_not_exists(skill_name)
+                    if str(new_skill_id) not in skill_ids:
+                        skill_ids.append(str(new_skill_id))
+        
         print(f"DEBUG: Received skill_ids from form: {skill_ids}")
         profile_service.update_user_skills(user_id, skill_ids)
         
