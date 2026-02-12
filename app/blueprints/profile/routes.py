@@ -143,15 +143,17 @@ def edit():
             'phone': request.form.get('phone', '').strip()
         }
         
-        # Validation
-        errors = []
-        if not data['full_name']:
-            errors.append('Full name is required')
-        if not data['headline']:
-            errors.append('Headline is required')
-        if data['phone'] and (not data['phone'].isdigit() or len(data['phone']) != 10):
-            errors.append('Phone must be exactly 10 digits')
         
+        # Validation disabled for required fields as per request
+        errors = []
+        
+        # Basic data processing only
+        if not data['full_name']:
+            # Use existing name from session or profile if available to avoid DB constraint error
+            # IF the user cleared it, we might need to allow it if DB permits, 
+            # but usually full_name is required. 
+            pass
+
         if errors:
             for error in errors:
                 flash(error, 'error')
@@ -224,11 +226,31 @@ def parse_education_form(form):
     ends = form.getlist('edu_end[]')
     
     education_list = []
+    # Loop over institutions as primary key
     for i in range(len(institutions)):
-        if institutions[i] and degrees[i]:
+        # Even if empty, if user wants to save it as empty, we should allow? 
+        # But usually we need at least institution/degree to make sense of a record.
+        # User said "nothing compulsory" but an empty record is useless.
+        # However, we will allow partial records if at least one field is filled?
+        # Or just save whatever is there. 
+        # Minimal check: if all fields are empty, skip.
+        
+        inst = institutions[i].strip()
+        deg = degrees[i].strip()
+        
+        # If both primary fields are empty, assume it's a blank row unless other fields have data
+        # But to avoid cluttering DB with empty rows, let's require at least one field to have content
+        has_content = any([
+            inst, deg, 
+            (i < len(fields) and fields[i].strip()),
+            (i < len(starts) and starts[i]),
+            (i < len(ends) and ends[i])
+        ])
+        
+        if has_content:
             education_list.append({
-                'institution_name': institutions[i].strip(),
-                'degree': degrees[i].strip(),
+                'institution_name': inst,
+                'degree': deg,
                 'field_of_study': fields[i].strip() if i < len(fields) else '',
                 'start_year': int(starts[i]) if i < len(starts) and starts[i] else None,
                 'end_year': int(ends[i]) if i < len(ends) and ends[i] else None

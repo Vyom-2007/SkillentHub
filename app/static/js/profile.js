@@ -199,17 +199,14 @@ function addEducationEntry(prefilled = null) {
 
     const html = `
         <div class="education-entry" data-index="${eduIndex}">
-            <button type="button" class="remove-btn" onclick="removeEducation(this)">
-                <i class="bi bi-x-circle"></i>
-            </button>
             <div class="row">
                 <div class="col-md-6 mb-2">
                     <input type="text" class="form-control" name="edu_institution[]"
-                           value="${prefilled?.institution_name || ''}" placeholder="Institution *" required>
+                           value="${prefilled?.institution_name || ''}" placeholder="Institution">
                 </div>
                 <div class="col-md-6 mb-2">
                     <input type="text" class="form-control" name="edu_degree[]"
-                           value="${prefilled?.degree || ''}" placeholder="Degree *" required>
+                           value="${prefilled?.degree || ''}" placeholder="Degree">
                 </div>
                 <div class="col-md-4 mb-2">
                     <input type="text" class="form-control" name="edu_field[]"
@@ -231,6 +228,7 @@ function addEducationEntry(prefilled = null) {
 }
 
 function removeEducation(button) {
+    // Function kept but unused as button is removed
     const entry = button.closest('.education-entry');
     const educationId = entry.dataset.id;
 
@@ -245,35 +243,8 @@ function removeEducation(button) {
 }
 
 function validateForm(event) {
-    const form = event.target;
-    let valid = true;
-    const errors = [];
-
-    const fullName = form.querySelector('[name="full_name"]');
-    const headline = form.querySelector('[name="headline"]');
-    const phone = form.querySelector('[name="phone"]');
-
-    if (!fullName.value.trim()) {
-        errors.push('Full name is required');
-        valid = false;
-    }
-
-    if (!headline.value.trim()) {
-        errors.push('Headline is required');
-        valid = false;
-    }
-
-    if (phone && phone.value && phone.value.length !== 10) {
-        errors.push('Phone must be 10 digits');
-        valid = false;
-    }
-
-    if (!valid) {
-        event.preventDefault();
-        alert(errors.join('\n'));
-    }
-
-    return valid;
+    // Validation removed as per request
+    return true;
 }
 
 // Global exports

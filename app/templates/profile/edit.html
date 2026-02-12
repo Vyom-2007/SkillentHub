@@ -194,17 +194,14 @@
                             {% if profile.education %}
                             {% for edu in profile.education %}
                             <div class="education-entry" data-id="{{ edu.education_id }}">
-                                <button type="button" class="remove-btn" onclick="removeEducation(this)">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
                                         <input type="text" class="form-control" name="edu_institution[]"
-                                            value="{{ edu.institution_name }}" placeholder="Institution" required>
+                                            value="{{ edu.institution_name }}" placeholder="Institution">
                                     </div>
                                     <div class="col-md-6 mb-2">
                                         <input type="text" class="form-control" name="edu_degree[]"
-                                            value="{{ edu.degree }}" placeholder="Degree" required>
+                                            value="{{ edu.degree }}" placeholder="Degree">
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <input type="text" class="form-control" name="edu_field[]"
@@ -228,11 +225,11 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
                                         <input type="text" class="form-control" name="edu_institution[]"
-                                            placeholder="Institution" required>
+                                            placeholder="Institution">
                                     </div>
                                     <div class="col-md-6 mb-2">
-                                        <input type="text" class="form-control" name="edu_degree[]" placeholder="Degree"
-                                            required>
+                                        <input type="text" class="form-control" name="edu_degree[]"
+                                            placeholder="Degree">
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <input type="text" class="form-control" name="edu_field[]"

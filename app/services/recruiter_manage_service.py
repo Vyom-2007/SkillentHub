@@ -258,6 +258,8 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             # Fetch details for email
             fetch_sql = """
                 SELECT 
+                    a.user_id,
+                    a.item_type,
                     u.email, 
                     p.full_name as candidate_name,
                     COALESCE(j.title, i.title, c.title, h.title) as item_title,
@@ -275,6 +277,7 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             details = execute_query(fetch_sql, (application_id,), fetch_one=True)
             
             if details:
+                # Send email
                 from app.services.email_service import send_status_update_email
                 send_status_update_email(
                     to_email=details['email'],
@@ -284,11 +287,21 @@ def update_application_status(application_id, new_status, recruiter_id=None):
                     status=new_status,
                     application_id=application_id
                 )
+                
+                # Auto-reject other applications if accepted
+                if new_status == 'accepted':
+                    from app.services import application_service
+                    application_service.auto_reject_other_applications(
+                        user_id=details['user_id'],
+                        accepted_application_id=application_id,
+                        accepted_item_type=details['item_type']
+                    )
+                    
         except Exception as e:
             # Log error but don't fail the status update
-            print(f"Error sending status email: {e}")
+            print(f"Error handling status update side effects: {e}")
             from flask import current_app
-            current_app.logger.error(f"Error sending status email for app {application_id}: {e}")
+            current_app.logger.error(f"Error handling status update for app {application_id}: {e}")
         
     return result
 

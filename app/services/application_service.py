@@ -193,3 +193,23 @@ def get_application_counts(user_id):
         'rejected': counts.get('rejected', 0),
         'accepted': counts.get('accepted', 0)
     }
+    
+    
+def auto_reject_other_applications(user_id, accepted_application_id, accepted_item_type):
+    """
+    Automatically reject other pending applications when one is accepted.
+    Only applies to Jobs and Internships.
+    """
+    if accepted_item_type not in ['job', 'internship']:
+        return 0
+        
+    # Find other pending applications for jobs/internships
+    query = """
+        UPDATE applications 
+        SET status = 'rejected', updated_at = NOW()
+        WHERE user_id = %s 
+        AND application_id != %s
+        AND item_type IN ('job', 'internship')
+        AND status IN ('applied', 'reviewing', 'shortlisted')
+    """
+    return execute_update(query, (user_id, accepted_application_id))
