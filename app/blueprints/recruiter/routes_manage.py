@@ -85,6 +85,10 @@ def update_application_status(application_id):
     else:
         flash('Failed to update status', 'danger')
         
+    next_url = request.args.get('next') or request.form.get('next')
+    if next_url:
+        return redirect(next_url)
+        
     return redirect(url_for('recruiter.application_detail', application_id=application_id))
 
 @recruiter_bp.route('/applications/<int:application_id>/note', methods=['POST'])

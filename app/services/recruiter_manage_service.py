@@ -253,7 +253,7 @@ def update_application_status(application_id, new_status, recruiter_id=None):
     query = "UPDATE applications SET status = %s, updated_at = NOW() WHERE application_id = %s"
     result = execute_update(query, (new_status, application_id))
     
-    if result and new_status in ['shortlisted', 'accepted']:
+    if result and new_status in ['shortlisted', 'accepted', 'rejected']:
         try:
             # Fetch details for email
             fetch_sql = """

@@ -109,11 +109,65 @@
                                 </span>
                             </td>
                             <td class="text-end pe-4">
-                                {% if app.item_type in ['job', 'internship'] %}
-                                <a href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}"
-                                    class="btn btn-sm btn-outline-primary">
-                                    View Details
-                                </a>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        Action
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item"
+                                                href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}">
+                                                <i class="bi bi-eye me-2"></i>View Details
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <h6 class="dropdown-header">Update Status</h6>
+                                        </li>
+                                        {% if app.status != 'shortlisted' %}
+                                        <li>
+                                            <form
+                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                                method="POST">
+                                                <input type="hidden" name="status" value="shortlisted">
+                                                <input type="hidden" name="next" value="{{ request.url }}">
+                                                <button type="submit" class="dropdown-item">
+                                                    <i class="bi bi-check me-2"></i>Shortlist
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                        {% if app.status != 'accepted' %}
+                                        <li>
+                                            <form
+                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                                method="POST">
+                                                <input type="hidden" name="status" value="accepted">
+                                                <input type="hidden" name="next" value="{{ request.url }}">
+                                                <button type="submit" class="dropdown-item text-success">
+                                                    <i class="bi bi-check-circle me-2"></i>Accept
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                        {% if app.status != 'rejected' %}
+                                        <li>
+                                            <form
+                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                                method="POST">
+                                                <input type="hidden" name="status" value="rejected">
+                                                <input type="hidden" name="next" value="{{ request.url }}">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-x-circle me-2"></i>Reject
+                                                </button>
+                                            </form>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
                                 {% else %}
                                 {# Event Registrations #}
                                 {% if app.email and app.email != 'No Email' %}
@@ -123,25 +177,15 @@
                                 </a>
                                 {% endif %}
 
-                                {# Check if we have a user_id to link to profile.
-                                Note: Our query didn't select user_id explicitly in the main wrapper,
-                                but we can infer from profile_picture or if we selected it.
-                                Let's assume if profile_picture is not default, it might be a user.
-                                Better: The service query didn't explicitly select user_id in the outer wrapper.
-                                We should probably add user_id to the query to be safe.
-                                But for now, sticking to what we have or just showing a disabled button if guest.
-                                #}
-
-
                                 {# Message Action for any registered user #}
                                 {% if app.user_id %}
-                                <a href="{{ url_for('recruiter_messages.messages', user=app.user_id, type='user') }}"
+                                <a href="{{ url_for('messages.messages', user=app.user_id, type='user') }}"
                                     class="btn btn-sm btn-outline-success ms-1" title="Message Candidate">
                                     <i class="bi bi-chat-dots"></i>
                                 </a>
                                 {% endif %}
 
-                                <span class="text-muted small ms-2">Registration</span>
+                                <span class="text-muted small ms-2">Event</span>
                                 {% endif %}
                             </td>
                         </tr>
