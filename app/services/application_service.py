@@ -195,19 +195,18 @@ def get_application_counts(user_id):
     }
     
     
-def auto_reject_other_applications(user_id, accepted_application_id, accepted_item_type):
+def auto_delete_other_applications(user_id, accepted_application_id, accepted_item_type):
     """
-    Automatically reject other pending applications when one is accepted.
+    Automatically delete other pending applications when one is accepted.
     Only applies to Jobs and Internships.
     """
     if accepted_item_type not in ['job', 'internship']:
-        print(f"DEBUG: Auto-reject skipped for type {accepted_item_type}")
+        print(f"DEBUG: Auto-delete skipped for type {accepted_item_type}")
         return 0
         
-    # Find other pending applications for jobs/internships
+    # Delete other pending applications for jobs/internships
     query = """
-        UPDATE applications 
-        SET status = 'rejected', updated_at = NOW()
+        DELETE FROM applications 
         WHERE user_id = %s 
         AND application_id != %s
         AND item_type IN ('job', 'internship')

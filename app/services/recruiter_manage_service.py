@@ -280,10 +280,10 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             details = execute_query(fetch_sql, (application_id,), fetch_one=True)
             
             if details:
-                # Auto-reject other applications if accepted
+                # Auto-delete other applications if accepted
                 if new_status == 'accepted':
                     from app.services import application_service
-                    application_service.auto_reject_other_applications(
+                    application_service.auto_delete_other_applications(
                         user_id=details['user_id'],
                         accepted_application_id=application_id,
                         accepted_item_type=details['item_type']

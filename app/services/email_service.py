@@ -85,6 +85,22 @@ Welcome aboard!
 Thanks,
 SkillentHub Team
         """
+    elif status == 'rejected':
+        subject = f"[SkillentHub] Update on your application for {item_title}"
+        body_template = """
+Hi {{ candidate_name }},
+
+Thank you for your interest in the "{{ item_title }}" position at {{ company_name }}.
+
+After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.
+
+We encourage you to apply for other opportunities on SkillentHub that match your skills.
+
+We wish you the best in your job search.
+
+Thanks,
+SkillentHub Team
+        """
     else:
         return False # No email for other statuses
 
