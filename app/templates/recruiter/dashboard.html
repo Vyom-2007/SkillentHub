@@ -253,7 +253,8 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 {% if app.profile_photo %}
-                                <img src="{{ app.profile_photo }}" alt="" class="rounded-circle" width="35" height="35">
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_photo) }}"
+                                    alt="" class="rounded-circle" width="35" height="35">
                                 {% else %}
                                 <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
                                     style="width: 35px; height: 35px;">

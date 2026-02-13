@@ -31,7 +31,7 @@
                         <a href="mailto:{{ app.email }}" class="btn btn-outline-primary">
                             <i class="bi bi-envelope"></i> Contact Candidate
                         </a>
-                        <a href="{{ url_for('profile.view_profile', user_id=app.applicant_id) }}" class="btn btn-light"
+                        <a href="{{ url_for('profile.view', user_id=app.applicant_id) }}" class="btn btn-light"
                             target="_blank">
                             View Full Profile <i class="bi bi-box-arrow-up-right small"></i>
                         </a>

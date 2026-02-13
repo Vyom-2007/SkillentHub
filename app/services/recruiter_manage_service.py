@@ -103,6 +103,7 @@ def get_applications(recruiter_id, filters=None):
             p.full_name, 
             u.email,
             p.profile_picture,
+            a.user_id,
             COALESCE(j.title, i.title, c.title, h.title) as item_title,
             NULL as team_name
         FROM applications a
@@ -137,6 +138,7 @@ def get_applications(recruiter_id, filters=None):
             COALESCE(p.full_name, hr.name, 'Guest') as full_name, 
             COALESCE(u.email, hr.email, 'No Email') as email,
             p.profile_picture,
+            hr.user_id,
             h.title as item_title,
             hr.team_name
         FROM hackathon_registrations hr
@@ -158,6 +160,7 @@ def get_applications(recruiter_id, filters=None):
             p.full_name, 
             u.email,
             p.profile_picture,
+            cr.user_id,
             c.title as item_title,
             NULL as team_name
         FROM competition_registrations cr
@@ -313,7 +316,7 @@ def add_note(application_id, recruiter_id, content):
 def get_notes(application_id):
     """Get internal notes for an application."""
     query = """
-        SELECT n.*, r.company_name, r.first_name as recruiter_name 
+        SELECT n.*, r.company_name, r.company_name as recruiter_name 
         FROM application_notes n
         JOIN recruiters r ON n.recruiter_id = r.recruiter_id
         WHERE n.application_id = %s
