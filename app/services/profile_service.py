@@ -281,6 +281,14 @@ def record_visit(profile_user_id, visitor_user_id=None, visitor_recruiter_id=Non
         """
         if execute_query(check_query, (profile_user_id, visitor_user_id), fetch_one=True):
             return
+
+    if visitor_recruiter_id:
+        check_query = """
+            SELECT visit_id FROM profile_visits
+            WHERE profile_user_id = %s AND visitor_recruiter_id = %s AND DATE(visited_at) = CURDATE()
+        """
+        if execute_query(check_query, (profile_user_id, visitor_recruiter_id), fetch_one=True):
+            return
     
     # Record visit
     insert_query = """

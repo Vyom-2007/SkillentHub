@@ -5,7 +5,7 @@ Handles job/internship applications, resume uploads, and tracking.
 import os
 import uuid
 from flask import current_app
-from app.database.connection import execute_query, execute_insert, get_db_connection
+from app.database.connection import execute_query, execute_insert, execute_update, get_db_connection
 
 
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -201,6 +201,7 @@ def auto_reject_other_applications(user_id, accepted_application_id, accepted_it
     Only applies to Jobs and Internships.
     """
     if accepted_item_type not in ['job', 'internship']:
+        print(f"DEBUG: Auto-reject skipped for type {accepted_item_type}")
         return 0
         
     # Find other pending applications for jobs/internships

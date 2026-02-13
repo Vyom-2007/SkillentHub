@@ -1,24 +1,12 @@
-
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify, current_app
 from app.database.connection import execute_query
-
-# Assume this is imported/registered in __init__.py or routes.py
-# For now, I'll create it as a separate module and might need to import it in routes.py or __init__
+from app.utils.decorators import recruiter_required
+from app.services import profile_service
 
 candidates_bp = Blueprint('recruiter_candidates', __name__)
 
-def login_required(f):
-    # ... import or redefine ...
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('recruiter_id'):
-            return redirect(url_for('auth_recruiter.login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
 @candidates_bp.route('/recruiter/candidates')
-@login_required
+@recruiter_required
 def list_candidates():
     """List candidates with filtering."""
     # Filters
@@ -60,43 +48,71 @@ def list_candidates():
     return render_template('recruiter/candidates/list.html', candidates=candidates)
 
 @candidates_bp.route('/recruiter/candidates/<int:user_id>')
-@login_required
+@recruiter_required
 def view_candidate(user_id):
     """View candidate profile."""
-    # Get profile
-    profile = execute_query("""
-        SELECT p.*, u.email 
-        FROM profiles p 
-        JOIN users u ON p.user_id = u.user_id 
-        WHERE p.user_id = %s
-    """, (user_id,), fetch_one=True)
-    
-    if not profile:
-        flash('Candidate not found', 'danger')
-        return redirect(url_for('recruiter_candidates.list_candidates'))
+    try:
+        # Get profile
+        try:
+            profile = execute_query("""
+                SELECT p.*, u.email 
+                FROM profiles p 
+                JOIN users u ON p.user_id = u.user_id 
+                WHERE p.user_id = %s
+            """, (user_id,), fetch_one=True)
+            if not profile:
+                flash('Candidate not found', 'danger')
+                return redirect(url_for('recruiter_candidates.list_candidates'))
+        except Exception as e:
+            current_app.logger.error(f"Error fetching profile for user {user_id}: {e}")
+            raise e
+
+        # Get skills
+        try:
+            skills = execute_query("""
+                SELECT s.skill_name, us.proficiency_level 
+                FROM user_skills us 
+                JOIN skills s ON us.skill_id = s.skill_id 
+                WHERE us.user_id = %s
+            """, (user_id,), fetch_all=True)
+        except Exception as e:
+            current_app.logger.error(f"Error fetching skills for user {user_id}: {e}")
+            skills = [] # Graceful degradation
+
+        # Get experience
+        try:
+            experience = execute_query("SELECT * FROM experience WHERE user_id = %s ORDER BY start_date DESC", (user_id,), fetch_all=True)
+        except Exception as e:
+            current_app.logger.error(f"Error fetching experience for user {user_id}: {e}")
+            experience = [] # Graceful degradation
         
-    # Get skills
-    skills = execute_query("""
-        SELECT s.skill_name, us.proficiency_level 
-        FROM user_skills us 
-        JOIN skills s ON us.skill_id = s.skill_id 
-        WHERE us.user_id = %s
-    """, (user_id,), fetch_all=True)
-    
-    # Get experience
-    experience = execute_query("SELECT * FROM experience WHERE user_id = %s ORDER BY start_date DESC", (user_id,), fetch_all=True)
-    
-    # Get education
-    education = execute_query("SELECT * FROM education WHERE user_id = %s ORDER BY start_year DESC", (user_id,), fetch_all=True)
-    
-    return render_template('recruiter/candidates/detail.html', 
-                           profile=profile, 
-                           skills=skills, 
-                           experience=experience, 
-                           education=education)
+        # Get education
+        try:
+            education = execute_query("SELECT * FROM education WHERE user_id = %s ORDER BY start_year DESC", (user_id,), fetch_all=True)
+        except Exception as e:
+            current_app.logger.error(f"Error fetching education for user {user_id}: {e}")
+            education = [] # Graceful degradation
+        
+        # Record Visit
+        try:
+            recruiter_id = session.get('recruiter_id')
+            if recruiter_id:
+                profile_service.record_visit(user_id, visitor_recruiter_id=recruiter_id)
+        except Exception as e:
+            current_app.logger.error(f"Error recording visit for user {user_id}: {e}")
+
+        return render_template('recruiter/candidates/detail.html', 
+                               profile=profile, 
+                               skills=skills, 
+                               experience=experience, 
+                               education=education)
+    except Exception as e:
+        current_app.logger.error(f"Critical error in view_candidate for user {user_id}: {e}")
+        flash(f'Error viewing profile: {str(e)}', 'danger')
+        return redirect(url_for('recruiter.dashboard'))
 
 @candidates_bp.route('/recruiter/api/messages/send', methods=['POST'])
-@login_required # Checks session['recruiter_id']
+@recruiter_required # Checks session['recruiter_id']
 def send_message_api():
     """Send message from recruiter to candidate."""
     from app.services import message_service

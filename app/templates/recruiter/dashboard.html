@@ -286,10 +286,12 @@
                         <td class="text-muted">{{ app.time_ago }}</td>
                         <td>
                             {% if app.item_type in ['job', 'internship'] %}
-                            <a href="{{ url_for('recruiter.application_detail', application_id=app.id) }}"
-                                class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-eye"></i> View
+                            {% if app.user_id %}
+                            <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
+                                class="btn btn-sm btn-outline-secondary ms-1">
+                                <i class="bi bi-person"></i> Profile
                             </a>
+                            {% endif %}
                             {% else %}
                             {% if app.user_id %}
                             <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"

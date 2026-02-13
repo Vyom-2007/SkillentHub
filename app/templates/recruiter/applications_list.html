@@ -73,7 +73,7 @@
                         <tr>
                             <td class="ps-4">
                                 {% if app.user_id %}
-                                <a href="{{ url_for('profile.view', user_id=app.user_id) }}"
+                                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
                                     class="text-decoration-none text-dark d-flex align-items-center" target="_blank">
                                     {% if app.profile_picture %}
                                     <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_picture) }}"
@@ -136,15 +136,6 @@
                                         Action
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item"
-                                                href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}">
-                                                <i class="bi bi-eye me-2"></i>View Details
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
                                         <li>
                                             <h6 class="dropdown-header">Update Status</h6>
                                         </li>

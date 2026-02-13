@@ -25,6 +25,22 @@ def get_db_connection():
             cursorclass=pymysql.cursors.DictCursor,
             autocommit=True
         )
+    else:
+        # Ping to ensure connection is alive
+        try:
+            g.db.ping(reconnect=True)
+        except pymysql.Error:
+            # If ping fails, reconnect
+            g.db = pymysql.connect(
+                host=current_app.config['DB_HOST'],
+                port=current_app.config['DB_PORT'],
+                user=current_app.config['DB_USER'],
+                password=current_app.config['DB_PASSWORD'],
+                database=current_app.config['DB_NAME'],
+                charset='utf8mb4',
+                cursorclass=pymysql.cursors.DictCursor,
+                autocommit=True
+            )
     return g.db
 
 

@@ -280,6 +280,15 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             details = execute_query(fetch_sql, (application_id,), fetch_one=True)
             
             if details:
+                # Auto-reject other applications if accepted
+                if new_status == 'accepted':
+                    from app.services import application_service
+                    application_service.auto_reject_other_applications(
+                        user_id=details['user_id'],
+                        accepted_application_id=application_id,
+                        accepted_item_type=details['item_type']
+                    )
+
                 # Send email
                 from app.services.email_service import send_status_update_email
                 send_status_update_email(
@@ -290,15 +299,6 @@ def update_application_status(application_id, new_status, recruiter_id=None):
                     status=new_status,
                     application_id=application_id
                 )
-                
-                # Auto-reject other applications if accepted
-                if new_status == 'accepted':
-                    from app.services import application_service
-                    application_service.auto_reject_other_applications(
-                        user_id=details['user_id'],
-                        accepted_application_id=application_id,
-                        accepted_item_type=details['item_type']
-                    )
                     
         except Exception as e:
             # Log error but don't fail the status update
