@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Post by {{ post.full_name }} - SkillentHub{% endblock %}
+
+{% block extra_css %}
+<!-- Reusing feed styles -->
+<style>
+    .post-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+    }
+
+    .post-author-pic {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .post-image {
+        max-width: 100%;
+        max-height: 500px;
+        border-radius: 0.75rem;
+        object-fit: contain;
+        margin-top: 1rem;
+    }
+
+    .post-actions {
+        display: flex;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .post-action-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .post-action-btn:hover {
+        background: #f1f5f9;
+        color: var(--primary-color);
+    }
+
+    .post-action-btn.liked {
+        color: #ef4444;
+    }
+
+    .post-content {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .comments-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .comment {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .comment-pic {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .comment-content {
+        background: #f1f5f9;
+        padding: 0.5rem 0.75rem;
+        border-radius: 1rem;
+        flex: 1;
+    }
+
+    .comment-author {
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .comment-text {
+        font-size: 0.875rem;
+    }
+
+    .time-ago {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="mb-3">
+                <a href="{{ url_for('posts.feed') }}" class="text-decoration-none text-muted">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Feed
+                </a>
+            </div>
+
+            {% include 'feed/_post_card.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/feed.js') }}"></script>
+{% endblock %}

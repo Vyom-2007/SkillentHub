@@ -51,6 +51,40 @@ def feed():
                            first_post_id=first_post_id)
 
 
+@posts_bp.route('/posts/<int:post_id>')
+@login_required
+def post_detail(post_id):
+    """Display a single post."""
+    post = post_service.get_post(post_id)
+    if not post:
+        flash('Post not found.', 'error')
+        return redirect(url_for('posts.feed'))
+    
+    # Check if liked by current user
+    user_id = session.get('user_id')
+    from app.database.connection import execute_query
+    
+    # Optimization: get_post already joins user/profile, but we need liked status
+    # We could update get_post or just query here.
+    # Actually get_post uses a simple query. get_feed uses a complex one.
+    # Let's reuse get_feed logic but for single post or just add the check.
+    
+    liked = False
+    if user_id:
+        res = execute_query(
+            "SELECT 1 FROM post_likes WHERE post_id = %s AND user_id = %s",
+            (post_id, user_id), fetch_one=True
+        )
+        liked = res is not None
+
+    post['liked_by_current_user'] = liked
+    
+    # Get comments
+    comments = post_service.get_comments(post_id)
+    
+    return render_template('feed/post_detail.html', post=post, comments=comments)
+
+
 @posts_bp.route('/posts/create', methods=['GET', 'POST'])
 @login_required
 def create_post():
