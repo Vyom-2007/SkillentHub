@@ -3,7 +3,7 @@ Profile management routes blueprint.
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from functools import wraps
-from app.services import profile_service
+from app.services import profile_service, connection_service
 
 profile_bp = Blueprint('profile', __name__, url_prefix='/profile')
 
@@ -106,6 +106,18 @@ def view(user_id):
     current_user_id = session.get('user_id')
     is_own_profile = current_user_id == user_id
     
+    # Privacy Check
+    if profile.get('visibility') == 'private':
+        # Allow if owner or connected
+        is_connected = current_user_id and connection_service.are_connected(current_user_id, user_id)
+        if not is_own_profile and not is_connected:
+            flash('This profile is private. Connect with the user to view their profile.', 'warning')
+            if current_user_id:
+                # Redirect to user's own profile or network? Network seems better to find other people.
+                # Or maybe back to where they came from?
+                return redirect(url_for('network.network'))
+            return redirect(url_for('auth.login'))
+    
     # Record visit if viewing someone else's profile
     if not is_own_profile and current_user_id:
         profile_service.record_visit(user_id, current_user_id, None)
@@ -113,9 +125,13 @@ def view(user_id):
     # Get posts
     posts = profile_service.get_user_posts(user_id)
     
+    # Get achievements/wins
+    wins = profile_service.get_user_wins(user_id)
+    
     context = {
         'profile': profile,
         'posts': posts,
+        'wins': wins,
         'is_own_profile': is_own_profile
     }
     

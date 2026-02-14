@@ -81,7 +81,7 @@ def update_privacy():
     show_phone = request.form.get('show_phone') == 'on'
     
     # Validate visibility
-    if visibility not in ['public', 'registered_only']:
+    if visibility not in ['public', 'registered_only', 'private']:
         visibility = 'public'
     
     # Update settings
@@ -105,7 +105,7 @@ def api_update_privacy():
     show_email = bool(data.get('show_email', True))
     show_phone = bool(data.get('show_phone', False))
     
-    if visibility not in ['public', 'registered_only']:
+    if visibility not in ['public', 'registered_only', 'private']:
         visibility = 'public'
     
     user_service.update_privacy_settings(user_id, visibility, show_email, show_phone)

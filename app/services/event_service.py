@@ -11,17 +11,29 @@ def get_event_status(start_date, end_date):
     now = datetime.now()
     
     # Convert strings to datetime if needed
+    # Convert strings to datetime if needed
     if isinstance(start_date, str):
         try:
             start_date = datetime.fromisoformat(start_date)
         except ValueError:
-            pass
+            # Try common SQL format
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                pass
             
     if isinstance(end_date, str):
         try:
             end_date = datetime.fromisoformat(end_date)
         except ValueError:
-            pass
+            # Try common SQL format
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+            except ValueError:
+                pass
+    
+    if not isinstance(start_date, datetime) or not isinstance(end_date, datetime):
+        return 'unknown'
             
     if now < start_date:
         return 'upcoming'

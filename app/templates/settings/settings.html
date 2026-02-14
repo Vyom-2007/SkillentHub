@@ -152,11 +152,10 @@
                         <label class="form-label">Profile Visibility</label>
                         <select class="form-select" name="visibility" id="visibility">
                             <option value="public" {% if privacy.visibility=='public' %}selected{% endif %}>
-                                Public - Anyone can view
+                                Public Profile - Visible to everyone
                             </option>
-                            <option value="registered_only" {% if privacy.visibility=='registered_only' %}selected{%
-                                endif %}>
-                                Registered Users Only
+                            <option value="private" {% if privacy.visibility=='private' %}selected{% endif %}>
+                                Private Profile - Visible only to connections
                             </option>
                         </select>
                         <small class="text-muted">Control who can see your profile.</small>

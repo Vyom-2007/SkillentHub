@@ -352,3 +352,55 @@ def get_user_posts(user_id, limit=10):
         LIMIT %s
     """
     return execute_query(query, (user_id, limit), fetch_all=True) or []
+
+# ==================== Achievements / Wins ====================
+
+def get_user_wins(user_id):
+    """
+    Get hackathon and competition wins for a user.
+    Returns list of wins with event details and team members.
+    """
+    # Query to get teams the user is part of that have a rank
+    query = """
+        SELECT 
+            t.team_id, t.team_name, t.rank,
+            c.title as competition_title, c.competition_id,
+            h.title as hackathon_title, h.hackathon_id,
+            CASE 
+                WHEN c.competition_id IS NOT NULL THEN 'Competition'
+                WHEN h.hackathon_id IS NOT NULL THEN 'Hackathon'
+            END as event_type,
+            CASE 
+                WHEN c.competition_id IS NOT NULL THEN c.title
+                WHEN h.hackathon_id IS NOT NULL THEN h.title
+            END as event_title,
+            CASE 
+                WHEN c.competition_id IS NOT NULL THEN c.end_date
+                WHEN h.hackathon_id IS NOT NULL THEN h.end_date
+            END as event_date
+        FROM teams t
+        JOIN team_members tm ON t.team_id = tm.team_id
+        LEFT JOIN competitions c ON t.item_type = 'competition' AND t.item_id = c.competition_id
+        LEFT JOIN hackathons h ON t.item_type = 'hackathon' AND t.item_id = h.hackathon_id
+        WHERE tm.user_id = %s 
+        AND t.rank IS NOT NULL 
+        AND t.rank != ''
+        ORDER BY event_date DESC
+    """
+    wins = execute_query(query, (user_id,), fetch_all=True)
+    
+    if not wins:
+        return []
+        
+    # For each win, get team members
+    for win in wins:
+        members_query = """
+            SELECT u.user_id, p.full_name, p.profile_picture
+            FROM team_members tm
+            JOIN users u ON tm.user_id = u.user_id
+            LEFT JOIN profiles p ON u.user_id = p.user_id
+            WHERE tm.team_id = %s
+        """
+        win['members'] = execute_query(members_query, (win['team_id'],), fetch_all=True)
+        
+    return wins
