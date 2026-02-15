@@ -209,6 +209,37 @@ def invite_member(team_id):
     return jsonify({'error': result}), 400
 
 
+@teams_bp.route('/api/teams/<int:team_id>/invite-by-email', methods=['POST'])
+@api_login_required
+def invite_member_by_email(team_id):
+    """Invite a user to team by email."""
+    user_id = session.get('user_id')
+    data = request.get_json() or {}
+    email = data.get('email', '').strip()
+    name = data.get('name', '').strip() # Optional, for UI validation if we wanted
+    
+    if not email:
+        return jsonify({'error': 'Email is required'}), 400
+    
+    success, result = team_service.invite_by_email(user_id, team_id, email, name)
+    
+    if success:
+        return jsonify({'success': True, 'message': result})
+    return jsonify({'error': result}), 400
+
+
+@teams_bp.route('/api/teams/<int:team_id>/unregister', methods=['POST'])
+@api_login_required
+def unregister_team(team_id):
+    """Unregister/Cancel team registration for event."""
+    user_id = session.get('user_id')
+    success, result = team_service.unregister_team(user_id, team_id)
+    
+    if success:
+        return jsonify({'success': True, 'message': result})
+    return jsonify({'error': result}), 400
+
+
 @teams_bp.route('/api/teams/invitations/received')
 @api_login_required
 def get_invitations():

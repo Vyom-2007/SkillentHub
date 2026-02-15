@@ -124,13 +124,6 @@
                     </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Ends</div>
-                    <div class="info-value">
-                        <i class="bi bi-calendar me-1"></i>
-                        {{ event.end_date.strftime('%b %d, %Y • %I:%M %p') if event.end_date else 'TBA' }}
-                    </div>
-                </div>
-                <div class="info-item">
                     <div class="info-label">Participants</div>
                     <div class="info-value">
                         <i class="bi bi-people me-1"></i>
@@ -139,17 +132,18 @@
                     </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">{% if event.status == 'upcoming' %}Starts In{% else %}Status{% endif %}
+                    <div class="info-label">Reg. Deadline</div>
+                    <div class="info-value">
+                        <i class="bi bi-clock-history me-1"></i>
+                        {{ event.registration_deadline.strftime('%b %d, %Y • %I:%M %p') if event.registration_deadline
+                        else 'Open until end' }}
                     </div>
-                    <div class="info-value countdown" {% if event.status=='upcoming'
-                        %}data-countdown="{{ event.start_date.isoformat() }}" {% endif %}>
-                        {% if event.status == 'upcoming' %}
-                        Calculating...
-                        {% elif event.status == 'ongoing' %}
-                        <span class="text-success">🟢 Live Now</span>
-                        {% else %}
-                        <span class="text-muted">Ended</span>
-                        {% endif %}
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Ends</div>
+                    <div class="info-value">
+                        <i class="bi bi-calendar me-1"></i>
+                        {{ event.end_date.strftime('%b %d, %Y • %I:%M %p') if event.end_date else 'TBA' }}
                     </div>
                 </div>
             </div>
@@ -173,7 +167,11 @@
                 </button>
                 {% elif event.status == 'completed' %}
                 <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="bi bi-lock me-2"></i>Registration Closed
+                    <i class="bi bi-lock me-2"></i>Event Ended
+                </button>
+                {% elif event.registration_deadline and now > event.registration_deadline %}
+                <button class="btn btn-secondary btn-lg" disabled>
+                    <i class="bi bi-x-circle me-2"></i>Registration Closed
                 </button>
                 {% elif event.max_participants and event.registration_count >= event.max_participants %}
                 <button class="btn btn-secondary btn-lg" disabled>

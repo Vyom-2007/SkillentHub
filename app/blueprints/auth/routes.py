@@ -2,7 +2,7 @@
 Authentication routes blueprint.
 Handles user registration, login, logout, and password reset flows.
 """
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from datetime import timedelta
 from app.services import auth_service, otp_service, email_service
 
@@ -347,3 +347,45 @@ def _is_valid_password(password):
     has_upper = any(c.isupper() for c in password)
     has_digit = any(c.isdigit() for c in password)
     return has_upper and has_digit
+    return has_upper and has_digit
+
+
+@auth_bp.route('/api/applications/<int:application_id>/withdraw', methods=['POST'])
+def withdraw_application(application_id):
+    """Withdraw an application."""
+    if not session.get('user_id'):
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    user_id = session['user_id']
+    from flask import jsonify
+    from app.services import application_service
+    
+    success, result = application_service.withdraw_application(user_id, application_id)
+    
+    if success:
+        return jsonify({'success': True, 'message': result})
+    if success:
+        return jsonify({'success': True, 'message': result})
+    return jsonify({'error': result}), 400
+
+
+@auth_bp.route('/api/events/cancel', methods=['POST'])
+def cancel_event_registration():
+    """Cancel event registration."""
+    if not session.get('user_id'):
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    user_id = session['user_id']
+    data = request.get_json() or {}
+    event_type = data.get('event_type')
+    event_id = data.get('event_id')
+    
+    if not event_type or not event_id:
+        return jsonify({'error': 'Missing event details'}), 400
+        
+    from app.services import event_service
+    success, result = event_service.unregister_from_event(user_id, event_type, event_id)
+    
+    if success:
+        return jsonify({'success': True, 'message': result})
+    return jsonify({'error': result}), 400

@@ -37,12 +37,6 @@
                             data-bs-target="#messageModal">
                             <i class="bi bi-chat-dots"></i> Message
                         </button>
-                        {% if profile.show_email or 1 %}
-                        <!-- Recruiters might see email by default? For now, respect visibility or show because 'recruiter' -->
-                        <a href="mailto:{{ profile.email }}" class="btn btn-outline-info">
-                            <i class="bi bi-envelope"></i> Email
-                        </a>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -123,6 +117,60 @@
                     {% else %}
                     <p class="text-muted">No education listed.</p>
                     {% endfor %}
+                </div>
+            </div>
+
+            <!-- Achievements / Wins -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Achievements</h6>
+                </div>
+                <div class="card-body">
+                    {% if wins %}
+                    {% for win in wins %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="font-weight-bold mb-1">
+                                    <i class="bi bi-trophy-fill text-warning me-2"></i>{{ win.rank }} Place
+                                </h5>
+                                <h6 class="text-primary mb-1">{{ win.event_title }}</h6>
+                                <div class="text-muted small mb-2">
+                                    {{ win.event_type }} • {{ win.event_date.strftime('%b %Y') if win.event_date else
+                                    'Unknown Date' }}
+                                </div>
+                                {% if win.team_name %}
+                                <div class="text-muted small">
+                                    <strong>Team:</strong> {{ win.team_name }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if win.members %}
+                        <div class="mt-2 text-muted small">Teammates:</div>
+                        <div class="d-flex mt-1 flex-wrap gap-2">
+                            {% for member in win.members %}
+                            <div class="text-center" style="width: 40px;" title="{{ member.full_name }}">
+                                {% if member.profile_picture %}
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + member.profile_picture) }}"
+                                    class="rounded-circle border" style="width: 30px; height: 30px; object-fit: cover;">
+                                {% else %}
+                                <div class="avatar-initials rounded-circle bg-light text-secondary d-flex justify-content-center align-items-center border"
+                                    style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                    {{ member.full_name[:1].upper() if member.full_name else '?' }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if not loop.last %}
+                    <hr>{% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No achievements listed.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>

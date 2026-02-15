@@ -93,6 +93,13 @@ def view_candidate(user_id):
             current_app.logger.error(f"Error fetching education for user {user_id}: {e}")
             education = [] # Graceful degradation
         
+        # Get wins/achievements
+        try:
+            wins = profile_service.get_user_wins(user_id)
+        except Exception as e:
+            current_app.logger.error(f"Error fetching wins for user {user_id}: {e}")
+            wins = []
+
         # Record Visit
         try:
             recruiter_id = session.get('recruiter_id')
@@ -105,7 +112,8 @@ def view_candidate(user_id):
                                profile=profile, 
                                skills=skills, 
                                experience=experience, 
-                               education=education)
+                               education=education,
+                               wins=wins)
     except Exception as e:
         current_app.logger.error(f"Critical error in view_candidate for user {user_id}: {e}")
         flash(f'Error viewing profile: {str(e)}', 'danger')

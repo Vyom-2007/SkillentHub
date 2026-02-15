@@ -2,7 +2,7 @@
 Event service.
 Handles competitions and hackathons browsing, details, and registration.
 """
-from app.database.connection import execute_query, execute_insert, get_db_connection
+from app.database.connection import execute_query, execute_insert, execute_update, get_db_connection
 from datetime import datetime
 
 
@@ -107,6 +107,9 @@ def register_competition(competition_id, user_id):
     if comp['status'] == 'completed':
         return False, "Registration closed"
     
+    if comp.get('registration_deadline') and datetime.now() > comp.get('registration_deadline'):
+         return False, f"Registration closed on {comp['registration_deadline'].strftime('%b %d, %Y %I:%M %p')}"
+    
     if comp['max_participants'] and comp['registration_count'] >= comp['max_participants']:
         return False, "Maximum participants reached"
     
@@ -188,21 +191,32 @@ def register_hackathon(hackathon_id, user_id, team_name=None, members=None):
     
     if hack['status'] == 'completed':
         return False, "Registration closed"
+
+    if hack.get('registration_deadline') and datetime.now() > hack.get('registration_deadline'):
+         return False, f"Registration closed on {hack['registration_deadline'].strftime('%b %d, %Y %I:%M %p')}"
     
     # If members provided, validate and handle team
     team_id = None
     member_data = [] # List of dicts: {user_id, name, email}
     
-    if members:
+    if team_name or members:
         if not team_name:
-            return False, "Team name is required when adding members"
+            return False, "Team name is required for team registration"
             
+        if not members:
+             return False, "At least one team member is required for team registration"
+
         # Validate team size
-        max_size = hack.get('team_size', 1) or 1
+        max_size = hack.get('team_size_max') or hack.get('team_size') or 1
+        min_size = hack.get('team_size_min') or 1
         
         current_size = 1 + len(members) # Leader + members
+        
         if max_size and current_size > max_size:
              return False, f"Team size exceeds limit of {max_size}"
+             
+        if current_size < min_size:
+             return False, f"Team size must be at least {min_size} members"
 
         # Resolve emails to User IDs or keep as non-users
         processed_emails = set()
@@ -316,16 +330,21 @@ def get_user_registrations(user_id, event_type=None):
                 c.competition_id as event_id,
                 c.title, c.description, c.start_date, c.end_date, c.prize,
                 r.company_name,
-                cr.registered_at
+                cr.registered_at,
+                t.team_id,
+                t.created_by as team_leader_id
             FROM competition_registrations cr
             JOIN competitions c ON cr.competition_id = c.competition_id
             LEFT JOIN recruiters r ON c.recruiter_id = r.recruiter_id
+            LEFT JOIN teams t ON t.item_type = 'competition' AND t.item_id = c.competition_id 
+                AND t.team_id IN (SELECT team_id FROM team_members WHERE user_id = %s)
             WHERE cr.user_id = %s
             ORDER BY c.start_date ASC
         """
-        comps = execute_query(comp_query, (user_id,), fetch_all=True) or []
+        comps = execute_query(comp_query, (user_id, user_id), fetch_all=True) or []
         for c in comps:
             c['status'] = get_event_status(c['start_date'], c['end_date'])
+            c['is_leader'] = (c['team_leader_id'] == int(user_id)) if c.get('team_leader_id') else False
         results.extend(comps)
     
     # Get hackathon registrations
@@ -336,16 +355,21 @@ def get_user_registrations(user_id, event_type=None):
                 h.hackathon_id as event_id,
                 h.title, h.description, h.start_date, h.end_date, h.venue, h.mode, h.prizes,
                 r.company_name,
-                hr.registered_at, hr.team_name
+                hr.registered_at, hr.team_name,
+                t.team_id,
+                t.created_by as team_leader_id
             FROM hackathon_registrations hr
             JOIN hackathons h ON hr.hackathon_id = h.hackathon_id
             LEFT JOIN recruiters r ON h.recruiter_id = r.recruiter_id
+            LEFT JOIN teams t ON t.item_type = 'hackathon' AND t.item_id = h.hackathon_id
+                AND t.team_id IN (SELECT team_id FROM team_members WHERE user_id = %s)
             WHERE hr.user_id = %s
             ORDER BY h.start_date ASC
         """
-        hacks = execute_query(hack_query, (user_id,), fetch_all=True) or []
+        hacks = execute_query(hack_query, (user_id, user_id), fetch_all=True) or []
         for h in hacks:
             h['status'] = get_event_status(h['start_date'], h['end_date'])
+            h['is_leader'] = (h['team_leader_id'] == int(user_id)) if h.get('team_leader_id') else False
         results.extend(hacks)
     
     # Sort by start date
@@ -367,3 +391,43 @@ def get_event_counts():
         'competitions': comp_count['count'] if comp_count else 0,
         'hackathons': hack_count['count'] if hack_count else 0
     }
+
+
+def unregister_from_event(user_id, event_type, event_id):
+    """
+    Unregister a user from an event.
+    Handles both individual and team registrations.
+    """
+    from app.services import team_service
+    
+    # 1. Check if user has a team for this event
+    # We can query the teams table directly or use team_service
+    # But event_service shouldn't depend circularly on team_service if possible.
+    # Actually team_service is imported inside functions usually.
+    
+    # Let's find the team first
+    team = team_service.get_user_team_for_event(user_id, event_type, event_id)
+    
+    if team:
+        # User is in a team
+        if team['created_by'] == user_id:
+            # User is Leader -> Cancel entire team registration
+            # This should ideally cascade deletion of team members' registrations too
+            return team_service.unregister_team(user_id, team['team_id'])
+        else:
+            # User is Member -> Leave team
+            # This should remove them from the team and thus the event
+            return team_service.leave_team(user_id, team['team_id'])
+            
+    # 2. User is NOT in a team (Individual Registration)
+    # Just delete the registration record
+    
+    table = 'competition_registrations' if event_type == 'competition' else 'hackathon_registrations'
+    id_col = 'competition_id' if event_type == 'competition' else 'hackathon_id'
+    
+    query = f"DELETE FROM {table} WHERE {id_col} = %s AND user_id = %s"
+    rows = execute_update(query, (event_id, user_id))
+    
+    if rows > 0:
+        return True, "Registration cancelled successfully"
+    return False, "You were not registered for this event"

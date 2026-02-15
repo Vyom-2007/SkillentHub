@@ -161,23 +161,11 @@
                     </div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Registered</div>
+                    <div class="info-label">Reg. Deadline</div>
                     <div class="info-value">
-                        <i class="bi bi-person-check me-1"></i>{{ event.registration_count or 0 }} participants
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">{% if event.status == 'upcoming' %}Starts In{% else %}Status{% endif %}
-                    </div>
-                    <div class="info-value countdown" {% if event.status=='upcoming'
-                        %}data-countdown="{{ event.start_date.isoformat() }}" {% endif %}>
-                        {% if event.status == 'upcoming' %}
-                        Calculating...
-                        {% elif event.status == 'ongoing' %}
-                        <span class="text-success">🟢 Live Now</span>
-                        {% else %}
-                        <span class="text-muted">Ended</span>
-                        {% endif %}
+                        <i class="bi bi-clock-history me-1"></i>
+                        {{ event.registration_deadline.strftime('%b %d, %Y • %I:%M %p') if event.registration_deadline
+                        else 'Open until end' }}
                     </div>
                 </div>
             </div>
@@ -201,11 +189,15 @@
                 </button>
                 {% elif event.status == 'completed' %}
                 <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="bi bi-lock me-2"></i>Registration Closed
+                    <i class="bi bi-lock me-2"></i>Event Ended
+                </button>
+                {% elif event.registration_deadline and now > event.registration_deadline %}
+                <button class="btn btn-secondary btn-lg" disabled>
+                    <i class="bi bi-x-circle me-2"></i>Registration Closed
                 </button>
                 {% else %}
                 <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#registerModal">
-                    <i class="bi bi-person-plus me-2"></i>Register Now
+                    <i class="bi bi-code-square me-2"></i>Register Now
                 </button>
                 {% endif %}
             </div>
@@ -230,55 +222,17 @@
                     <input type="text" class="form-control" id="teamNameInput" placeholder="Enter team name" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label d-flex justify-content-between align-items-center">
-                        Team Members
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addMemberInput()">
-                            <i class="bi bi-plus"></i> Add
-                        </button>
-                    </label>
+                    <label class="form-label">Team Members</label>
                     <div id="teamMembersContainer">
-                        <!-- Dynamic inputs will be added here -->
+                        {% for i in range(event.team_size - 1) %}
                         <div class="input-group mb-2 member-row">
-                            <input type="text" class="form-control member-name" placeholder="Name" required>
-                            <input type="email" class="form-control member-email" placeholder="Email" required>
-                            <button class="btn btn-outline-secondary" type="button" onclick="removeMemberInput(this)">
-                                <i class="bi bi-x"></i>
-                            </button>
+                            <span class="input-group-text">{{ i + 1 }}</span>
+                            <input type="text" class="form-control member-name" placeholder="Name">
+                            <input type="email" class="form-control member-email" placeholder="Email">
                         </div>
+                        {% endfor %}
                     </div>
-                    <small class="text-muted">Max team size: {{ event.team_size }}</small>
                 </div>
-                <script>
-                    const maxTeamSize = {{ event.team_size }};
-                    let memberCount = 1; // Initial input
-
-                    function addMemberInput() {
-                        if (memberCount >= maxTeamSize - 1) { // -1 because user is already 1
-                            alert('Maximum team size reached');
-                            return;
-                        }
-                        const container = document.getElementById('teamMembersContainer');
-                        const div = document.createElement('div');
-                        div.className = 'input-group mb-2 member-row';
-                        div.innerHTML = `
-                            <input type="text" class="form-control member-name" placeholder="Name" required>
-                            <input type="email" class="form-control member-email" placeholder="Email" required>
-                            <button class="btn btn-outline-secondary" type="button" onclick="removeMemberInput(this)">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        `;
-                        container.appendChild(div);
-                        memberCount++;
-                    }
-
-                    function removeMemberInput(btn) {
-                        if (document.querySelectorAll('.member-row').length <= 1) {
-                            return; // Keep at least one
-                        }
-                        btn.closest('.member-row').remove();
-                        memberCount--;
-                    }
-                </script>
                 {% endif %}
                 <p class="text-muted small mb-0">
                     <i class="bi bi-calendar me-1"></i>
@@ -300,4 +254,28 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/events.js') }}"></script>
+<script>
+    function cancelRegistration(eventType, eventId) {
+        if (!confirm('Are you sure you want to cancel your registration? This action cannot be undone.')) return;
+
+        fetch('/api/events/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_type: eventType, event_id: eventId })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to cancel registration');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('An error occurred');
+            });
+    }
+</script>
 {% endblock %}
+```

@@ -90,6 +90,55 @@ def invite_member(leader_id, team_id, target_user_id):
     return False, "Failed to send invitation"
 
 
+def invite_by_email(leader_id, team_id, email, name_hint=None):
+    """Invite a user by email (bypass connection check)."""
+    # Verify leader owns team
+    team = get_team_by_id(team_id)
+    if not team:
+        return False, "Team not found"
+    if team['created_by'] != leader_id:
+        return False, "Only team leader can invite members"
+    
+    # Check if user exists
+    from app.services import auth_service
+    user = auth_service.get_user_by_email(email)
+    if not user:
+        return False, "User with this email does not exist"
+    
+    target_user_id = user['user_id']
+    
+    if target_user_id == leader_id:
+        return False, "Cannot invite yourself"
+    
+    # Check if user is already in a team for this event
+    existing_team = get_user_team_for_event(target_user_id, team['item_type'], team['item_id'])
+    if existing_team:
+        return False, "User is already in a team for this event"
+    
+    # Check if already invited
+    existing_invite = get_pending_invitation(team_id, target_user_id)
+    if existing_invite:
+        return False, "User already has a pending invitation"
+    
+    # Check max members
+    member_count = get_team_member_count(team_id)
+    pending_count = get_pending_invitation_count(team_id)
+    if team['max_members'] and (member_count + pending_count) >= team['max_members']:
+        return False, "Team is at maximum capacity"
+    
+    # Insert invitation
+    query = """
+        INSERT INTO team_invitations (team_id, invited_user_id, invited_by, status)
+        VALUES (%s, %s, %s, 'pending')
+    """
+    inv_id = execute_insert(query, (team_id, target_user_id, leader_id))
+    
+    if inv_id:
+        create_team_notification(target_user_id, leader_id, team, 'team_invitation')
+        return True, "Invitation sent successfully"
+    return False, "Failed to send invitation"
+
+
 def accept_invitation(user_id, invitation_id):
     """Accept a team invitation."""
     invitation = get_invitation_by_id(invitation_id)
@@ -179,6 +228,17 @@ def leave_team(user_id, team_id):
     query = "DELETE FROM team_members WHERE team_id = %s AND user_id = %s"
     execute_update(query, (team_id, user_id))
     
+    # Also remove application/registration
+    team = get_team_by_id(team_id)
+    if team:
+        if team['item_type'] == 'hackathon':
+             execute_update("DELETE FROM hackathon_registrations WHERE hackathon_id = %s AND user_id = %s", (team['item_id'], user_id))
+        elif team['item_type'] == 'competition':
+             execute_update("DELETE FROM competition_registrations WHERE competition_id = %s AND user_id = %s", (team['item_id'], user_id))
+             
+    app_query = "DELETE FROM applications WHERE team_id = %s AND user_id = %s"
+    execute_update(app_query, (team_id, user_id))
+    
     return True, "Left team successfully"
 
 
@@ -197,6 +257,15 @@ def remove_member(leader_id, team_id, target_user_id):
     
     query = "DELETE FROM team_members WHERE team_id = %s AND user_id = %s"
     execute_update(query, (team_id, target_user_id))
+    
+    # Also remove application/registration
+    if team['item_type'] == 'hackathon':
+             execute_update("DELETE FROM hackathon_registrations WHERE hackathon_id = %s AND user_id = %s", (team['item_id'], target_user_id))
+    elif team['item_type'] == 'competition':
+             execute_update("DELETE FROM competition_registrations WHERE competition_id = %s AND user_id = %s", (team['item_id'], target_user_id))
+
+    app_query = "DELETE FROM applications WHERE team_id = %s AND user_id = %s"
+    execute_update(app_query, (team_id, target_user_id))
     
     return True, "Member removed"
 
@@ -239,6 +308,18 @@ def register_team_for_event(leader_id, team_id):
                     INSERT INTO applications (user_id, item_type, item_id, team_id, status)
                     VALUES (%s, %s, %s, %s, 'applied')
                 """, (member['user_id'], team['item_type'], team['item_id'], team_id))
+                
+                # Also insert into specific registration tables
+                if team['item_type'] == 'hackathon':
+                    cursor.execute("""
+                        INSERT INTO hackathon_registrations (hackathon_id, user_id, name, email, team_name)
+                        VALUES (%s, %s, %s, NULL, %s)
+                    """, (team['item_id'], member['user_id'], member['full_name'], team['team_name']))
+                elif team['item_type'] == 'competition':
+                    cursor.execute("""
+                        INSERT INTO competition_registrations (competition_id, user_id)
+                        VALUES (%s, %s)
+                    """, (team['item_id'], member['user_id']))
         
         connection.commit()
         return True, "Team registered successfully"
@@ -247,6 +328,42 @@ def register_team_for_event(leader_id, team_id):
         return False, str(e)
     finally:
         connection.close()
+
+
+def unregister_team(leader_id, team_id):
+    """
+    Cancel team registration for an event.
+    Removes application entries for all team members.
+    """
+    team = get_team_by_id(team_id)
+    if not team:
+        return False, "Team not found"
+        
+    if team['created_by'] != leader_id:
+        return False, "Only team leader can cancel registration"
+        
+    # Delete applications for this team
+    query = "DELETE FROM applications WHERE team_id = %s"
+    rows = execute_update(query, (team_id,))
+    
+    # Also delete from registration tables
+    members = get_team_members(team_id)
+    member_ids = tuple(m['user_id'] for m in members) if members else None
+    
+    if member_ids:
+        placeholders = ', '.join(['%s'] * len(member_ids))
+        if team['item_type'] == 'hackathon':
+             execute_update(f"DELETE FROM hackathon_registrations WHERE hackathon_id=%s AND user_id IN ({placeholders})", (team['item_id'],) + member_ids)
+        elif team['item_type'] == 'competition':
+             execute_update(f"DELETE FROM competition_registrations WHERE competition_id=%s AND user_id IN ({placeholders})", (team['item_id'],) + member_ids)
+    
+    if rows > 0:
+        return True, "Registration cancelled successfully"
+    # Even if no applications found, if registrations were deleted it's a success? 
+    # But for now keep logic consistent.
+    if member_ids: return True, "Registration cancelled successfully"
+    
+    return False, "Team was not registered"
 
 
 # ========== HELPER FUNCTIONS ==========

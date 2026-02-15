@@ -144,10 +144,6 @@
                         specified' }}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Openings</div>
-                    <div class="info-value"><i class="bi bi-people me-1"></i>{{ item.number_of_openings or 1 }}</div>
-                </div>
-                <div class="info-item">
                     <div class="info-label">Deadline</div>
                     <div class="info-value"><i class="bi bi-calendar me-1"></i>{{ item.deadline.strftime('%b %d, %Y') if
                         item.deadline else 'Open' }}</div>

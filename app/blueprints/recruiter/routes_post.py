@@ -58,7 +58,8 @@ def create_internship():
             'skills_required': request.form.get('skills_required'),
             'description': request.form.get('description'),
             'requirements': request.form.get('requirements'),
-            'deadline': request.form.get('deadline')
+            'deadline': request.form.get('deadline'),
+            'openings': request.form.get('openings', 1)
         }
 
         # Validation
@@ -91,11 +92,12 @@ def create_competition():
             'start_date': request.form.get('start_date'),
             'end_date': request.form.get('end_date'),
             'prize_details': request.form.get('prize_details'),
-            'max_participants': request.form.get('max_participants')
+            'max_participants': request.form.get('max_participants'),
+            'registration_deadline': request.form.get('registration_deadline')
         }
 
         # Validation
-        required_fields = ['title', 'description', 'rules', 'start_date', 'end_date', 'prize_details', 'max_participants']
+        required_fields = ['title', 'description', 'rules', 'start_date', 'end_date', 'prize_details', 'max_participants', 'registration_deadline']
         if any(not data.get(k) for k in required_fields):
             flash('All fields marked with * are required.', 'danger')
             return render_template('recruiter/competition_form.html')
@@ -117,6 +119,12 @@ def create_competition():
 def create_hackathon():
     if request.method == 'POST':
         recruiter_id = session.get('recruiter_id')
+        
+        # Min size is now always 1, Max is specified by user
+        min_size = 1
+        max_size = request.form.get('team_size_max')
+        team_size_str = f"Max {max_size} Members" if max_size else request.form.get('team_size')
+
         data = {
             'title': request.form.get('title'),
             'description': request.form.get('description'),
@@ -125,12 +133,15 @@ def create_hackathon():
             'end_date': request.form.get('end_date'),
             'venue': request.form.get('venue'),
             'mode': request.form.get('mode'),
-            'team_size': request.form.get('team_size'),
-            'prize_details': request.form.get('prize_details')
+            'team_size': team_size_str,
+            'team_size_min': min_size,
+            'team_size_max': max_size,
+            'prize_details': request.form.get('prize_details'),
+            'registration_deadline': request.form.get('registration_deadline')
         }
 
         # Validation
-        required_fields = ['title', 'description', 'theme', 'start_date', 'end_date', 'venue', 'mode', 'team_size', 'prize_details']
+        required_fields = ['title', 'description', 'theme', 'start_date', 'end_date', 'venue', 'mode', 'team_size_max', 'prize_details', 'registration_deadline']
         if any(not data.get(k) for k in required_fields):
             flash('All fields marked with * are required.', 'danger')
             return render_template('recruiter/hackathon_form.html')

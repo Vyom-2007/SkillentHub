@@ -5,6 +5,7 @@ Handles hackathon browsing, details, and registration.
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from functools import wraps
 from app.services import event_service
+from datetime import datetime
 
 hackathons_bp = Blueprint('hackathons', __name__)
 
@@ -60,7 +61,8 @@ def hackathon_detail(hackathon_id):
     return render_template('opportunities/hackathon_detail.html',
                            event=hackathon,
                            event_type='hackathon',
-                           is_registered=is_registered)
+                           is_registered=is_registered,
+                           now=datetime.now())
 
 
 @hackathons_bp.route('/hackathons/<int:hackathon_id>/register', methods=['POST'])
@@ -69,6 +71,7 @@ def register_hackathon(hackathon_id):
     """Register for a hackathon."""
     user_id = session.get('user_id')
     team_name = None
+    members = []
     
     if request.is_json:
         team_name = request.json.get('team_name')

@@ -40,8 +40,8 @@ def create_internship(recruiter_id, data):
         INSERT INTO internships (
             recruiter_id, title, location, duration, stipend, 
             work_mode, certificate_provided, skills_required, 
-            description, requirements, deadline
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            description, requirements, deadline, number_of_openings
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     params = (
         recruiter_id,
@@ -54,7 +54,8 @@ def create_internship(recruiter_id, data):
         data.get('skills_required'),
         data.get('description'),
         data.get('requirements'),
-        data.get('deadline')
+        data.get('deadline'),
+        data.get('openings', 1)
     )
     return execute_insert(query, params)
 
@@ -65,8 +66,8 @@ def create_competition(recruiter_id, data):
     query = """
         INSERT INTO competitions (
             recruiter_id, title, description, rules, 
-            start_date, end_date, prize, max_participants
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            start_date, end_date, prize, max_participants, registration_deadline
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     params = (
         recruiter_id,
@@ -76,7 +77,8 @@ def create_competition(recruiter_id, data):
         data.get('start_date'),
         data.get('end_date'),
         data.get('prize_details'), # Maps to 'prize' column
-        data.get('max_participants')
+        data.get('max_participants'),
+        data.get('registration_deadline')
     )
     return execute_insert(query, params)
 
@@ -88,8 +90,8 @@ def create_hackathon(recruiter_id, data):
         INSERT INTO hackathons (
             recruiter_id, title, description, theme, 
             start_date, end_date, venue, mode, 
-            team_size, prizes
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            team_size, team_size_min, team_size_max, prizes, registration_deadline
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     params = (
         recruiter_id,
@@ -101,6 +103,9 @@ def create_hackathon(recruiter_id, data):
         data.get('venue'),
         data.get('mode'),
         data.get('team_size'),
-        data.get('prize_details') # Maps to 'prizes' column
+        data.get('team_size_min'),
+        data.get('team_size_max'),
+        data.get('prize_details'), # Maps to 'prizes' column
+        data.get('registration_deadline')
     )
     return execute_insert(query, params)

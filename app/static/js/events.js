@@ -64,19 +64,62 @@ function registerEvent(eventType, eventId) {
 
         // Collect members
         const members = [];
-        document.querySelectorAll('.member-row').forEach(row => {
-            const nameInput = row.querySelector('.member-name');
-            const emailInput = row.querySelector('.member-email');
-
-            if (emailInput && emailInput.value && emailInput.value.trim()) {
-                members.push({
-                    name: nameInput ? nameInput.value.trim() : '',
-                    email: emailInput.value.trim()
-                });
-            }
-        });
+        let missingDetails = false;
 
         if (teamNameInput) {
+            if (!teamNameInput.value.trim()) {
+                alert('Team Name is required.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>Register Now';
+                return;
+            }
+
+            let rowIndex = 0;
+            document.querySelectorAll('.member-row').forEach(row => {
+                rowIndex++;
+                const nameInput = row.querySelector('.member-name');
+                const emailInput = row.querySelector('.member-email');
+
+                // Get values
+                const nameVal = nameInput ? nameInput.value.trim() : '';
+                const emailVal = emailInput ? emailInput.value.trim() : '';
+
+                // Skip empty rows
+                if (!nameVal && !emailVal) {
+                    return;
+                }
+
+                // Enforce both fields
+                if (nameVal && !emailVal) {
+                    alert(`Please enter an Email for member #${rowIndex} (${nameVal}).`);
+                    missingDetails = true;
+                    return;
+                }
+                if (!nameVal && emailVal) {
+                    alert(`Please enter a Name for member #${rowIndex} (${emailVal}).`);
+                    missingDetails = true;
+                    return;
+                }
+
+                members.push({
+                    name: nameVal,
+                    email: emailVal
+                });
+            });
+
+            if (missingDetails) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check me-1"></i>Confirm';
+                return;
+            }
+
+            if (members.length === 0) {
+                alert('At least one team member is required for team registration.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-person-plus me-2"></i>Register Now';
+                return;
+            }
+
             body = {
                 team_name: teamNameInput.value,
                 members: members

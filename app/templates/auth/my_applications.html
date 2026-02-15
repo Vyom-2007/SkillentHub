@@ -1,6 +1,56 @@
 {% extends "base.html" %}
 
-{% block title %}My Applications - SkillentHub{% endblock %}
+{% block title %}My Applications - SkillentHub </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function withdrawApplication(appId, type) {
+        if (!confirm('Are you sure you want to withdraw this application? This action cannot be undone.')) return;
+
+        fetch(`/api/applications/${appId}/withdraw`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // simple reload to refresh list
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to withdraw application');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('An error occurred');
+            });
+    }
+
+    function cancelRegistration(eventType, eventId) {
+        if (!confirm('Are you sure you want to cancel your registration? This action cannot be undone.')) return;
+
+        fetch('/api/events/cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_type: eventType, event_id: eventId })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to cancel registration');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('An error occurred');
+            });
+    }
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">

@@ -25,14 +25,24 @@
         <div class="border-top pt-3 mt-auto">
             <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">Applied: {{ app.applied_at.strftime('%b %d, %Y') }}</small>
-                <!-- Link to view details if available -->
-                {% if app.item_type == 'job' %}
-                <a href="{{ url_for('opportunities.job_detail', job_id=app.item_id) }}"
-                    class="btn btn-sm btn-outline-secondary">View Role</a>
-                {% else %}
-                <a href="{{ url_for('opportunities.internship_detail', internship_id=app.item_id) }}"
-                    class="btn btn-sm btn-outline-secondary">View Role</a>
-                {% endif %}
+                <div class="d-flex gap-2">
+                    <!-- Withdraw Button -->
+                    {% if app.status in ['applied', 'reviewing', 'shortlisted'] %}
+                    <button class="btn btn-sm btn-outline-danger"
+                        onclick="withdrawApplication({{ app.application_id }}, '{{ app.item_type }}')">
+                        Withdraw
+                    </button>
+                    {% endif %}
+
+                    <!-- Link to view details -->
+                    {% if app.item_type == 'job' %}
+                    <a href="{{ url_for('opportunities.job_detail', job_id=app.item_id) }}"
+                        class="btn btn-sm btn-outline-secondary">View Role</a>
+                    {% else %}
+                    <a href="{{ url_for('opportunities.internship_detail', internship_id=app.item_id) }}"
+                        class="btn btn-sm btn-outline-secondary">View Role</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

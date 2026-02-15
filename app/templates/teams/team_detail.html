@@ -234,9 +234,35 @@
                 </div>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
-        {% endif %}
+
+        <!-- Invite by Email Section -->
+        <div class="team-section mt-3">
+            <h5 class="mb-3"><i class="bi bi-envelope-plus me-2"></i>Invite by Email</h5>
+            <p class="text-muted small mb-3">
+                Invite any registered user by their email address.
+            </p>
+            <form id="inviteByEmailForm">
+                <div class="mb-2">
+                    <label class="form-label small">Name</label>
+                    <input type="text" class="form-control form-control-sm" id="inviteName" placeholder="Full Name"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">Email</label>
+                    <input type="email" class="form-control form-control-sm" id="inviteEmail"
+                        placeholder="user@example.com" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm w-100" id="inviteEmailBtn">
+                    Invite User
+                </button>
+                <div id="inviteEmailMsg" class="mt-2 small text-center"></div>
+            </form>
+        </div>
     </div>
+    {% endif %}
+</div>
 </div>
 {% endblock %}
 
@@ -313,6 +339,56 @@
                     alert(data.error || 'Failed to register');
                 }
             });
+    }
+
+    // Invite by Email
+    const inviteEmailForm = document.getElementById('inviteByEmailForm');
+    if (inviteEmailForm) {
+        inviteEmailForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const emailInput = document.getElementById('inviteEmail');
+            const nameInput = document.getElementById('inviteName');
+            const btn = document.getElementById('inviteEmailBtn');
+            const msgDiv = document.getElementById('inviteEmailMsg');
+
+            const email = emailInput.value.trim();
+            const name = nameInput.value.trim();
+
+            if (!email || !name) {
+                msgDiv.innerHTML = '<span class="text-danger">Name and Email are required</span>';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Inviting...';
+            msgDiv.innerHTML = '';
+
+            fetch(`/api/teams/${TEAM_ID}/invite-by-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, name: name })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        msgDiv.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Invitation sent!</span>';
+                        emailInput.value = '';
+                        nameInput.value = '';
+                        setTimeout(() => msgDiv.innerHTML = '', 3000);
+                    } else {
+                        msgDiv.innerHTML = `<span class="text-danger">${data.error || 'Failed to invite'}</span>`;
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = 'Invite User';
+                })
+                .catch(err => {
+                    console.error(err);
+                    msgDiv.innerHTML = '<span class="text-danger">Network error</span>';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Invite User';
+                });
+        });
     }
 </script>
 {% endblock %}

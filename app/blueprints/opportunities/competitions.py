@@ -5,6 +5,7 @@ Handles competition browsing, details, and registration.
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from functools import wraps
 from app.services import event_service
+from datetime import datetime
 
 competitions_bp = Blueprint('competitions', __name__)
 
@@ -60,7 +61,8 @@ def competition_detail(competition_id):
     return render_template('opportunities/competition_detail.html',
                            event=competition,
                            event_type='competition',
-                           is_registered=is_registered)
+                           is_registered=is_registered,
+                           now=datetime.now())
 
 
 @competitions_bp.route('/competitions/<int:competition_id>/register', methods=['POST'])

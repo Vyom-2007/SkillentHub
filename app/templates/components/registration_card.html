@@ -24,13 +24,21 @@
         <div class="border-top pt-3 mt-auto">
             <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">Reg Date: {{ reg.registered_at.strftime('%b %d, %Y') }}</small>
-                {% if reg.event_type == 'hackathon' %}
-                <a href="{{ url_for('hackathons.hackathon_detail', hackathon_id=reg.event_id) }}"
-                    class="btn btn-sm btn-outline-secondary">View Event</a>
-                {% else %}
-                <a href="{{ url_for('competitions.competition_detail', competition_id=reg.event_id) }}"
-                    class="btn btn-sm btn-outline-secondary">View Event</a>
-                {% endif %}
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-danger"
+                        onclick="cancelRegistration('{{ reg.event_type }}', {{ reg.event_id }})">
+                        {% if reg.is_leader %}Cancel Registration{% elif reg.team_id %}Leave Team{% else %}Cancel
+                        Registration{% endif %}
+                    </button>
+
+                    {% if reg.event_type == 'hackathon' %}
+                    <a href="{{ url_for('hackathons.hackathon_detail', hackathon_id=reg.event_id) }}"
+                        class="btn btn-sm btn-outline-secondary">View Event</a>
+                    {% else %}
+                    <a href="{{ url_for('competitions.competition_detail', competition_id=reg.event_id) }}"
+                        class="btn btn-sm btn-outline-secondary">View Event</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

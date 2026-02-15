@@ -213,3 +213,25 @@ def auto_delete_other_applications(user_id, accepted_application_id, accepted_it
         AND status IN ('applied', 'reviewing', 'shortlisted')
     """
     return execute_update(query, (user_id, accepted_application_id))
+
+
+def withdraw_application(user_id, application_id):
+    """
+    Withdraw/Cancel an application.
+    Allowed only if status is 'applied', 'reviewing', or 'shortlisted'.
+    """
+    # Get application to verify ownership and status
+    app = get_application_by_id(application_id, user_id)
+    if not app:
+        return False, "Application not found"
+        
+    if app['status'] in ['accepted', 'rejected']:
+        return False, "Cannot withdraw application that has already been processed"
+        
+    # Delete application (this removes it from recruiter view too)
+    query = "DELETE FROM applications WHERE application_id = %s"
+    rows = execute_update(query, (application_id,))
+    
+    if rows > 0:
+        return True, "Application withdrawn successfully"
+    return False, "Failed to withdraw application"
