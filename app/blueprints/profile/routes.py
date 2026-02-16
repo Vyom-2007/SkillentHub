@@ -244,7 +244,47 @@ def edit():
                            all_skills=profile_service.get_all_skills())
 
 
+@profile_bp.route('/api/parse-resume', methods=['POST'])
+@login_required
+def parse_resume_route():
+    """Parse resume and return structured data."""
+    if 'resume' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+        
+    file = request.files['resume']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+        
+    # Check Allowed ext
+    allowed_exts = {'pdf', 'docx', 'doc', 'txt'}
+    filename = file.filename
+    ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    
+    if ext not in allowed_exts:
+        return jsonify({'error': 'File type not allowed. Use PDF or DOCX.'}), 400
+    
+    try:
+        # Save temp file
+        temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], 'temp_' + filename)
+        file.save(temp_path)
+        
+        # Parse
+        from app.utils.resume_parser import parse_resume
+        data = parse_resume(temp_path)
+        
+        # Clean up
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+            
+        return jsonify(data)
+        
+    except Exception as e:
+        current_app.logger.error(f"Error parsing resume: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 @profile_bp.route('/resume/<filename>')
+@login_required
 def download_resume(filename):
     """Download user resume."""
     from flask import send_from_directory
