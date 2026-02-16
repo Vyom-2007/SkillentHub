@@ -404,3 +404,80 @@ def is_candidate_saved(recruiter_id, user_id):
     query = "SELECT 1 FROM saved_candidates WHERE recruiter_id = %s AND user_id = %s"
     result = execute_query(query, (recruiter_id, user_id), fetch_one=True)
     return bool(result)
+
+
+def get_analytics_stats(recruiter_id):
+    """
+    Get analytics for recruiter dashboard.
+    Returns:
+        dict: {
+            'top_jobs': [{'title': str, 'count': int}, ...],
+            'funnel': {'total': int, 'reviewing': int, 'shortlisted': int, 'hired': int},
+            'time_to_hire': float (days)
+        }
+    """
+    stats = {
+        'top_jobs': [],
+        'funnel': {'total': 0, 'reviewing': 0, 'shortlisted': 0, 'hired': 0},
+        'time_to_hire': 0
+    }
+    
+    try:
+        # 1. Top 5 Jobs by Applications
+        # Just jobs for now as per plan
+        job_query = """
+            SELECT j.title, COUNT(a.application_id) as count
+            FROM jobs j
+            LEFT JOIN applications a ON j.job_id = a.item_id AND a.item_type = 'job'
+            WHERE j.recruiter_id = %s
+            GROUP BY j.job_id
+            ORDER BY count DESC
+            LIMIT 5
+        """
+        top_jobs = execute_query(job_query, (recruiter_id,), fetch_all=True)
+        stats['top_jobs'] = top_jobs if top_jobs else []
+        
+        # 2. Funnel Stats (Global for all items)
+        funnel_query = """
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status IN ('reviewing', 'shortlisted', 'accepted') THEN 1 ELSE 0 END) as reviewing,
+                SUM(CASE WHEN status IN ('shortlisted', 'accepted') THEN 1 ELSE 0 END) as shortlisted,
+                SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) as hired
+            FROM applications a
+            WHERE (
+                (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
+                OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
+                OR (a.item_type = 'competition' AND a.item_id IN (SELECT competition_id FROM competitions WHERE recruiter_id = %s))
+                OR (a.item_type = 'hackathon' AND a.item_id IN (SELECT hackathon_id FROM hackathons WHERE recruiter_id = %s))
+            )
+        """
+        funnel = execute_query(funnel_query, (recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+        if funnel:
+            # Decimal to int conversion if needed, though pymysql usually handles returns well
+            stats['funnel'] = {
+                'total': int(funnel['total'] or 0),
+                'reviewing': int(funnel['reviewing'] or 0),
+                'shortlisted': int(funnel['shortlisted'] or 0),
+                'hired': int(funnel['hired'] or 0)
+            }
+            
+        # 3. Time to Hire
+        # Average time from applied_at to updated_at for 'accepted' status
+        tth_query = """
+            SELECT AVG(DATEDIFF(updated_at, applied_at)) as avg_days
+            FROM applications a
+            WHERE status = 'accepted'
+            AND (
+                (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
+                OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))
+            )
+        """
+        tth = execute_query(tth_query, (recruiter_id, recruiter_id), fetch_one=True)
+        if tth and tth['avg_days'] is not None:
+             stats['time_to_hire'] = round(float(tth['avg_days']), 1)
+             
+    except Exception as e:
+        logging.error(f"Error fetching analytics for recruiter {recruiter_id}: {e}")
+        
+    return stats

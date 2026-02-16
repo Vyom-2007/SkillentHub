@@ -34,3 +34,16 @@ def dashboard():
 from app.blueprints.recruiter import interviews
 
 
+@recruiter_bp.route('/analytics')
+@recruiter_required
+def analytics():
+    """Recruiter analytics dashboard."""
+    recruiter_id = session.get('recruiter_id')
+    
+    # Get stats
+    from app.services import recruiter_service
+    stats = recruiter_service.get_analytics_stats(recruiter_id)
+    
+    return render_template('recruiter/analytics.html', stats=stats)
+
+

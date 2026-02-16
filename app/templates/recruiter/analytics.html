@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-graph-up me-2"></i>Recruitment Analytics</h2>
+        <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <h6 class="text-muted text-uppercase mb-3">Total Applications</h6>
+                    <h2 class="display-4 fw-bold text-primary">{{ stats.funnel.total }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <h6 class="text-muted text-uppercase mb-3">Total Hires</h6>
+                    <h2 class="display-4 fw-bold text-success">{{ stats.funnel.hired }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <h6 class="text-muted text-uppercase mb-3">Avg Time to Hire</h6>
+                    <h2 class="display-4 fw-bold text-info">{{ stats.time_to_hire }} <span
+                            class="fs-4 text-muted">days</span></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Application Funnel -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">Hiring Funnel</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="funnelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Jobs -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">Top Jobs by Applications</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="jobsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Funnel Chart
+        const funnelCtx = document.getElementById('funnelChart').getContext('2d');
+        new Chart(funnelCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Applied', 'Reviewing', 'Shortlisted', 'Hired'],
+                datasets: [{
+                    label: 'Candidates',
+                    data: [
+                        {{ stats.funnel.total }},
+                {{ stats.funnel.reviewing }}, 
+                        {{ stats.funnel.shortlisted }},
+        {{ stats.funnel.hired }}
+                    ],
+        backgroundColor: [
+        'rgba(54, 162, 235, 0.6)',
+        'rgba(255, 206, 86, 0.6)',
+        'rgba(75, 192, 192, 0.6)',
+        'rgba(153, 102, 255, 0.6)'
+    ],
+        borderColor: [
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)'
+    ],
+        borderWidth: 1
+                }]
+            },
+        options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        }
+    }
+        });
+
+    // Jobs Chart
+    const jobsCtx = document.getElementById('jobsChart').getContext('2d');
+    new Chart(jobsCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for job in stats.top_jobs %}"{{ job.title }}",{% endfor %}],
+        datasets: [{
+            label: 'Applications',
+            data: [{% for job in stats.top_jobs %}{{ job.count }}, {% endfor %}],
+        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+                }]
+            },
+        options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+        });
+    });
+</script>
+{% endblock %}
