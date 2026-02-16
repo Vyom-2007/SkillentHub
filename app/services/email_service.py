@@ -70,14 +70,46 @@ Best of luck for the next steps!
 Thanks,
 SkillentHub Team
         """
-    elif status == 'accepted':
-        subject = f"[SkillentHub] Congratulations - Application Accepted for {item_title}"
+    elif status == 'interview':
+        subject = f"[SkillentHub] Interview Invitation - {item_title}"
         body_template = """
 Hi {{ candidate_name }},
 
-Congratulations! We're excited to inform you that your application for "{{ item_title }}" at {{ company_name }} has been ACCEPTED.
+Congratulations! Your application for "{{ item_title }}" at {{ company_name }} has moved to the INTERVIEW stage.
 
-Login to your SkillentHub account for next steps:
+The recruiter will be in touch shortly with interview details.
+
+You can track your application status here:
+https://skillenthub.com/applications/{{ application_id }}
+
+Good luck!
+
+Thanks,
+SkillentHub Team
+        """
+    elif status == 'offer':
+        subject = f"[SkillentHub] Job Offer - {item_title}"
+        body_template = """
+Hi {{ candidate_name }},
+
+Congratulations! We are pleased to inform you that {{ company_name }} has extended an OFFER for the position of "{{ item_title }}".
+
+Please check your email or the SkillentHub platform for the official offer letter and details.
+
+https://skillenthub.com/applications/{{ application_id }}
+
+Best regards,
+SkillentHub Team
+        """
+    elif status in ['hired', 'accepted']:
+        subject = f"[SkillentHub] You're Hired! - {item_title}"
+        body_template = """
+Hi {{ candidate_name }},
+
+Congratulations! We are thrilled to welcome you to the team at {{ company_name }} for the position of "{{ item_title }}".
+
+This marks the successful completion of your application process.
+
 https://skillenthub.com/applications/{{ application_id }}
 
 Welcome aboard!

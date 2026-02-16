@@ -25,9 +25,10 @@ def login_required(f):
 def opportunities():
     """Display opportunities page with filters."""
     opp_type = request.args.get('type', 'all')
+    user_id = session.get('user_id')
     
-    # Get initial opportunities
-    items = opportunity_service.search_opportunities(opp_type=opp_type)
+    # Get initial opportunities with match scores
+    items = opportunity_service.search_opportunities(opp_type=opp_type, user_id=user_id)
     
     # Get filter options
     locations = opportunity_service.get_all_locations()
@@ -52,6 +53,7 @@ def search_opportunities():
     date_posted = request.args.get('date_posted', '').strip()
     experience = request.args.get('experience', '').strip()
     page = request.args.get('page', 1, type=int)
+    user_id = session.get('user_id')
     
     results = opportunity_service.search_opportunities(
         opp_type=opp_type if opp_type else 'all',
@@ -61,7 +63,8 @@ def search_opportunities():
         job_type=job_type if job_type else None,
         date_posted=date_posted if date_posted else None,
         experience=experience if experience else None,
-        page=page
+        page=page,
+        user_id=user_id
     )
     
     # Format for JSON
@@ -79,7 +82,8 @@ def search_opportunities():
             'stipend': item.get('stipend'),
             'duration': item.get('duration'),
             'skills_required': item.get('skills_required'),
-            'posted_at': item['posted_at'].isoformat() if item.get('posted_at') else None
+            'posted_at': item['posted_at'].isoformat() if item.get('posted_at') else None,
+            'match_score': item.get('match_score')
         })
     
     return jsonify({'success': True, 'opportunities': opportunities_json})

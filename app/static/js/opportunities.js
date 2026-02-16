@@ -105,7 +105,16 @@ function renderOpportunities(opportunities) {
         return;
     }
 
-    container.innerHTML = opportunities.map(item => `
+    container.innerHTML = opportunities.map(item => {
+        let matchBadge = '';
+        if (item.match_score !== undefined && item.match_score !== null) {
+            let color = 'secondary';
+            if (item.match_score >= 80) color = 'success';
+            else if (item.match_score >= 50) color = 'warning text-dark';
+            matchBadge = `<div class="mb-1"><span class="badge bg-${color}">Match: ${item.match_score}%</span></div>`;
+        }
+
+        return `
         <div class="opp-card">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
@@ -116,7 +125,10 @@ function renderOpportunities(opportunities) {
                         ${(item.work_mode || 'on-site').replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     </span>
                 </div>
-                <small class="text-muted">${formatDate(item.posted_at)}</small>
+                <div class="text-end">
+                    ${matchBadge}
+                    <small class="text-muted">${formatDate(item.posted_at)}</small>
+                </div>
             </div>
             <h5 class="opp-title mt-2">${escapeHtml(item.title)}</h5>
             <p class="opp-company mb-1">${escapeHtml(item.company_name || 'Company')}</p>
@@ -135,7 +147,7 @@ function renderOpportunities(opportunities) {
                 <a href="/${item.type === 'job' ? 'jobs' : 'internships'}/${item.id}" class="btn btn-primary btn-sm">View Details</a>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function clearFilters() {

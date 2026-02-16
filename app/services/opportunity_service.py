@@ -48,7 +48,7 @@ def _ensure_dates(item):
 
 def search_opportunities(opp_type='all', q=None, location=None, work_mode=None, 
                          job_type=None, date_posted=None, experience=None,
-                         page=1, per_page=50):
+                         page=1, per_page=50, user_id=None):
     """
     Search opportunities with dynamic SQL filtering.
     
@@ -62,6 +62,7 @@ def search_opportunities(opp_type='all', q=None, location=None, work_mode=None,
         experience: Experience level filter (jobs only)
         page: Page number
         per_page: Results per page
+        user_id: ID of the current user (candidate) to calculate match scores
     """
     offset = (page - 1) * per_page
     results = []
@@ -76,8 +77,26 @@ def search_opportunities(opp_type='all', q=None, location=None, work_mode=None,
         internships = _search_internships(q, location, work_mode, date_posted, per_page, offset)
         results.extend(internships)
     
-    # Sort by posted_at desc
-    results.sort(key=lambda x: x.get('posted_at') or datetime.min, reverse=True)
+    # Calculate match scores if user_id provided
+    if user_id:
+        from app.services import matching_service
+        for item in results:
+             if item.get('type') == 'job':
+                 try:
+                     score = matching_service.calculate_match_score(item['id'], user_id)
+                     item['match_score'] = score
+                 except Exception:
+                     item['match_score'] = None
+             else:
+                 item['match_score'] = None
+
+    # Sort by posted_at desc (Default)
+    # But if user_id is present, maybe we should sort by match_score?
+    # Requirement: "Ranked jobs for candidates".
+    if user_id:
+        results.sort(key=lambda x: (x.get('match_score') or 0, x.get('posted_at') or datetime.min), reverse=True)
+    else:
+        results.sort(key=lambda x: x.get('posted_at') or datetime.min, reverse=True)
     
     # Limit if fetching both
     if opp_type == 'all':
@@ -206,6 +225,17 @@ def get_job_by_id(job_id):
         WHERE j.job_id = %s
     """
     job = execute_query(query, (job_id,), fetch_one=True)
+    
+    if job:
+        # Fetch structured skills - REUSING execute_query from current module
+        skills_query = """
+            SELECT s.skill_name, js.min_proficiency, js.weight, js.is_required
+            FROM job_skills js
+            JOIN skills s ON js.skill_id = s.skill_id
+            WHERE js.job_id = %s
+        """
+        job['structured_skills'] = execute_query(skills_query, (job_id,), fetch_all=True)
+        
     return _ensure_dates(job)
 
 

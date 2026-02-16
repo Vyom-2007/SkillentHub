@@ -102,7 +102,7 @@ def get_user_applications(user_id, item_type=None, status=None, page=1, per_page
         where_clauses.append("a.item_type = %s")
         params.append(item_type)
     
-    if status and status in ['applied', 'reviewing', 'shortlisted', 'rejected', 'accepted']:
+    if status and status in ['applied', 'reviewing', 'shortlisted', 'interview', 'offer', 'hired', 'rejected', 'accepted']:
         where_clauses.append("a.status = %s")
         params.append(status)
     

@@ -217,7 +217,30 @@ def get_applications(recruiter_id, filters=None):
     
     final_sql = full_query.replace(" as date", " as applied_at").replace("ORDER BY date", "ORDER BY applied_at")
     
-    return execute_query(final_sql, tuple(all_params), fetch_all=True)
+    applications = execute_query(final_sql, tuple(all_params), fetch_all=True)
+    
+    # Calculate match scores
+    from app.services import matching_service
+    for app in applications:
+        if app.get('item_type') == 'job':
+            try:
+                # job_id is item_id
+                score = matching_service.calculate_match_score(app['item_id'], app['user_id'])
+                app['match_score'] = score
+            except Exception as e:
+                # Log error?
+                app['match_score'] = 0
+        else:
+            app['match_score'] = None
+            
+    # Sort by match_score DESC, then applied_at DESC
+    # Treat None match_score as -1 to put them at bottom? Or 0?
+    # Requirement: "Ranked candidates for recruiters" -> imply sort.
+    # But mixed list with non-jobs?
+    # If all are jobs, sort works. If mixed, jobs with high match on top?
+    applications.sort(key=lambda x: (x.get('match_score') or 0, x.get('applied_at')), reverse=True)
+
+    return applications
 
 def get_application_detail(application_id, recruiter_id):
     """
@@ -247,7 +270,18 @@ def get_application_detail(application_id, recruiter_id):
         (h.recruiter_id = %s)
     )
     """
-    return execute_query(query, (application_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+    details = execute_query(query, (application_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+    
+    if details and details.get('item_type') == 'job':
+        from app.services import matching_service
+        try:
+             # item_id is correct here as per query select a.*
+             score = matching_service.calculate_match_score(details['item_id'], details['user_id'])
+             details['match_score'] = score
+        except Exception:
+             details['match_score'] = 0
+             
+    return details
 
 def update_application_status(application_id, new_status, recruiter_id=None):
     """
@@ -256,7 +290,7 @@ def update_application_status(application_id, new_status, recruiter_id=None):
     query = "UPDATE applications SET status = %s, updated_at = NOW() WHERE application_id = %s"
     result = execute_update(query, (new_status, application_id))
     
-    if result and new_status in ['shortlisted', 'accepted', 'rejected']:
+    if result and new_status in ['shortlisted', 'interview', 'offer', 'hired', 'accepted', 'rejected']:
         try:
             # Fetch details for email
             fetch_sql = """
@@ -280,8 +314,8 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             details = execute_query(fetch_sql, (application_id,), fetch_one=True)
             
             if details:
-                # Auto-delete other applications if accepted
-                if new_status == 'accepted':
+                # Auto-delete other applications if hired/accepted
+                if new_status in ['hired', 'accepted']:
                     from app.services import application_service
                     application_service.auto_delete_other_applications(
                         user_id=details['user_id'],

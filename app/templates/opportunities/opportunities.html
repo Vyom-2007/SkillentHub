@@ -255,8 +255,19 @@
                                     {{ item.work_mode|replace('-', ' ')|title if item.work_mode else 'On-site' }}
                                 </span>
                             </div>
-                            <small class="text-muted">{{ item.posted_at.strftime('%b %d') if item.posted_at else ''
-                                }}</small>
+                            <div class="text-end">
+                                {% if item.match_score is defined and item.match_score is not none %}
+                                {% if item.match_score >= 80 %}
+                                <div class="mb-1"><span class="badge bg-success">Match: {{ item.match_score }}%</span>
+                                </div>
+                                {% elif item.match_score >= 50 %}
+                                <div class="mb-1"><span class="badge bg-warning text-dark">Match: {{ item.match_score
+                                        }}%</span></div>
+                                {% endif %}
+                                {% endif %}
+                                <small class="text-muted">{{ item.posted_at.strftime('%b %d') if item.posted_at else ''
+                                    }}</small>
+                            </div>
                         </div>
                         <h5 class="opp-title mt-2">{{ item.title }}</h5>
                         <p class="opp-company mb-1">{{ item.company_name or 'Company' }}</p>

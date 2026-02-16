@@ -9,8 +9,21 @@ from app.services import recruiter_post_service
 @recruiter_bp.route('/jobs/create', methods=['GET', 'POST'])
 @recruiter_required
 def create_job():
+    from app.services import profile_service
+    import json
+    
     if request.method == 'POST':
         recruiter_id = session.get('recruiter_id')
+        
+        # Parse structured skills
+        structured_skills = []
+        skills_json = request.form.get('structured_skills_json')
+        if skills_json:
+            try:
+                structured_skills = json.loads(skills_json)
+            except json.JSONDecodeError:
+                pass
+
         data = {
             'title': request.form.get('title'),
             'location': request.form.get('location'),
@@ -22,14 +35,16 @@ def create_job():
             'description': request.form.get('description'),
             'requirements': request.form.get('requirements'),
             'openings': request.form.get('openings', 1),
-            'deadline': request.form.get('deadline')
+            'deadline': request.form.get('deadline'),
+            'structured_skills': structured_skills
         }
         
         # Validation
         required_fields = ['title', 'location', 'job_type', 'work_mode', 'salary_range', 'description', 'openings', 'skills_required', 'deadline']
         if any(not data.get(k) for k in required_fields):
             flash('All fields marked with * are required.', 'danger')
-            return render_template('recruiter/job_form.html')
+            all_skills = profile_service.get_all_skills()
+            return render_template('recruiter/job_form.html', all_skills=all_skills)
         
         try:
             job_id = recruiter_post_service.create_job(recruiter_id, data)
@@ -41,7 +56,8 @@ def create_job():
         except Exception as e:
             flash(f'Error: {str(e)}', 'danger')
             
-    return render_template('recruiter/job_form.html')
+    all_skills = profile_service.get_all_skills()
+    return render_template('recruiter/job_form.html', all_skills=all_skills)
 
 @recruiter_bp.route('/internships/create', methods=['GET', 'POST'])
 @recruiter_required

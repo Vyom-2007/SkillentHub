@@ -30,7 +30,32 @@ def create_job(recruiter_id, data):
         data.get('deadline'),
         data.get('openings', 1)
     )
-    return execute_insert(query, params)
+    job_id = execute_insert(query, params)
+    
+    # Insert structured skills if provided
+    skills_data = data.get('structured_skills')
+    if job_id and skills_data:
+        for skill in skills_data:
+            skill_id = skill.get('skill_id')
+            if skill_id:
+                try:
+                    execute_insert(
+                        """
+                        INSERT INTO job_skills (job_id, skill_id, min_proficiency, weight, is_required)
+                        VALUES (%s, %s, %s, %s, %s)
+                        """,
+                        (
+                            job_id, 
+                            skill_id, 
+                            skill.get('min_proficiency', 'beginner'),
+                            skill.get('weight', 1),
+                            skill.get('is_required', 0)
+                        )
+                    )
+                except Exception as e:
+                    print(f"Error adding skill {skill_id} to job {job_id}: {e}")
+                    
+    return job_id
 
 def create_internship(recruiter_id, data):
     """
