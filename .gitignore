@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.flaskenv
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Instance folder (Flask)
+instance/
+
+# Flask-Session
+flask_session/
+
+# Logs
+logs/
+*.log
+
+# Uploads
+uploads/
+
+# IDEs
+.vscode/
+.idea/
+
+# Database
+*.sqlite3
+*.db
+
+# macOS
+.DS_Store
