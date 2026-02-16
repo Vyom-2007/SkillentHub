@@ -287,11 +287,25 @@ def get_application_detail(application_id, recruiter_id):
 def update_application_status(application_id, new_status, recruiter_id=None):
     """
     Update status and trigger email if Shortlisted/Accepted.
+    Uses application_service for strict transition enforcement.
     """
-    query = "UPDATE applications SET status = %s, updated_at = NOW() WHERE application_id = %s"
-    result = execute_update(query, (new_status, application_id))
+    from app.services import application_service
     
-    if result and new_status in ['shortlisted', 'interview', 'offer', 'hired', 'accepted', 'rejected']:
+    # Delegate to application_service for core logic
+    success, message = application_service.update_application_status(
+        application_id=application_id, 
+        new_status=new_status, 
+        changed_by_user_id=recruiter_id, # This logs recruiter ID as changed_by
+        notes=None # Optional: we could pass a note if the UI supported it during status change
+    )
+    
+    if not success:
+        return False, message
+    
+    # Handle Side Effects (Emails, Notifications)
+    # These could optionally be moved to application_service, but keeping here 
+    # since they are specific to Recruiter workflows (e.g. company name in email).
+    if new_status in ['shortlisted', 'interview', 'offer', 'hired', 'accepted', 'rejected']:
         try:
             # Fetch details for email
             fetch_sql = """
@@ -317,7 +331,6 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             if details:
                 # Auto-delete other applications if hired/accepted
                 if new_status in ['hired', 'accepted']:
-                    from app.services import application_service
                     application_service.auto_delete_other_applications(
                         user_id=details['user_id'],
                         accepted_application_id=application_id,
@@ -350,7 +363,12 @@ def update_application_status(application_id, new_status, recruiter_id=None):
             from flask import current_app
             current_app.logger.error(f"Error handling status update for app {application_id}: {e}")
         
-    return result
+    return True, message
+
+def get_application_history(application_id):
+    """Get audit history."""
+    from app.services import application_service
+    return application_service.get_application_history(application_id)
 
 def add_note(application_id, recruiter_id, content):
     """Add an internal note."""

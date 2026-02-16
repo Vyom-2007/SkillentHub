@@ -65,10 +65,15 @@ def application_detail(application_id):
         return redirect(url_for('recruiter.applications'))
     
     notes = recruiter_manage_service.get_notes(application_id)
+    history = recruiter_manage_service.get_application_history(application_id)
+    
+    from app.services.application_service import ALLOWED_TRANSITIONS
     
     return render_template('recruiter/application_detail.html', 
                            app=app_details, 
-                           notes=notes)
+                           notes=notes,
+                           history=history,
+                           allowed_transitions=ALLOWED_TRANSITIONS)
 
 @recruiter_bp.route('/applications/<int:application_id>/status', methods=['POST'])
 @recruiter_required
@@ -76,14 +81,12 @@ def update_application_status(application_id):
     recruiter_id = session.get('recruiter_id')
     new_status = request.form.get('status')
     
-    # Verify ownership logic inside service or assume route decorator enough?
-    # Service doesn't explicitly check ownership on update, but UI shouldn't allow it.
-    # Ideally service should check. For now, rely on trusted inputs/detail view check.
+    success, message = recruiter_manage_service.update_application_status(application_id, new_status, recruiter_id)
     
-    if recruiter_manage_service.update_application_status(application_id, new_status, recruiter_id):
-        flash(f'Status updated to {new_status}', 'success')
+    if success:
+        flash(message, 'success')
     else:
-        flash('Failed to update status', 'danger')
+        flash(message, 'danger')
         
     next_url = request.args.get('next') or request.form.get('next')
     if next_url:

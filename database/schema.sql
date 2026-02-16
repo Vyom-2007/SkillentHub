@@ -685,6 +685,25 @@ CREATE TABLE IF NOT EXISTS `interviews` (
   KEY `idx_scheduled_at` (`scheduled_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `application_history`
+--
+
+DROP TABLE IF EXISTS `application_history`;
+CREATE TABLE IF NOT EXISTS `application_history` (
+  `history_id` int NOT NULL AUTO_INCREMENT,
+  `application_id` int NOT NULL,
+  `previous_status` varchar(50) DEFAULT NULL,
+  `new_status` varchar(50) NOT NULL,
+  `changed_by` int DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `changed_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`history_id`),
+  KEY `idx_app_history` (`application_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

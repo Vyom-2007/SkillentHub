@@ -256,3 +256,111 @@ def withdraw_application(user_id, application_id):
     if rows > 0:
         return True, "Application withdrawn successfully"
     return False, "Failed to withdraw application"
+
+
+# ========== STATUS WORKFLOW ==========
+
+ALLOWED_TRANSITIONS = {
+    'applied': ['reviewing', 'rejected'],
+    'reviewing': ['shortlisted', 'rejected'],
+    'shortlisted': ['interview', 'rejected'],
+    'interview': ['offer', 'rejected'],
+    'offer': ['accepted', 'rejected', 'declined'], # rejected here means rescinded
+    'accepted': ['hired'],
+    'rejected': [], # Terminal state
+    'hired': [], # Terminal state
+    'declined': [] # Terminal state
+}
+
+def update_application_status(application_id, new_status, changed_by_user_id=None, notes=None):
+    """
+    Update application status with strict transition validation and audit logging.
+    
+    Args:
+        application_id: ID of the application
+        new_status: Target status
+        changed_by_user_id: ID of the user (recruiter) making the change
+        notes: Optional notes explaining the change
+        
+    Returns:
+        (bool, message): Success status and message
+    """
+    # Get current application
+    app = get_application_by_id(application_id)
+    if not app:
+        return False, "Application not found"
+        
+    current_status = app['status']
+    
+    # Validate transition
+    # Allow same status update (e.g. adding notes)? Maybe not for strict flow, but practical.
+    if current_status == new_status:
+        return True, "Status is already " + new_status
+        
+    valid_next_states = ALLOWED_TRANSITIONS.get(current_status, [])
+    
+    # Special case: Recruiter can always 'Reject' from any non-terminal state?
+    # For now, stick to strict defined flow.
+    
+    if new_status not in valid_next_states:
+        return False, f"Invalid transition from '{current_status}' to '{new_status}'. Allowed: {', '.join(valid_next_states)}"
+        
+    # Perform Update
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            # Update Status
+            cursor.execute(
+                "UPDATE applications SET status = %s WHERE application_id = %s",
+                (new_status, application_id)
+            )
+            
+            # Log History
+            cursor.execute("""
+                INSERT INTO application_history 
+                (application_id, previous_status, new_status, changed_by, notes)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (application_id, current_status, new_status, changed_by_user_id, notes))
+            
+        connection.commit()
+        
+        # Trigger notifications/side effects
+        if new_status == 'accepted':
+            # Auto-delete logic should be called here or handled by caller? 
+            # Caller might be user accepting, so user_id would be 'changed_by'.
+            # For correctness, let's keep side-effects separated or ensure imports don't cycle.
+            pass
+            
+        return True, f"Status updated to {new_status}"
+        
+    except Exception as e:
+        connection.rollback()
+        return False, f"Database error: {str(e)}"
+    finally:
+        connection.close()
+
+def get_application_history(application_id):
+    """Get audit history for an application."""
+    query = """
+        SELECT h.*, 
+               CASE WHEN r.recruiter_id IS NOT NULL THEN r.company_name 
+                    WHEN u.user_id IS NOT NULL THEN p.full_name
+                    ELSE 'System' END as changed_by_name
+        FROM application_history h
+        LEFT JOIN recruiters r ON h.changed_by = r.recruiter_id -- Assuming changed_by is recruiter_id (wait, user_id and recruiter_id distinct?)
+        -- If changed_by_user_id is generic ID, we need to know type. 
+        -- For now, let's assume it's recruiter ID if context implies. 
+        -- Or we need a changed_by_type column. 
+        -- Simplification: Just show ID or fetch name if needed.
+        LEFT JOIN users u ON h.changed_by = u.user_id 
+        LEFT JOIN profiles p ON u.user_id = p.user_id
+        WHERE h.application_id = %s
+        ORDER BY h.changed_at DESC
+    """
+    # Note: This join is tricky if IDs overlap between recruiters and users. 
+    # Usually they are distinct tables. Application history 'changed_by' ideally stores Recruiter ID.
+    # But candidates can also change status (Accept/Decline).
+    # We might need 'changed_by_type' in history (added next time?)
+    # For now, simple query:
+    simple_query = "SELECT * FROM application_history WHERE application_id = %s ORDER BY changed_at DESC"
+    return execute_query(simple_query, (application_id,), fetch_all=True)
