@@ -199,3 +199,20 @@ def create_connection_notification(to_user_id, from_user_id, notif_type):
         content = "Connection update"
     
     notification_service.create_notification(to_user_id, notif_type, content, from_user_id)
+    
+    # Log Activity for accepted connections
+    if notif_type == 'connection_accepted':
+        try:
+            from app.services import activity_service
+            # Log for both users? Or just the one accepting?
+            # Typically "User A and User B are now connected"
+            # Let's log it as the accepter's action
+            activity_service.log_activity(
+                action_type='connection_made',
+                user_id=from_user_id,
+                item_type='user',
+                item_id=to_user_id,
+                details={'target_user': to_user_id}
+            )
+        except Exception as e:
+            print(f"Error logging connection activity: {e}")

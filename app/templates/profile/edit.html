@@ -247,14 +247,74 @@
                             </div>
                             {% endif %}
                         </div>
-                    </div>
+                        <!-- Resume -->
+                        <div class="mb-4">
+                            <label class="form-label">Resume</label>
+                            <div class="p-3 bg-light rounded border">
+                                <div class="mb-2">
+                                    <label for="resumeFile" class="form-label small text-muted">Upload PDF, DOC, or DOCX
+                                        (Max 5MB)</label>
+                                    <input type="file" class="form-control" name="resume_file" id="resumeFile"
+                                        accept=".pdf,.doc,.docx">
+                                </div>
+                                {% if profile.resume_path %}
+                                <div class="d-flex align-items-center mt-2">
+                                    <i class="bi bi-file-earmark-check text-success me-2"></i>
+                                    <span class="small text-muted">Current file uploaded</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
 
-                    <hr class="my-4">
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="bi bi-check-circle me-2"></i>Save Changes
-                        </button>
-                    </div>
+                        <!-- Privacy Settings -->
+                        <div class="mb-4">
+                            <label class="form-label d-block">Privacy Settings</label>
+                            <div class="card p-3 border-0 shadow-sm bg-light">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showSkills"
+                                                name="show_skills" {% if profile.show_skills %}checked{% endif %}>
+                                            <label class="form-check-label" for="showSkills">Show Skills
+                                                Publicly</label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showEducation"
+                                                name="show_education" {% if profile.show_education %}checked{% endif %}>
+                                            <label class="form-check-label" for="showEducation">Show Education
+                                                Publicly</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showExperience"
+                                                name="show_experience" {% if profile.show_experience %}checked{% endif
+                                                %}>
+                                            <label class="form-check-label" for="showExperience">Show Experience
+                                                Publicly</label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showResume"
+                                                name="show_resume" {% if profile.show_resume %}checked{% endif %}>
+                                            <label class="form-check-label" for="showResume">Show Resume
+                                                Publicly</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block fst-italic">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Recruiters can always view your full profile. These settings apply to other users
+                                    and public visitors.
+                                </small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="bi bi-check-circle me-2"></i>Save Changes
+                            </button>
+                        </div>
                 </form>
             </div>
         </div>

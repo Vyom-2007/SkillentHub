@@ -231,6 +231,171 @@
         </div>
     </div>
 
+    <!-- Activity Feed Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Activity Feed</h5>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-outline-secondary active"
+                            onclick="loadFeed('all', this)">All</button>
+                        <button type="button" class="btn btn-outline-secondary"
+                            onclick="loadFeed('jobs', this)">Jobs</button>
+                        <button type="button" class="btn btn-outline-secondary"
+                            onclick="loadFeed('community', this)">Community</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div id="feed-container" class="list-group list-group-flush">
+                        <!-- Feed items will be loaded here -->
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center py-3" id="load-more-container" style="display: none;">
+                        <button class="btn btn-link text-decoration-none" onclick="loadMore()">Load More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadFeed();
+        });
+
+        function loadFeed(filter = 'all', btn = null) {
+            if (filter !== currentFilter || filter === 'all' && currentPage === 1) {
+                currentPage = 1;
+                document.getElementById('feed-container').innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>`;
+                document.getElementById('load-more-container').style.display = 'none';
+            }
+
+            currentFilter = filter;
+
+            // Update buttons
+            if (btn) {
+                document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+
+            fetch(`/api/activity-feed?page=${currentPage}&filter=${filter}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('feed-container');
+                    if (currentPage === 1) container.innerHTML = '';
+
+                    if (data.activities.length === 0 && currentPage === 1) {
+                        container.innerHTML = '<div class="text-center py-4 text-muted">No recent activity.</div>';
+                        return;
+                    }
+
+                    data.activities.forEach(item => {
+                        const html = createFeedItemHtml(item);
+                        container.insertAdjacentHTML('beforeend', html);
+                    });
+
+                    if (data.has_more) {
+                        document.getElementById('load-more-container').style.display = 'block';
+                    } else {
+                        document.getElementById('load-more-container').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading feed:', error);
+                    document.getElementById('feed-container').innerHTML = '<div class="text-center py-4 text-danger">Failed to load feed.</div>';
+                });
+        }
+
+        function loadMore() {
+            currentPage++;
+            loadFeed(currentFilter);
+        }
+
+        function createFeedItemHtml(item) {
+            let icon, content, link;
+            const details = item.details || {};
+
+            switch (item.action_type) {
+                case 'job_posted':
+                    icon = '<i class="bi bi-briefcase text-primary"></i>';
+                    content = `<strong>${item.actor_name}</strong> posted a new job: <strong>${details.title}</strong> in ${details.location}`;
+                    link = `/opportunities/jobs/${item.item_id}`;
+                    break;
+                case 'internship_posted':
+                    icon = '<i class="bi bi-laptop text-info"></i>';
+                    content = `<strong>${item.actor_name}</strong> posted a new internship: <strong>${details.title}</strong>`;
+                    link = `/opportunities/internships/${item.item_id}`;
+                    break;
+                case 'user_hired':
+                    icon = '<i class="bi bi-check-circle text-success"></i>';
+                    content = `<strong>${item.actor_name}</strong> hired a candidate for <strong>${details.item_type}</strong>`;
+                    link = '#';
+                    break;
+                case 'team_created':
+                    icon = '<i class="bi bi-people text-warning"></i>';
+                    content = `<strong>${item.actor_name}</strong> created a team <strong>${details.team_name}</strong>`;
+                    link = '#';
+                    break;
+                case 'connection_made':
+                    icon = '<i class="bi bi-person-plus text-purple"></i>';
+                    content = `<strong>${item.actor_name}</strong> connected with a new person`;
+                    link = '#';
+                    break;
+                case 'hackathon_posted':
+                    icon = '<i class="bi bi-code-slash text-danger"></i>';
+                    content = `<strong>${item.actor_name}</strong> posted a hackathon: <strong>${details.title}</strong>`;
+                    link = '#';
+                    break;
+                case 'competition_posted':
+                    icon = '<i class="bi bi-trophy text-warning"></i>';
+                    content = `<strong>${item.actor_name}</strong> posted a competition: <strong>${details.title}</strong>`;
+                    link = '#';
+                    break;
+                default:
+                    icon = '<i class="bi bi-activity"></i>';
+                    content = `<strong>${item.actor_name}</strong> performed an action`;
+                    link = '#';
+            }
+
+            const avatar = item.actor_picture
+                ? `/static/uploads/profiles/${item.actor_picture}`
+                : 'https://via.placeholder.com/40';
+
+            return `
+                <div class="list-group-item px-4 py-3">
+                    <div class="d-flex align-items-start">
+                        <img src="${avatar}" class="rounded-circle me-3" width="40" height="40" alt="${item.actor_name}" onerror="this.src='https://via.placeholder.com/40'">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <span class="mb-1">${content}</span>
+                                <small class="text-muted ms-2 text-nowrap">${item.time_ago}</small>
+                            </div>
+                            <div class="mt-1">
+                                ${link !== '#' ? `<a href="${link}" class="text-decoration-none small">View Details</a>` : ''}
+                            </div>
+                        </div>
+                        <div class="ms-3 fs-5">
+                            ${icon}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+
     <!-- Recent Activity -->
     <h5 class="mb-3"><i class="bi bi-clock-history me-2"></i>Recent Applications</h5>
     <div class="card activity-table">

@@ -2,6 +2,41 @@
 
 {% block title %}Search Candidates - SkillentHub{% endblock %}
 
+{% block extra_js %}
+<script>
+    async function toggleCandidateSave(btn, userId) {
+        const icon = btn.querySelector('i');
+        const isSaved = icon.classList.contains('bi-bookmark-fill');
+        const action = isSaved ? 'unsave' : 'save';
+
+        try {
+            const response = await fetch(`/recruiter/candidates/${action}/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (isSaved) {
+                    icon.classList.remove('bi-bookmark-fill', 'text-primary');
+                    icon.classList.add('bi-bookmark', 'text-secondary');
+                    btn.title = 'Save';
+                } else {
+                    icon.classList.remove('bi-bookmark', 'text-secondary');
+                    icon.classList.add('bi-bookmark-fill', 'text-primary');
+                    btn.title = 'Unsave';
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -45,7 +80,13 @@
         {% for candidate in candidates %}
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body text-center">
+                <div class="card-body text-center position-relative">
+                    <button class="btn btn-link p-0 text-decoration-none position-absolute top-0 end-0 mt-2 me-2"
+                        onclick="toggleCandidateSave(this, {{ candidate.user_id }})"
+                        title="{{ 'Unsave' if candidate.is_saved else 'Save' }}">
+                        <i
+                            class="bi {% if candidate.is_saved %}bi-bookmark-fill text-primary{% else %}bi-bookmark text-secondary{% endif %} fs-5"></i>
+                    </button>
                     {% if candidate.profile_picture %}
                     <img src="{{ url_for('static', filename='uploads/profiles/' + candidate.profile_picture) }}"
                         class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">

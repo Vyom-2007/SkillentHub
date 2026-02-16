@@ -9,15 +9,16 @@ from flask import current_app
 from app.database.connection import execute_query, execute_insert
 
 
-# Allowed file extensions for profile pictures
+# Allowed file extensions for profile pictures and resumes
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+ALLOWED_RESUME_EXTENSIONS = {'pdf', 'doc', 'docx'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 
-def allowed_file(filename):
+def allowed_file(filename, allowed_set):
     """Check if file extension is allowed."""
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in allowed_set
 
 
 def save_profile_picture(file, user_id):
@@ -28,7 +29,7 @@ def save_profile_picture(file, user_id):
     if not file or file.filename == '':
         return False, "No file selected"
     
-    if not allowed_file(file.filename):
+    if not allowed_file(file.filename, ALLOWED_EXTENSIONS):
         return False, "Only JPG and PNG files are allowed"
     
     # Check file size
@@ -54,13 +55,62 @@ def save_profile_picture(file, user_id):
     return True, filename
 
 
+def save_profile_resume(file, user_id):
+    """
+    Save uploaded resume.
+    Returns: Tuple (success, filename or error_message)
+    """
+    if not file or file.filename == '':
+        return False, "No file selected"
+    
+    if not allowed_file(file.filename, ALLOWED_RESUME_EXTENSIONS):
+        return False, "Only PDF, DOC, and DOCX files are allowed"
+    
+    # Check file size
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    
+    if size > MAX_FILE_SIZE:
+        return False, "File size exceeds 5MB limit"
+    
+    # Create unique filename
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    filename = f"resume_{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
+    
+    # Ensure upload directory exists
+    upload_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profile_resumes')
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Save file
+    filepath = os.path.join(upload_dir, filename)
+    file.save(filepath)
+    
+    return True, filename
+
+
 def delete_profile_picture(filename):
     """Delete a profile picture file."""
     if not filename:
         return
     filepath = os.path.join(current_app.root_path, 'static', 'uploads', 'profiles', filename)
     if os.path.exists(filepath):
-        os.remove(filepath)
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
+
+
+def delete_profile_resume(filename):
+    """Delete a resume file."""
+    if not filename:
+        return
+    filepath = os.path.join(current_app.root_path, 'static', 'uploads', 'profile_resumes', filename)
+    if os.path.exists(filepath):
+        try:
+            os.remove(filepath)
+        except OSError:
+            pass
 
 
 # ==================== Profile CRUD ====================
@@ -83,20 +133,32 @@ def profile_exists(user_id):
     return result is not None
 
 
-def create_profile(user_id, data, profile_picture=None):
+def create_profile(user_id, data, profile_picture=None, resume_file=None):
     """Create a new profile."""
     picture_filename = None
+    resume_filename = None
     
     if profile_picture and profile_picture.filename:
         success, result = save_profile_picture(profile_picture, user_id)
         if not success:
             return False, result
         picture_filename = result
+        
+    if resume_file and resume_file.filename:
+        success, result = save_profile_resume(resume_file, user_id)
+        if not success:
+            # Cleanup picture if resume failed
+            if picture_filename: delete_profile_picture(picture_filename)
+            return False, result
+        resume_filename = result
     
     try:
         query = """
-            INSERT INTO profiles (user_id, full_name, headline, bio, location, phone, profile_picture)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO profiles (
+                user_id, full_name, headline, bio, location, phone, profile_picture,
+                resume_path, show_skills, show_education, show_experience, show_resume
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         execute_insert(query, (
             user_id,
@@ -105,17 +167,23 @@ def create_profile(user_id, data, profile_picture=None):
             data.get('bio'),
             data.get('location'),
             data.get('phone'),
-            picture_filename
+            picture_filename,
+            resume_filename,
+            data.get('show_skills', 1),
+            data.get('show_education', 1),
+            data.get('show_experience', 1),
+            data.get('show_resume', 0)
         ))
         return True, "Profile created successfully"
     except Exception as e:
         return False, str(e)
 
 
-def update_profile(user_id, data, profile_picture=None):
+def update_profile(user_id, data, profile_picture=None, resume_file=None):
     """Update an existing profile."""
     existing = get_profile(user_id)
     picture_filename = existing.get('profile_picture') if existing else None
+    resume_filename = existing.get('resume_path') if existing else None
     
     if profile_picture and profile_picture.filename:
         if picture_filename:
@@ -124,12 +192,22 @@ def update_profile(user_id, data, profile_picture=None):
         if not success:
             return False, result
         picture_filename = result
+        
+    if resume_file and resume_file.filename:
+        if resume_filename:
+            delete_profile_resume(resume_filename)
+        success, result = save_profile_resume(resume_file, user_id)
+        if not success:
+            return False, result
+        resume_filename = result
     
     try:
         query = """
             UPDATE profiles 
             SET full_name = %s, headline = %s, bio = %s, 
                 location = %s, phone = %s, profile_picture = %s,
+                resume_path = %s, show_skills = %s, show_education = %s,
+                show_experience = %s, show_resume = %s,
                 updated_at = NOW()
             WHERE user_id = %s
         """
@@ -140,6 +218,11 @@ def update_profile(user_id, data, profile_picture=None):
             data.get('location'),
             data.get('phone'),
             picture_filename,
+            resume_filename,
+            data.get('show_skills', 1),
+            data.get('show_education', 1),
+            data.get('show_experience', 1),
+            data.get('show_resume', 0),
             user_id
         ))
         return True, "Profile updated successfully"

@@ -71,6 +71,24 @@ CREATE TABLE IF NOT EXISTS `comments` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `application_notes`
+--
+
+DROP TABLE IF EXISTS `application_notes`;
+CREATE TABLE IF NOT EXISTS `application_notes` (
+  `note_id` int NOT NULL AUTO_INCREMENT,
+  `application_id` int NOT NULL,
+  `recruiter_id` int NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`note_id`),
+  KEY `idx_app_notes` (`application_id`),
+  KEY `idx_recruiter_notes` (`recruiter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `competitions`
 --
 
@@ -428,6 +446,11 @@ CREATE TABLE IF NOT EXISTS `profiles` (
   `visibility` enum('public','registered_only') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'public',
   `show_email` tinyint(1) NOT NULL DEFAULT '1',
   `show_phone` tinyint(1) NOT NULL DEFAULT '0',
+  `resume_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `show_skills` tinyint(1) NOT NULL DEFAULT '1',
+  `show_education` tinyint(1) NOT NULL DEFAULT '1',
+  `show_experience` tinyint(1) NOT NULL DEFAULT '1',
+  `show_resume` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`profile_id`),
   UNIQUE KEY `user_id` (`user_id`),
   KEY `idx_full_name` (`full_name`(250)),
@@ -597,6 +620,71 @@ CREATE TABLE IF NOT EXISTS `user_skills` (
   KEY `idx_user_id` (`user_id`),
   KEY `idx_skill_id` (`skill_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `saved_jobs`
+--
+
+DROP TABLE IF EXISTS `saved_jobs`;
+CREATE TABLE IF NOT EXISTS `saved_jobs` (
+  `save_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `item_type` enum('job','internship','competition','hackathon') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `item_id` int NOT NULL,
+  `saved_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`save_id`),
+  UNIQUE KEY `idx_user_item_unique` (`user_id`,`item_type`,`item_id`),
+  KEY `idx_user_saved` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `saved_candidates`
+--
+
+DROP TABLE IF EXISTS `saved_candidates`;
+CREATE TABLE IF NOT EXISTS `saved_candidates` (
+  `save_id` int NOT NULL AUTO_INCREMENT,
+  `recruiter_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `saved_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`save_id`),
+  UNIQUE KEY `idx_recruiter_user_unique` (`recruiter_id`,`user_id`),
+  KEY `idx_recruiter_saved` (`recruiter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `interviews`
+--
+
+DROP TABLE IF EXISTS `interviews`;
+CREATE TABLE IF NOT EXISTS `interviews` (
+  `interview_id` int NOT NULL AUTO_INCREMENT,
+  `application_id` int NOT NULL,
+  `recruiter_id` int NOT NULL,
+  `candidate_id` int NOT NULL,
+  `scheduled_at` datetime NOT NULL,
+  `mode` enum('online','offline','phone') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'online',
+  `location_url` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `status` enum('pending','confirmed','declined','completed','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`interview_id`),
+  KEY `idx_app_interview` (`application_id`),
+  KEY `idx_recruiter_interview` (`recruiter_id`),
+  KEY `idx_candidate_interview` (`candidate_id`),
+  KEY `idx_scheduled_at` (`scheduled_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

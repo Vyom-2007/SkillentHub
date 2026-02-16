@@ -32,11 +32,15 @@ def opportunities():
     
     # Get filter options
     locations = opportunity_service.get_all_locations()
+    skills = opportunity_service.get_all_skills()
+    experience_levels = opportunity_service.get_all_experience_levels()
     counts = opportunity_service.get_opportunity_counts()
     
     return render_template('opportunities/opportunities.html',
                            opportunities=items,
                            locations=locations,
+                           skills=skills,
+                           experience_levels=experience_levels,
                            counts=counts,
                            current_type=opp_type)
 
@@ -52,6 +56,10 @@ def search_opportunities():
     job_type = request.args.get('job_type', '').strip()
     date_posted = request.args.get('date_posted', '').strip()
     experience = request.args.get('experience', '').strip()
+    
+    # Get list of skills
+    skills = request.args.getlist('skills[]')
+    
     page = request.args.get('page', 1, type=int)
     user_id = session.get('user_id')
     
@@ -63,6 +71,7 @@ def search_opportunities():
         job_type=job_type if job_type else None,
         date_posted=date_posted if date_posted else None,
         experience=experience if experience else None,
+        skills=skills if skills else None,
         page=page,
         user_id=user_id
     )
@@ -127,3 +136,33 @@ def internship_detail(internship_id):
                            item=internship,
                            item_type='internship',
                            has_applied=has_applied)
+
+
+@opportunities_bp.route('/opportunities/save/<string:item_type>/<int:item_id>', methods=['POST'])
+@login_required
+def save_opportunity(item_type, item_id):
+    """Save an opportunity."""
+    from app.services import user_service
+    user_id = session.get('user_id')
+    user_service.save_opportunity(user_id, item_type, item_id)
+    return jsonify({'success': True})
+
+
+@opportunities_bp.route('/opportunities/unsave/<string:item_type>/<int:item_id>', methods=['POST'])
+@login_required
+def unsave_opportunity(item_type, item_id):
+    """Unsave an opportunity."""
+    from app.services import user_service
+    user_id = session.get('user_id')
+    user_service.unsave_opportunity(user_id, item_type, item_id)
+    return jsonify({'success': True})
+
+
+@opportunities_bp.route('/saved-jobs')
+@login_required
+def saved_jobs():
+    """Display saved jobs."""
+    from app.services import user_service
+    user_id = session.get('user_id')
+    saved_items = user_service.get_saved_opportunities(user_id)
+    return render_template('users/saved_jobs.html', saved_items=saved_items)

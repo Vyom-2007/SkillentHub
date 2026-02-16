@@ -38,11 +38,16 @@ function initFilters() {
     });
 
     // Other filters
-    ['locationFilter', 'workModeFilter', 'jobTypeFilter', 'dateFilter'].forEach(id => {
+    ['locationFilter', 'workModeFilter', 'jobTypeFilter', 'dateFilter', 'experienceFilter'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener('change', performSearch);
         }
+    });
+
+    // Skill filters
+    document.querySelectorAll('.skill-filter').forEach(el => {
+        el.addEventListener('change', performSearch);
     });
 }
 
@@ -77,6 +82,14 @@ function performSearch() {
 
     const datePosted = document.getElementById('dateFilter')?.value;
     if (datePosted) params.append('date_posted', datePosted);
+
+    const experience = document.getElementById('experienceFilter')?.value;
+    if (experience) params.append('experience', experience);
+
+    // Skills
+    document.querySelectorAll('.skill-filter:checked').forEach(el => {
+        params.append('skills[]', el.value);
+    });
 
     showLoading(true);
 
@@ -156,6 +169,10 @@ function clearFilters() {
     document.getElementById('workModeFilter').value = '';
     document.getElementById('jobTypeFilter').value = '';
     document.getElementById('dateFilter').value = '';
+    const expFilter = document.getElementById('experienceFilter');
+    if (expFilter) expFilter.value = '';
+
+    document.querySelectorAll('.skill-filter').forEach(el => el.checked = false);
 
     currentType = 'all';
     document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
@@ -253,3 +270,37 @@ function escapeHtml(text) {
 
 // Global exports
 window.clearFilters = clearFilters;
+window.toggleSave = toggleSave;
+
+async function toggleSave(btn, type, id) {
+    const icon = btn.querySelector('i');
+    const isSaved = icon.classList.contains('bi-bookmark-fill');
+    const action = isSaved ? 'unsave' : 'save';
+
+    try {
+        const response = await fetch(`/opportunities/${action}/${type}/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (isSaved) {
+                icon.classList.remove('bi-bookmark-fill', 'text-primary');
+                icon.classList.add('bi-bookmark');
+                btn.title = 'Save';
+            } else {
+                icon.classList.remove('bi-bookmark');
+                icon.classList.add('bi-bookmark-fill', 'text-primary');
+                btn.title = 'Unsave';
+            }
+        } else {
+            console.error('Failed to toggle save');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}

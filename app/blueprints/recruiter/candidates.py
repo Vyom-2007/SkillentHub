@@ -20,14 +20,19 @@ def list_candidates():
                (SELECT GROUP_CONCAT(s.skill_name SEPARATOR ', ') 
                 FROM user_skills us 
                 JOIN skills s ON us.skill_id = s.skill_id 
-                WHERE us.user_id = p.user_id) as skills
+                WHERE us.user_id = p.user_id) as skills,
+               CASE WHEN sc.save_id IS NOT NULL THEN 1 ELSE 0 END as is_saved
         FROM profiles p
         LEFT JOIN user_skills us ON p.user_id = us.user_id
         LEFT JOIN skills s ON us.skill_id = s.skill_id
+        LEFT JOIN saved_candidates sc ON p.user_id = sc.user_id AND sc.recruiter_id = %s
         WHERE p.visibility = 'public'
     """
     
-    params = []
+    # Recruiter ID is first param now
+    from flask import session
+    recruiter_id = session.get('recruiter_id')
+    params = [recruiter_id]
     
     if search_query:
         sql += " AND (p.full_name LIKE %s OR p.headline LIKE %s)"
@@ -146,3 +151,33 @@ def send_message_api():
         return jsonify({'success': False, 'error': error}), 400
         
     return jsonify({'success': True})
+
+
+@candidates_bp.route('/recruiter/candidates/save/<int:user_id>', methods=['POST'])
+@recruiter_required
+def save_candidate(user_id):
+    """Save a candidate."""
+    from app.services import recruiter_service
+    recruiter_id = session.get('recruiter_id')
+    success, msg = recruiter_service.save_candidate(recruiter_id, user_id)
+    return jsonify({'success': success, 'message': msg})
+
+
+@candidates_bp.route('/recruiter/candidates/unsave/<int:user_id>', methods=['POST'])
+@recruiter_required
+def unsave_candidate(user_id):
+    """Unsave a candidate."""
+    from app.services import recruiter_service
+    recruiter_id = session.get('recruiter_id')
+    success, msg = recruiter_service.unsave_candidate(recruiter_id, user_id)
+    return jsonify({'success': success, 'message': msg})
+
+
+@candidates_bp.route('/recruiter/saved-candidates')
+@recruiter_required
+def saved_candidates():
+    """Display saved candidates."""
+    from app.services import recruiter_service
+    recruiter_id = session.get('recruiter_id')
+    saved = recruiter_service.get_saved_candidates(recruiter_id)
+    return render_template('recruiter/candidates/saved.html', candidates=saved)

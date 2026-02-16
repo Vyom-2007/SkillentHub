@@ -7,6 +7,7 @@ from app.utils.decorators import recruiter_required
 from app.services import recruiter_service
 from app.models import recruiter as recruiter_model
 
+
 recruiter_bp = Blueprint('recruiter', __name__, url_prefix='/recruiter')
 
 
@@ -28,5 +29,8 @@ def dashboard():
     return render_template('recruiter/dashboard.html', 
                            recruiter=recruiter,
                            stats=stats)
+
+# Import sub-modules to register routes
+from app.blueprints.recruiter import interviews
 
 

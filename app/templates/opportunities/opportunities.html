@@ -211,6 +211,33 @@
                     </select>
                 </div>
 
+                <!-- Experience (Jobs only) -->
+                <div class="filter-section" id="experienceSection">
+                    <label><i class="bi bi-bar-chart me-1"></i>Experience</label>
+                    <select class="form-select" id="experienceFilter">
+                        <option value="">Any</option>
+                        {% for exp in experience_levels %}
+                        <option value="{{ exp }}">{{ exp }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Skills -->
+                <div class="filter-section">
+                    <label><i class="bi bi-lightning-charge me-1"></i>Skills</label>
+                    <div class="card p-2 border-0 bg-light" style="max-height: 150px; overflow-y: auto;">
+                        {% for skill in skills %}
+                        <div class="form-check">
+                            <input class="form-check-input skill-filter" type="checkbox" value="{{ skill }}"
+                                id="skill_{{ loop.index }}">
+                            <label class="form-check-label small" for="skill_{{ loop.index }}">
+                                {{ skill }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <!-- Date Posted -->
                 <div class="filter-section">
                     <label><i class="bi bi-calendar me-1"></i>Posted</label>
@@ -250,12 +277,16 @@
                                     class="opp-badge {% if item.type == 'job' %}badge-job{% else %}badge-internship{% endif %}">
                                     {{ item.type|capitalize }}
                                 </span>
-                                <span
-                                    class="opp-badge {% if item.work_mode == 'remote' %}badge-remote{% elif item.work_mode == 'hybrid' %}badge-hybrid{% else %}badge-onsite{% endif %}">
-                                    {{ item.work_mode|replace('-', ' ')|title if item.work_mode else 'On-site' }}
+                                {{ item.work_mode|replace('-', ' ')|title if item.work_mode else 'On-site' }}
                                 </span>
                             </div>
                             <div class="text-end">
+                                <button class="btn btn-link p-0 text-decoration-none save-btn me-2"
+                                    onclick="toggleSave(this, '{{ item.type }}', {{ item.id }})"
+                                    title="{{ 'Unsave' if item.is_saved else 'Save' }}">
+                                    <i
+                                        class="bi {% if item.is_saved %}bi-bookmark-fill text-primary{% else %}bi-bookmark{% endif %} fs-5"></i>
+                                </button>
                                 {% if item.match_score is defined and item.match_score is not none %}
                                 {% if item.match_score >= 80 %}
                                 <div class="mb-1"><span class="badge bg-success">Match: {{ item.match_score }}%</span>

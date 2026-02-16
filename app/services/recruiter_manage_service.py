@@ -51,8 +51,9 @@ def get_posted_opportunities(recruiter_id, status_filter=None, search_query=None
     final_query = " UNION ALL ".join(queries) + " ORDER BY created_at DESC"
     
     # Execute (params repeated 4 times)
+    # Execute (params repeated 4 times)
     params = (recruiter_id, recruiter_id, recruiter_id, recruiter_id)
-    return execute_query(final_query, params)
+    return execute_query(final_query, params, fetch_all=True)
 
 def toggle_opportunity_status(item_type, item_id, recruiter_id):
     """
@@ -251,7 +252,7 @@ def get_application_detail(application_id, recruiter_id):
     SELECT 
         a.*,
         p.full_name, u.email, u.user_id as applicant_id,
-        p.profile_picture, p.headline, p.skills, p.city, p.state,
+        p.profile_picture, p.headline, p.location,
         COALESCE(j.title, i.title, c.title, h.title) as item_title
     FROM applications a
     JOIN users u ON a.user_id = u.user_id
@@ -333,6 +334,15 @@ def update_application_status(application_id, new_status, recruiter_id=None):
                     status=new_status,
                     application_id=application_id
                 )
+
+                # Send in-app notification
+                from app.services import notification_service
+                notification_service.create_notification(
+                    user_id=details['user_id'],
+                    notification_type='application_update',
+                    content=f"Your application for {details['item_title']} is now {new_status.capitalize()}.",
+                    related_id=application_id
+                )
                     
         except Exception as e:
             # Log error but don't fail the status update
@@ -356,4 +366,4 @@ def get_notes(application_id):
         WHERE n.application_id = %s
         ORDER BY n.created_at DESC
     """
-    return execute_query(query, (application_id,))
+    return execute_query(query, (application_id,), fetch_all=True)

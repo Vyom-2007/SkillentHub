@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Candidates - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4><i class="bi bi-bookmark-fill me-2 text-primary"></i>Saved Candidates</h4>
+        <a href="{{ url_for('recruiter_candidates.list_candidates') }}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-search me-1"></i>Find Candidates
+        </a>
+    </div>
+
+    {% if candidates %}
+    <div class="row">
+        {% for candidate in candidates %}
+        <div class="col-md-6 col-lg-4 mb-4" id="saved-candidate-{{ candidate.user_id }}">
+            <div class="card h-100 shadow-sm hover-shadow transition">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ candidate.profile_picture or url_for('static', filename='img/default_profile.png') }}"
+                            alt="{{ candidate.full_name }}" class="rounded-circle me-3"
+                            style="width: 50px; height: 50px; object-fit: cover;">
+                        <div>
+                            <h5 class="card-title mb-0">
+                                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"
+                                    class="text-decoration-none text-dark">
+                                    {{ candidate.full_name }}
+                                </a>
+                            </h5>
+                            <small class="text-muted">{{ candidate.headline or 'No headline' }}</small>
+                        </div>
+                        <div class="ms-auto">
+                            <button class="btn btn-link text-danger p-0"
+                                onclick="unsaveCandidate({{ candidate.user_id }})" title="Remove">
+                                <i class="bi bi-bookmark-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-2 text-secondary small">
+                        <i class="bi bi-geo-alt me-1"></i> {{ candidate.location or 'Location not specified' }}
+                    </div>
+
+                    {% if candidate.note %}
+                    <div class="alert alert-light border p-2 mb-0 small">
+                        <i class="bi bi-sticky me-1"></i> {{ candidate.note }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-top-0 pt-0 text-muted small">
+                    Saved {{ candidate.saved_at.strftime('%Y-%m-%d') }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-people display-1 text-muted"></i>
+        </div>
+        <h5>No saved candidates yet</h5>
+        <p class="text-muted">Bookmark promising candidates to view them here later.</p>
+        <a href="{{ url_for('recruiter_candidates.list_candidates') }}" class="btn btn-primary mt-2">Find Candidates</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    async function unsaveCandidate(userId) {
+        if (!confirm('Remove candidate from saved list?')) return;
+
+        try {
+            const response = await fetch(`/recruiter/candidates/unsave/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                document.getElementById(`saved-candidate-${userId}`).remove();
+                if (document.querySelectorAll('.col-md-6').length === 0) {
+                    location.reload();
+                }
+            } else {
+                alert('Failed to remove candidate.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>
+{% endblock %}

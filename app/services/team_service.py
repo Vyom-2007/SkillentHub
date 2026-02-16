@@ -36,12 +36,24 @@ def create_team(user_id, team_name, item_type, item_id, max_members=None):
             cursor.execute(member_query, (team_id, user_id))
         
         connection.commit()
-        return team_id, None
-    except Exception as e:
-        connection.rollback()
-        return None, str(e)
     finally:
         connection.close()
+        
+    # Log Activity
+    if team_id:
+        try:
+            from app.services import activity_service
+            activity_service.log_activity(
+                action_type='team_created',
+                user_id=user_id,
+                item_type='team',
+                item_id=team_id,
+                details={'team_name': team_name, 'event_type': item_type}
+            )
+        except Exception as e:
+            print(f"Error logging team activity: {e}")
+            
+    return team_id, None
 
 
 def invite_member(leader_id, team_id, target_user_id):

@@ -338,4 +338,69 @@ def update_application_status(application_id, new_status, recruiter_id):
     
     if rows:
         return True, "Status updated successfully"
+    if rows:
+        # Log Activity if hired/accepted
+        if new_status in ['hired', 'accepted']:
+            try:
+                from app.services import activity_service
+                # Need to find which user was hired.
+                # Query above didn't return user_id, let's fetch it.
+                user_check = execute_query("SELECT user_id, item_type, item_id FROM applications WHERE application_id = %s", (application_id,), fetch_one=True)
+                if user_check:
+                    activity_service.log_activity(
+                        action_type='user_hired',
+                        recruiter_id=recruiter_id,
+                        user_id=user_check['user_id'],
+                        item_type='application',
+                        item_id=application_id,
+                        details={'status': new_status, 'item_type': user_check['item_type'], 'item_id': user_check['item_id']}
+                    )
+            except Exception as e:
+                print(f"Error logging hire activity: {e}")
+                
+        return True, "Status updated successfully"
     return False, "Failed to update status"
+
+
+def save_candidate(recruiter_id, user_id, note=None):
+    """Save a candidate profile."""
+    # Ensure user exists
+    check_user = execute_query("SELECT 1 FROM users WHERE user_id = %s", (user_id,), fetch_one=True)
+    if not check_user:
+        return False, "User not found"
+        
+    query = """
+        INSERT IGNORE INTO saved_candidates (recruiter_id, user_id, note)
+        VALUES (%s, %s, %s)
+    """
+    execute_update(query, (recruiter_id, user_id, note))
+    return True, "Candidate saved successfully"
+
+
+def unsave_candidate(recruiter_id, user_id):
+    """Unsave a candidate."""
+    query = "DELETE FROM saved_candidates WHERE recruiter_id = %s AND user_id = %s"
+    execute_update(query, (recruiter_id, user_id))
+    return True, "Candidate removed from saved list"
+
+
+def get_saved_candidates(recruiter_id):
+    """Get all saved candidates for a recruiter."""
+    query = """
+        SELECT s.save_id, s.user_id, s.note, s.saved_at,
+               p.full_name, p.headline, p.profile_picture, p.location,
+               u.email
+        FROM saved_candidates s
+        JOIN users u ON s.user_id = u.user_id
+        LEFT JOIN profiles p ON u.user_id = p.user_id
+        WHERE s.recruiter_id = %s
+        ORDER BY s.saved_at DESC
+    """
+    return execute_query(query, (recruiter_id,), fetch_all=True) or []
+
+
+def is_candidate_saved(recruiter_id, user_id):
+    """Check if candidate is saved."""
+    query = "SELECT 1 FROM saved_candidates WHERE recruiter_id = %s AND user_id = %s"
+    result = execute_query(query, (recruiter_id, user_id), fetch_one=True)
+    return bool(result)

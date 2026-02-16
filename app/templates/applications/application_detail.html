@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Application Details - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <a href="{{ url_for('applications.my_applications') }}" class="btn btn-outline-secondary mb-4">
+        <i class="bi bi-arrow-left"></i> Back to My Applications
+    </a>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <span class="badge bg-light text-dark border mb-2">{{ application.item_type|capitalize }}</span>
+                    <h2 class="fw-bold mb-1">{{ application.item_title }}</h2>
+                    <p class="text-muted mb-3">{{ application.company_name }}</p>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge 
+                            {% if application.status == 'accepted' or application.status == 'hired' %}bg-success
+                            {% elif application.status == 'rejected' %}bg-danger
+                            {% elif application.status == 'shortlisted' or application.status == 'interview' %}bg-info
+                            {% else %}bg-secondary{% endif %} fs-6">
+                            {{ application.status|capitalize }}
+                        </span>
+                        <small class="text-muted">Applied on {{ application.applied_at.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interview Section -->
+            {% if interview %}
+            <div class="card shadow-sm mb-4 border-warning">
+                <div class="card-header bg-warning bg-opacity-10 fw-bold text-warning-emphasis">
+                    <i class="bi bi-calendar-event me-2"></i>Scheduled Interview
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="small text-muted fw-bold">Date & Time</label>
+                            <p class="mb-0 fs-5">{{ interview.scheduled_at.strftime('%b %d, %Y %I:%M %p') }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="small text-muted fw-bold">Mode</label>
+                            <p class="mb-0 fs-5">
+                                <i
+                                    class="bi {% if interview.mode == 'online' %}bi-camera-video{% elif interview.mode == 'phone' %}bi-telephone{% else %}bi-geo-alt{% endif %} me-1"></i>
+                                {{ interview.mode|capitalize }}
+                            </p>
+                        </div>
+                        {% if interview.location_url %}
+                        <div class="col-12 mb-3">
+                            <label class="small text-muted fw-bold">Link / Location</label>
+                            <p class="mb-0">
+                                {% if interview.mode == 'online' and 'http' in interview.location_url %}
+                                <a href="{{ interview.location_url }}" target="_blank" class="text-break">{{
+                                    interview.location_url }}</a>
+                                {% else %}
+                                {{ interview.location_url }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endif %}
+                        {% if interview.notes %}
+                        <div class="col-12 mb-3">
+                            <label class="small text-muted fw-bold">Notes from Recruiter</label>
+                            <div class="bg-light p-2 rounded small">{{ interview.notes }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            Status:
+                            <span class="fw-bold
+                                {% if interview.status == 'confirmed' %}text-success
+                                {% elif interview.status == 'declined' %}text-danger
+                                {% elif interview.status == 'pending' %}text-warning
+                                {% else %}text-secondary{% endif %}">
+                                {{ interview.status|capitalize }}
+                            </span>
+                        </div>
+
+                        {% if interview.status == 'pending' %}
+                        <div class="d-flex gap-2">
+                            <form
+                                action="{{ url_for('applications.respond_interview', interview_id=interview.interview_id) }}"
+                                method="POST">
+                                <input type="hidden" name="action" value="decline">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Decline</button>
+                            </form>
+                            <form
+                                action="{{ url_for('applications.respond_interview', interview_id=interview.interview_id) }}"
+                                method="POST">
+                                <input type="hidden" name="action" value="confirm">
+                                <button type="submit" class="btn btn-success btn-sm">Confirm Attendance</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- My Application Content -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">My Application</div>
+                <div class="card-body">
+                    {% if application.cover_letter %}
+                    <h6 class="fw-bold mb-2">Cover Letter</h6>
+                    <div class="bg-light p-3 rounded mb-3 text-break">
+                        {{ application.cover_letter }}
+                    </div>
+                    {% endif %}
+
+                    {% if application.resume_path %}
+                    <h6 class="fw-bold mb-2">Resume</h6>
+                    <div class="p-3 border rounded d-flex align-items-center">
+                        <i class="bi bi-file-earmark-pdf fs-3 text-danger me-3"></i>
+                        <div>
+                            <div>{{ application.resume_path.split('/')[-1] }}</div>
+                            <a href="{{ url_for('applications.download_resume', filename=application.resume_path.split('/')[-1]) }}"
+                                class="small text-decoration-none">Download</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Timeline (Placeholder for now) -->
+            <div class="card shadow-sm border-0 bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-info-circle me-2"></i>Need Help?</h5>
+                    <p class="card-text small">If you have questions about the interview or position, you can message
+                        the recruiter directly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

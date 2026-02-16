@@ -389,3 +389,39 @@ def cancel_event_registration():
     if success:
         return jsonify({'success': True, 'message': result})
     return jsonify({'error': result}), 400
+
+
+@auth_bp.route('/api/activity-feed')
+def get_activity_feed():
+    """Get paginated activity feed."""
+    # Allow both users and recruiters
+    if not session.get('user_id') and not session.get('recruiter_id'):
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    page = request.args.get('page', 1, type=int)
+    filter_type = request.args.get('filter', None)
+    
+    from app.services import activity_service
+    activities = activity_service.get_activity_feed(page=page, filter_type=filter_type)
+    
+    # Format for JSON response
+    feed_data = []
+    from app.services.recruiter_service import get_time_ago # Reuse util
+    
+    for item in activities:
+        feed_data.append({
+            'id': item['activity_id'],
+            'actor_name': item['actor_name'] or 'Unknown',
+            'actor_picture': item['actor_picture'], # Filename
+            'action_type': item['action_type'],
+            'item_type': item['item_type'],
+            'item_id': item['item_id'],
+            'details': item['details'], # Already parsed if dict
+            'created_at': item['created_at'].isoformat() if item['created_at'] else None,
+            'time_ago': get_time_ago(item['created_at'])
+        })
+        
+    return jsonify({
+        'activities': feed_data,
+        'has_more': len(feed_data) >= 20 # Assuming default per_page is 20
+    })

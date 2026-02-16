@@ -193,7 +193,7 @@ def edit():
         # Handle skills
         skill_ids = request.form.getlist('skills')
         
-        # Handle custom skills
+        # Custom skills
         custom_skills = request.form.getlist('custom_skills[]')
         if custom_skills:
             for skill_name in custom_skills:
@@ -202,7 +202,27 @@ def edit():
                     if str(new_skill_id) not in skill_ids:
                         skill_ids.append(str(new_skill_id))
         
+        # Additional privacy settings
+        data['show_skills'] = 1 if request.form.get('show_skills') else 0
+        data['show_education'] = 1 if request.form.get('show_education') else 0
+        data['show_experience'] = 1 if request.form.get('show_experience') else 0
+        data['show_resume'] = 1 if request.form.get('show_resume') else 0
+        
+        # Handle resume upload
+        resume_file = request.files.get('resume_file')
+        
         print(f"DEBUG: Received skill_ids from form: {skill_ids}")
+        
+        # Update profile with resume
+        success, message = profile_service.update_profile(user_id, data, profile_picture, resume_file)
+        
+        if not success:
+            flash(message, 'error')
+            profile = profile_service.get_profile_with_details(user_id)
+            return render_template('profile/edit.html',
+                                   profile=profile,
+                                   all_skills=profile_service.get_all_skills())
+        
         profile_service.update_user_skills(user_id, skill_ids)
         
         # Handle education
@@ -222,6 +242,17 @@ def edit():
     return render_template('profile/edit.html',
                            profile=profile,
                            all_skills=profile_service.get_all_skills())
+
+
+@profile_bp.route('/resume/<filename>')
+def download_resume(filename):
+    """Download user resume."""
+    from flask import send_from_directory
+    import os
+    from flask import current_app
+    
+    directory = os.path.join(current_app.root_path, 'static', 'uploads', 'profile_resumes')
+    return send_from_directory(directory, filename, as_attachment=True)
 
 
 @profile_bp.route('/education/delete/<int:education_id>', methods=['POST'])

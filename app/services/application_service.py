@@ -78,6 +78,27 @@ def apply_to_opportunity(user_id, item_type, item_id, resume_file=None, cover_le
     application_id = execute_insert(query, (user_id, item_type, item_id, resume_path, cover_letter))
     
     if application_id:
+        # Send in-app notification to candidate
+        try:
+            from app.services import notification_service
+            # Fetch title for notification
+            title = "Opportunity"
+            if item_type == 'job':
+                res = execute_query("SELECT title FROM jobs WHERE job_id=%s", (item_id,), fetch_one=True)
+                if res: title = res['title']
+            elif item_type == 'internship':
+                res = execute_query("SELECT title FROM internships WHERE internship_id=%s", (item_id,), fetch_one=True)
+                if res: title = res['title']
+                
+            notification_service.create_notification(
+                user_id=user_id,
+                notification_type='application_update',
+                content=f"You successfully applied for {title}",
+                related_id=application_id
+            )
+        except Exception as e:
+            print(f"Error sending application notification: {e}")
+            
         return True, application_id
     return False, "Failed to submit application"
 

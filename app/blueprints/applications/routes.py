@@ -67,7 +67,17 @@ def application_detail(application_id):
         flash('Application not found.', 'error')
         return redirect(url_for('applications.my_applications'))
     
-    return render_template('applications/application_detail.html', application=application)
+    # Fetch interview if exists
+    from app.database.connection import execute_query
+    interview = execute_query(
+        "SELECT * FROM interviews WHERE application_id = %s", 
+        (application_id,), 
+        fetch_one=True
+    )
+    
+    return render_template('applications/application_detail.html', 
+                           application=application,
+                           interview=interview)
 
 
 @applications_bp.route('/applications/apply', methods=['POST'])
@@ -118,4 +128,31 @@ def download_resume(filename):
     
     # For now, allow download if logged in
     resume_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
+    # For now, allow download if logged in
+    resume_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
     return send_from_directory(resume_dir, filename, as_attachment=True)
+
+
+@applications_bp.route('/interviews/<int:interview_id>/respond', methods=['POST'])
+@login_required
+def respond_interview(interview_id):
+    """Candidate responds to interview (confirm/decline)."""
+    user_id = session.get('user_id')
+    action = request.form.get('action') # 'confirm' or 'decline'
+    
+    if action not in ['confirm', 'decline']:
+        flash('Invalid action', 'danger')
+        return redirect(request.referrer)
+        
+    status_map = {'confirm': 'confirmed', 'decline': 'declined'}
+    new_status = status_map[action]
+    
+    from app.services import interview_service
+    success, msg = interview_service.update_interview_status(interview_id, new_status, 'user', user_id)
+    
+    if success:
+        flash(f'Interview {new_status}', 'success')
+    else:
+        flash(msg, 'danger')
+        
+    return redirect(request.referrer)

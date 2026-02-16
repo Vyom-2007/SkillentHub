@@ -47,34 +47,22 @@ def _ensure_dates(item):
 
 
 def search_opportunities(opp_type='all', q=None, location=None, work_mode=None, 
-                         job_type=None, date_posted=None, experience=None,
+                         job_type=None, date_posted=None, experience=None, skills=None,
                          page=1, per_page=50, user_id=None):
     """
     Search opportunities with dynamic SQL filtering.
-    
-    Args:
-        opp_type: 'job', 'internship', or 'all'
-        q: Keyword search (title/description)
-        location: Location filter
-        work_mode: on-site/remote/hybrid
-        job_type: full-time/part-time/contract (jobs only)
-        date_posted: 7/30/90 (days)
-        experience: Experience level filter (jobs only)
-        page: Page number
-        per_page: Results per page
-        user_id: ID of the current user (candidate) to calculate match scores
     """
     offset = (page - 1) * per_page
     results = []
     
     # Fetch jobs
     if opp_type in ['job', 'all']:
-        jobs = _search_jobs(q, location, work_mode, job_type, date_posted, experience, per_page, offset)
+        jobs = _search_jobs(q, location, work_mode, job_type, date_posted, experience, per_page, offset, skills)
         results.extend(jobs)
     
     # Fetch internships
     if opp_type in ['internship', 'all']:
-        internships = _search_internships(q, location, work_mode, date_posted, per_page, offset)
+        internships = _search_internships(q, location, work_mode, date_posted, per_page, offset, skills)
         results.extend(internships)
     
     # Calculate match scores if user_id provided
@@ -106,16 +94,18 @@ def search_opportunities(opp_type='all', q=None, location=None, work_mode=None,
 
 
 def _search_jobs(q=None, location=None, work_mode=None, job_type=None, 
-                 date_posted=None, experience=None, limit=50, offset=0):
+                 date_posted=None, experience=None, limit=50, offset=0, skills=None):
     """Search jobs with dynamic filters."""
     params = []
     where_clauses = ["j.status = 'active'", "j.is_active = 1"]
     
-    # Keyword search
+    # Keyword search (FULLTEXT)
     if q and q.strip():
-        where_clauses.append("(j.title LIKE %s OR j.description LIKE %s OR j.skills_required LIKE %s)")
-        search_term = f"%{q.strip()}%"
-        params.extend([search_term, search_term, search_term])
+        # Check if length is sufficient for FULLTEXT (usually min 3-4 chars default in MySQL)
+        # But we can fallback to LIKE if needed, or rely on index.
+        # MATCH(title, description, skills_required)
+        where_clauses.append("MATCH(j.title, j.description, j.skills_required) AGAINST(%s IN NATURAL LANGUAGE MODE)")
+        params.append(q.strip())
     
     # Location filter
     if location and location.strip():
@@ -134,15 +124,33 @@ def _search_jobs(q=None, location=None, work_mode=None, job_type=None,
     
     # Date posted filter
     if date_posted:
-        days = int(date_posted)
-        cutoff_date = datetime.now() - timedelta(days=days)
-        where_clauses.append("j.posted_at >= %s")
-        params.append(cutoff_date)
+        try:
+            days = int(date_posted)
+            cutoff_date = datetime.now() - timedelta(days=days)
+            where_clauses.append("j.posted_at >= %s")
+            params.append(cutoff_date)
+        except ValueError:
+            pass
     
     # Experience filter
     if experience and experience.strip():
-        where_clauses.append("j.experience_required LIKE %s")
-        params.append(f"%{experience.strip()}%")
+        where_clauses.append("j.experience_required = %s")
+        params.append(experience.strip())
+
+    # Skills Filter (List of skills)
+    if skills and isinstance(skills, list) and skills:
+        # For each skill, check if it's in skills_required
+        # Simple AND approach: Must have all selected skills? or Any?
+        # Typically "Any" or "All". Let's do "Match Any" for broader results, or "Match All" for strict.
+        # Let's use LIKE %skill% for each.
+        skill_clauses = []
+        for skill in skills:
+            skill_clauses.append("j.skills_required LIKE %s")
+            params.append(f"%{skill}%")
+        
+        # Combine with OR (Any)
+        if skill_clauses:
+            where_clauses.append(f"({' OR '.join(skill_clauses)})")
     
     query = f"""
         SELECT 
@@ -166,16 +174,15 @@ def _search_jobs(q=None, location=None, work_mode=None, job_type=None,
 
 
 def _search_internships(q=None, location=None, work_mode=None, date_posted=None, 
-                        limit=50, offset=0):
+                        limit=50, offset=0, skills=None):
     """Search internships with dynamic filters."""
     params = []
     where_clauses = ["i.status = 'active'", "i.is_active = 1"]
     
-    # Keyword search
+    # Keyword search (FULLTEXT)
     if q and q.strip():
-        where_clauses.append("(i.title LIKE %s OR i.description LIKE %s OR i.skills_required LIKE %s)")
-        search_term = f"%{q.strip()}%"
-        params.extend([search_term, search_term, search_term])
+        where_clauses.append("MATCH(i.title, i.description, i.skills_required) AGAINST(%s IN NATURAL LANGUAGE MODE)")
+        params.append(q.strip())
     
     # Location filter
     if location and location.strip():
@@ -189,10 +196,23 @@ def _search_internships(q=None, location=None, work_mode=None, date_posted=None,
     
     # Date posted filter
     if date_posted:
-        days = int(date_posted)
-        cutoff_date = datetime.now() - timedelta(days=days)
-        where_clauses.append("i.posted_at >= %s")
-        params.append(cutoff_date)
+        try:
+            days = int(date_posted)
+            cutoff_date = datetime.now() - timedelta(days=days)
+            where_clauses.append("i.posted_at >= %s")
+            params.append(cutoff_date)
+        except ValueError:
+            pass
+
+    # Skills Filter
+    if skills and isinstance(skills, list) and skills:
+        skill_clauses = []
+        for skill in skills:
+            skill_clauses.append("i.skills_required LIKE %s")
+            params.append(f"%{skill}%")
+        
+        if skill_clauses:
+            where_clauses.append(f"({' OR '.join(skill_clauses)})")
     
     query = f"""
         SELECT 
@@ -265,6 +285,25 @@ def get_all_locations():
     """
     results = execute_query(query, fetch_all=True) or []
     return [r['location'] for r in results]
+
+
+def get_all_skills():
+    """Get all unique skills for filter."""
+    query = "SELECT skill_name FROM skills ORDER BY skill_name"
+    results = execute_query(query, fetch_all=True) or []
+    return [r['skill_name'] for r in results]
+
+
+def get_all_experience_levels():
+    """Get all unique experience levels from jobs."""
+    query = """
+        SELECT DISTINCT experience_required FROM jobs 
+        WHERE status = 'active' AND is_active = 1 
+        AND experience_required IS NOT NULL AND experience_required != ''
+        ORDER BY experience_required
+    """
+    results = execute_query(query, fetch_all=True) or []
+    return [r['experience_required'] for r in results]
 
 
 def get_opportunity_counts():

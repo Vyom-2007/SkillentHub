@@ -54,7 +54,21 @@ def create_job(recruiter_id, data):
                     )
                 except Exception as e:
                     print(f"Error adding skill {skill_id} to job {job_id}: {e}")
-                    
+    
+    # Log Activity
+    if job_id:
+        try:
+            from app.services import activity_service
+            activity_service.log_activity(
+                action_type='job_posted',
+                recruiter_id=recruiter_id,
+                item_type='job',
+                item_id=job_id,
+                details={'title': data.get('title'), 'location': data.get('location')}
+            )
+        except Exception as e:
+            print(f"Error logging job activity: {e}")
+
     return job_id
 
 def create_internship(recruiter_id, data):
@@ -82,7 +96,23 @@ def create_internship(recruiter_id, data):
         data.get('deadline'),
         data.get('openings', 1)
     )
-    return execute_insert(query, params)
+    internship_id = execute_insert(query, params)
+    
+    # Log Activity
+    if internship_id:
+        try:
+            from app.services import activity_service
+            activity_service.log_activity(
+                action_type='internship_posted',
+                recruiter_id=recruiter_id,
+                item_type='internship',
+                item_id=internship_id,
+                details={'title': data.get('title'), 'location': data.get('location')}
+            )
+        except Exception as e:
+            print(f"Error logging internship activity: {e}")
+            
+    return internship_id
 
 def create_competition(recruiter_id, data):
     """
@@ -105,7 +135,23 @@ def create_competition(recruiter_id, data):
         data.get('max_participants'),
         data.get('registration_deadline')
     )
-    return execute_insert(query, params)
+    comp_id = execute_insert(query, params)
+    
+    # Log Activity
+    if comp_id:
+        try:
+            from app.services import activity_service
+            activity_service.log_activity(
+                action_type='competition_posted',
+                recruiter_id=recruiter_id,
+                item_type='competition',
+                item_id=comp_id,
+                details={'title': data.get('title')}
+            )
+        except Exception as e:
+            print(f"Error logging competition activity: {e}")
+            
+    return comp_id
 
 def create_hackathon(recruiter_id, data):
     """
@@ -133,4 +179,20 @@ def create_hackathon(recruiter_id, data):
         data.get('prize_details'), # Maps to 'prizes' column
         data.get('registration_deadline')
     )
-    return execute_insert(query, params)
+    hack_id = execute_insert(query, params)
+    
+    # Log Activity
+    if hack_id:
+        try:
+            from app.services import activity_service
+            activity_service.log_activity(
+                action_type='hackathon_posted',
+                recruiter_id=recruiter_id,
+                item_type='hackathon',
+                item_id=hack_id,
+                details={'title': data.get('title'), 'venue': data.get('venue')}
+            )
+        except Exception as e:
+            print(f"Error logging hackathon activity: {e}")
+            
+    return hack_id

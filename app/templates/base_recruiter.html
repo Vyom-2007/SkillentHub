@@ -123,9 +123,13 @@
                             <i class="bi bi-file-earmark-person"></i> Applications
                         </a>
                     </li>
+                    <a class="nav-link" href="{{ url_for('recruiter_candidates.list_candidates') }}">
+                        <i class="bi bi-people"></i> Candidates
+                    </a>
+                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('recruiter_candidates.list_candidates') }}">
-                            <i class="bi bi-people"></i> Candidates
+                        <a class="nav-link" href="{{ url_for('recruiter.list_interviews') }}">
+                            <i class="bi bi-calendar-event"></i> Interviews
                         </a>
                     </li>
                     <li class="nav-item">
