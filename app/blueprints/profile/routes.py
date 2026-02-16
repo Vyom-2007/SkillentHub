@@ -287,7 +287,43 @@ def parse_resume_route():
 @login_required
 def download_resume(filename):
     """Download user resume."""
-    from flask import send_from_directory
+    from flask import send_from_directory, current_app, abort
+    from app.utils.permissions import can_access_resume
+    
+    # Determine viewer
+    viewer_id = session.get('user_id') or session.get('recruiter_id')
+    viewer_role = 'recruiter' if session.get('recruiter_id') else 'user'
+    
+    if not viewer_id:
+        # Should be covered by login_required but good for safety
+        abort(401)
+        
+    if not can_access_resume(filename, viewer_id, viewer_role):
+        abort(403)
+        
+    try:
+        # Check profiles dir first
+        # Note: logic in can_access_resume checks both profile and app resumes.
+        # But where are they stored?
+        # Profile resume -> static/uploads/profiles/ (maybe? or resumes/)
+        # App resume -> static/uploads/resumes/
+        
+        # Let's check where they are actually stored.
+        # application_service.save_resume -> 'static/uploads/resumes'
+        # profile_service? I should check.
+        # Assuming all in 'static/uploads/resumes' or we check both.
+        
+        directory = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
+        if os.path.exists(os.path.join(directory, filename)):
+             return send_from_directory(directory, filename)
+             
+        # Fallback to profiles dir if different?
+        # Let's assume resumes are centralized or try both.
+        
+        return abort(404)
+    except Exception as e:
+        current_app.logger.error(f"Error serving resume: {e}")
+        abort(404)
     import os
     from flask import current_app
     
