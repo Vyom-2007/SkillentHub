@@ -284,11 +284,37 @@ def get_application_detail(application_id, recruiter_id):
              
     return details
 
+def verify_application_ownership(application_id, recruiter_id):
+    """
+    Verify that the application belongs to an item posted by the recruiter.
+    """
+    query = """
+    SELECT 1 FROM applications a
+    LEFT JOIN jobs j ON a.item_type = 'job' AND a.item_id = j.job_id
+    LEFT JOIN internships i ON a.item_type = 'internship' AND a.item_id = i.internship_id
+    LEFT JOIN competitions c ON a.item_type = 'competition' AND a.item_id = c.competition_id
+    LEFT JOIN hackathons h ON a.item_type = 'hackathon' AND a.item_id = h.hackathon_id
+    WHERE a.application_id = %s
+    AND (
+        (j.recruiter_id = %s) OR 
+        (i.recruiter_id = %s) OR 
+        (c.recruiter_id = %s) OR 
+        (h.recruiter_id = %s)
+    )
+    """
+    result = execute_query(query, (application_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
+    return bool(result)
+
 def update_application_status(application_id, new_status, recruiter_id=None):
     """
     Update status and trigger email if Shortlisted/Accepted.
     Uses application_service for strict transition enforcement.
     """
+    # Enforce ownership check if recruiter_id is provided
+    if recruiter_id:
+        if not verify_application_ownership(application_id, recruiter_id):
+            return False, "Unauthorized: You do not own this application."
+
     from app.services import application_service
     
     # Delegate to application_service for core logic
@@ -372,6 +398,9 @@ def get_application_history(application_id):
 
 def add_note(application_id, recruiter_id, content):
     """Add an internal note."""
+    if not verify_application_ownership(application_id, recruiter_id):
+        return False
+        
     query = "INSERT INTO application_notes (application_id, recruiter_id, content) VALUES (%s, %s, %s)"
     return execute_insert(query, (application_id, recruiter_id, content))
 

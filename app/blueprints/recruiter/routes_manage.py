@@ -101,7 +101,10 @@ def add_application_note(application_id):
     content = request.form.get('content')
     
     if content:
-        recruiter_manage_service.add_note(application_id, recruiter_id, content)
-        flash('Note added', 'success')
+        success = recruiter_manage_service.add_note(application_id, recruiter_id, content)
+        if success:
+            flash('Note added', 'success')
+        else:
+            flash('Failed to add note. Unauthorized or valid application not found.', 'danger')
     
     return redirect(url_for('recruiter.application_detail', application_id=application_id))
