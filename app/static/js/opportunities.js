@@ -6,6 +6,7 @@
 // ========== INITIALIZATION ==========
 
 let currentType = 'all';
+let currentPage = 1;
 let searchTimeout = null;
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -26,6 +27,7 @@ function initFilters() {
             document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
             currentType = this.dataset.type;
+            currentPage = 1; // Reset page on filter change
 
             // Show/hide job type filter
             const jobTypeSection = document.getElementById('jobTypeSection');
@@ -41,13 +43,19 @@ function initFilters() {
     ['locationFilter', 'workModeFilter', 'jobTypeFilter', 'dateFilter', 'experienceFilter'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.addEventListener('change', performSearch);
+            el.addEventListener('change', () => {
+                currentPage = 1; // Reset page on filter change
+                performSearch();
+            });
         }
     });
 
     // Skill filters
     document.querySelectorAll('.skill-filter').forEach(el => {
-        el.addEventListener('change', performSearch);
+        el.addEventListener('change', () => {
+            currentPage = 1; // Reset page on filter change
+            performSearch();
+        });
     });
 }
 
@@ -58,6 +66,7 @@ function initSearch() {
     if (searchInput) {
         searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
+            currentPage = 1; // Reset page on search
             searchTimeout = setTimeout(performSearch, 300);
         });
     }
@@ -67,6 +76,7 @@ function performSearch() {
     const params = new URLSearchParams();
 
     params.append('type', currentType);
+    params.append('page', currentPage);
 
     const q = document.getElementById('searchInput')?.value.trim();
     if (q) params.append('q', q);
@@ -98,6 +108,7 @@ function performSearch() {
         .then(data => {
             if (data.success) {
                 renderOpportunities(data.opportunities);
+                renderPagination(data.meta);
             }
         })
         .catch(console.error)
@@ -115,6 +126,7 @@ function renderOpportunities(opportunities) {
                 <p class="mt-3">No opportunities found matching your criteria.</p>
             </div>
         `;
+        document.getElementById('paginationContainer').innerHTML = '';
         return;
     }
 
@@ -140,7 +152,12 @@ function renderOpportunities(opportunities) {
                 </div>
                 <div class="text-end">
                     ${matchBadge}
-                    <small class="text-muted">${formatDate(item.posted_at)}</small>
+                    <button class="btn btn-link p-0 text-decoration-none save-btn me-2"
+                        onclick="toggleSave(this, '${item.type}', ${item.id})"
+                        title="${item.is_saved ? 'Unsave' : 'Save'}">
+                        <i class="bi ${item.is_saved ? 'bi-bookmark-fill text-primary' : 'bi-bookmark'} fs-5"></i>
+                    </button>
+                    <small class="text-muted d-block mt-1">${formatDate(item.posted_at)}</small>
                 </div>
             </div>
             <h5 class="opp-title mt-2">${escapeHtml(item.title)}</h5>
@@ -161,6 +178,66 @@ function renderOpportunities(opportunities) {
             </div>
         </div>
     `}).join('');
+}
+
+function renderPagination(meta) {
+    const container = document.getElementById('paginationContainer');
+    if (!container || !meta || meta.pages <= 1) {
+        if (container) container.innerHTML = '';
+        return;
+    }
+
+    const { page, pages } = meta;
+    let html = '<ul class="pagination justify-content-center">';
+
+    // Previous
+    html += `
+        <li class="page-item ${page === 1 ? 'disabled' : ''}">
+            <button class="page-link" onclick="changePage(${page - 1})">Previous</button>
+        </li>
+    `;
+
+    // Pages
+    // Show limited range: 1 ... p-1 p p+1 ... total
+    const range = [];
+    for (let i = Math.max(1, page - 2); i <= Math.min(pages, page + 2); i++) {
+        range.push(i);
+    }
+
+    if (range[0] > 1) {
+        html += `<li class="page-item"><button class="page-link" onclick="changePage(1)">1</button></li>`;
+        if (range[0] > 2) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+    }
+
+    range.forEach(p => {
+        html += `
+            <li class="page-item ${p === page ? 'active' : ''}">
+                <button class="page-link" onclick="changePage(${p})">${p}</button>
+            </li>
+        `;
+    });
+
+    if (range[range.length - 1] < pages) {
+        if (range[range.length - 1] < pages - 1) html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        html += `<li class="page-item"><button class="page-link" onclick="changePage(${pages})">${pages}</button></li>`;
+    }
+
+    // Next
+    html += `
+        <li class="page-item ${page === pages ? 'disabled' : ''}">
+            <button class="page-link" onclick="changePage(${page + 1})">Next</button>
+        </li>
+    `;
+
+    html += '</ul>';
+    container.innerHTML = html;
+}
+
+function changePage(newPage) {
+    if (newPage < 1) return;
+    currentPage = newPage;
+    performSearch();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function clearFilters() {

@@ -90,7 +90,25 @@ def search_opportunities(opp_type='all', q=None, location=None, work_mode=None,
     if opp_type == 'all':
         results = results[:per_page]
     
-    return results
+    # For performance, we should refactor into `_build_query` and then run count + select.
+    
+    # Simple refactor:
+    total_count = 0
+    if opp_type in ['job', 'all']:
+        total_count += _count_jobs(q, location, work_mode, job_type, date_posted, experience, skills)
+    if opp_type in ['internship', 'all']:
+        total_count += _count_internships(q, location, work_mode, date_posted, skills)
+        
+    import math
+    total_pages = math.ceil(total_count / per_page) if per_page > 0 else 1
+    
+    return {
+        'items': results,
+        'total': total_count,
+        'page': page,
+        'per_page': per_page,
+        'pages': total_pages
+    }
 
 
 def _search_jobs(q=None, location=None, work_mode=None, job_type=None, 
@@ -233,6 +251,95 @@ def _search_internships(q=None, location=None, work_mode=None, date_posted=None,
     for r in results:
         _ensure_dates(r)
     return results
+
+
+
+def _count_internships(q=None, location=None, work_mode=None, date_posted=None, skills=None):
+    """Count internships with dynamic filters."""
+    params = []
+    where_clauses = ["i.status = 'active'", "i.is_active = 1"]
+    
+    if q and q.strip():
+        where_clauses.append("MATCH(i.title, i.description, i.skills_required) AGAINST(%s IN NATURAL LANGUAGE MODE)")
+        params.append(q.strip())
+    
+    if location and location.strip():
+        where_clauses.append("i.location LIKE %s")
+        params.append(f"%{location.strip()}%")
+    
+    if work_mode and work_mode in ['on-site', 'remote', 'hybrid']:
+        where_clauses.append("i.work_mode = %s")
+        params.append(work_mode)
+    
+    if date_posted:
+        try:
+            days = int(date_posted)
+            cutoff_date = datetime.now() - timedelta(days=days)
+            where_clauses.append("i.posted_at >= %s")
+            params.append(cutoff_date)
+        except ValueError:
+            pass
+            
+    if skills and isinstance(skills, list) and skills:
+        skill_clauses = []
+        for skill in skills:
+            skill_clauses.append("i.skills_required LIKE %s")
+            params.append(f"%{skill}%")
+        if skill_clauses:
+            where_clauses.append(f"({' OR '.join(skill_clauses)})")
+    
+    query = f"SELECT COUNT(*) as count FROM internships i WHERE {' AND '.join(where_clauses)}"
+    result = execute_query(query, tuple(params), fetch_one=True)
+    return result['count'] if result else 0
+
+
+def _count_jobs(q=None, location=None, work_mode=None, job_type=None, 
+                  date_posted=None, experience=None, skills=None):
+    """Count jobs with dynamic filters."""
+    params = []
+    where_clauses = ["j.status = 'active'", "j.is_active = 1"]
+    
+    if q and q.strip():
+        where_clauses.append("MATCH(j.title, j.description, j.skills_required) AGAINST(%s IN NATURAL LANGUAGE MODE)")
+        params.append(q.strip())
+    
+    if location and location.strip():
+        where_clauses.append("j.location LIKE %s")
+        params.append(f"%{location.strip()}%")
+    
+    if work_mode and work_mode in ['on-site', 'remote', 'hybrid']:
+        where_clauses.append("j.work_mode = %s")
+        params.append(work_mode)
+    
+    if job_type and job_type in ['full-time', 'part-time', 'contract']:
+        where_clauses.append("j.job_type = %s")
+        params.append(job_type)
+    
+    if date_posted:
+        try:
+            days = int(date_posted)
+            cutoff_date = datetime.now() - timedelta(days=days)
+            where_clauses.append("j.posted_at >= %s")
+            params.append(cutoff_date)
+        except ValueError:
+            pass
+    
+    if experience and experience.strip():
+        where_clauses.append("j.experience_required = %s")
+        params.append(experience.strip())
+
+    if skills and isinstance(skills, list) and skills:
+        skill_clauses = []
+        for skill in skills:
+            skill_clauses.append("j.skills_required LIKE %s")
+            params.append(f"%{skill}%")
+        if skill_clauses:
+            where_clauses.append(f"({' OR '.join(skill_clauses)})")
+    
+    query = f"SELECT COUNT(*) as count FROM jobs j WHERE {' AND '.join(where_clauses)}"
+    
+    result = execute_query(query, tuple(params), fetch_one=True)
+    return result['count'] if result else 0
 
 
 def get_job_by_id(job_id):

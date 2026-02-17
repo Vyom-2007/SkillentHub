@@ -63,6 +63,7 @@ def search_opportunities():
     page = request.args.get('page', 1, type=int)
     user_id = session.get('user_id')
     
+    # Results is now a dict with items and metadata
     results = opportunity_service.search_opportunities(
         opp_type=opp_type if opp_type else 'all',
         q=q if q else None,
@@ -76,9 +77,11 @@ def search_opportunities():
         user_id=user_id
     )
     
+    items = results['items']
+    
     # Format for JSON
     opportunities_json = []
-    for item in results:
+    for item in items:
         opportunities_json.append({
             'id': item['id'],
             'type': item['type'],
@@ -95,7 +98,16 @@ def search_opportunities():
             'match_score': item.get('match_score')
         })
     
-    return jsonify({'success': True, 'opportunities': opportunities_json})
+    return jsonify({
+        'success': True, 
+        'opportunities': opportunities_json,
+        'meta': {
+            'total': results['total'],
+            'page': results['page'],
+            'per_page': results['per_page'],
+            'pages': results['pages']
+        }
+    })
 
 
 @opportunities_bp.route('/jobs/<int:job_id>')

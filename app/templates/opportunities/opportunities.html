@@ -277,7 +277,9 @@
                                     class="opp-badge {% if item.type == 'job' %}badge-job{% else %}badge-internship{% endif %}">
                                     {{ item.type|capitalize }}
                                 </span>
-                                {{ item.work_mode|replace('-', ' ')|title if item.work_mode else 'On-site' }}
+                                <span
+                                    class="opp-badge {% if item.work_mode == 'remote' %}badge-remote{% elif item.work_mode == 'hybrid' %}badge-hybrid{% else %}badge-onsite{% endif %}">
+                                    {{ (item.work_mode or 'on-site')|replace('-', ' ')|title }}
                                 </span>
                             </div>
                             <div class="text-end">
@@ -332,6 +334,11 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                <!-- Pagination Controls -->
+                 <nav aria-label="Page navigation" class="mt-4" id="paginationContainer">
+                    <!-- Javascript will populate this -->
+                 </nav>
             </div>
         </div>
     </div>
