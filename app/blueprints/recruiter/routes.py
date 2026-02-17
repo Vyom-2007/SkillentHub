@@ -47,3 +47,30 @@ def analytics():
     return render_template('recruiter/analytics.html', stats=stats)
 
 
+@recruiter_bp.route('/save_candidate/<int:user_id>', methods=['POST'])
+@recruiter_required
+def save_candidate(user_id):
+    """Save a candidate profile."""
+    recruiter_id = session.get('recruiter_id')
+    success, message = recruiter_service.save_candidate(recruiter_id, user_id)
+    return jsonify({'success': success, 'message': message})
+
+
+@recruiter_bp.route('/unsave_candidate/<int:user_id>', methods=['POST'])
+@recruiter_required
+def unsave_candidate(user_id):
+    """Unsave a candidate profile."""
+    recruiter_id = session.get('recruiter_id')
+    success, message = recruiter_service.unsave_candidate(recruiter_id, user_id)
+    return jsonify({'success': success, 'message': message})
+
+
+@recruiter_bp.route('/saved_candidates')
+@recruiter_required
+def saved_candidates():
+    """View saved candidates."""
+    recruiter_id = session.get('recruiter_id')
+    candidates = recruiter_service.get_saved_candidates(recruiter_id)
+    return render_template('recruiter/saved_candidates.html', candidates=candidates)
+
+

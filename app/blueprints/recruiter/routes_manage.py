@@ -68,12 +68,18 @@ def application_detail(application_id):
     history = recruiter_manage_service.get_application_history(application_id)
     
     from app.services.application_service import ALLOWED_TRANSITIONS
+    from app.services import recruiter_service
+
+    is_saved = False
+    if app_details and 'applicant_id' in app_details:
+        is_saved = recruiter_service.is_candidate_saved(recruiter_id, app_details['applicant_id'])
     
     return render_template('recruiter/application_detail.html', 
                            app=app_details, 
                            notes=notes,
                            history=history,
-                           allowed_transitions=ALLOWED_TRANSITIONS)
+                           allowed_transitions=ALLOWED_TRANSITIONS,
+                           is_saved=is_saved)
 
 @recruiter_bp.route('/applications/<int:application_id>/status', methods=['POST'])
 @recruiter_required

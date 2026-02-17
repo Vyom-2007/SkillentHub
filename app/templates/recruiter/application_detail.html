@@ -35,6 +35,12 @@
                             class="btn btn-light" target="_blank">
                             View Full Profile <i class="bi bi-box-arrow-up-right small"></i>
                         </a>
+                        <button onclick="toggleCandidateSave({{ app.applicant_id }}, this)"
+                            class="btn {{ 'btn-success' if is_saved else 'btn-outline-success' }}"
+                            title="{{ 'Unsave Candidate' if is_saved else 'Save Candidate' }}">
+                            <i class="bi {{ 'bi-bookmark-check-fill' if is_saved else 'bi-bookmark-plus' }} me-2"></i>
+                            <span class="btn-text">{{ 'Saved' if is_saved else 'Save Candidate' }}</span>
+                        </button>
                     </div>
                 </div>
                 <div class="card-footer bg-white p-3">
@@ -51,6 +57,53 @@
                 </div>
             </div>
         </div>
+
+        <script>
+            async function toggleCandidateSave(userId, btn) {
+                const isSaved = btn.classList.contains('btn-success');
+                const action = isSaved ? 'unsave_candidate' : 'save_candidate';
+                const originalContent = btn.innerHTML;
+
+                // Optimistic UI update
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch(`/recruiter/${action}/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        if (isSaved) {
+                            // Was saved, now unsaved
+                            btn.classList.remove('btn-success');
+                            btn.classList.add('btn-outline-success');
+                            btn.title = 'Save Candidate';
+                            btn.innerHTML = '<i class="bi bi-bookmark-plus me-2"></i><span class="btn-text">Save Candidate</span>';
+                        } else {
+                            // Was unsaved, now saved
+                            btn.classList.remove('btn-outline-success');
+                            btn.classList.add('btn-success');
+                            btn.title = 'Unsave Candidate';
+                            btn.innerHTML = '<i class="bi bi-bookmark-check-fill me-2"></i><span class="btn-text">Saved</span>';
+                        }
+                    } else {
+                        alert('Failed to update status: ' + data.message);
+                        btn.innerHTML = originalContent; // Revert on failure
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred.');
+                    btn.innerHTML = originalContent; // Revert on error
+                } finally {
+                    btn.disabled = false;
+                }
+            }
+        </script>
 
         <!-- Application Details (Right) -->
         <div class="col-lg-8">

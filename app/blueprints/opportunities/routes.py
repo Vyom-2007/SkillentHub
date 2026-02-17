@@ -114,6 +114,7 @@ def search_opportunities():
 @login_required
 def job_detail(job_id):
     """Display job details."""
+    from app.services import user_service
     user_id = session.get('user_id')
     job = opportunity_service.get_job_by_id(job_id)
     
@@ -123,17 +124,21 @@ def job_detail(job_id):
     
     # Check if already applied
     has_applied = application_service.has_applied(user_id, 'job', job_id)
+    # Check if saved
+    is_saved = user_service.is_saved(user_id, 'job', job_id)
     
     return render_template('opportunities/job_detail.html',
                            item=job,
                            item_type='job',
-                           has_applied=has_applied)
+                           has_applied=has_applied,
+                           is_saved=is_saved)
 
 
 @opportunities_bp.route('/internships/<int:internship_id>')
 @login_required
 def internship_detail(internship_id):
     """Display internship details."""
+    from app.services import user_service
     user_id = session.get('user_id')
     internship = opportunity_service.get_internship_by_id(internship_id)
     
@@ -143,11 +148,14 @@ def internship_detail(internship_id):
     
     # Check if already applied
     has_applied = application_service.has_applied(user_id, 'internship', internship_id)
+    # Check if saved
+    is_saved = user_service.is_saved(user_id, 'internship', internship_id)
     
     return render_template('opportunities/internship_detail.html',
                            item=internship,
                            item_type='internship',
-                           has_applied=has_applied)
+                           has_applied=has_applied,
+                           is_saved=is_saved)
 
 
 @opportunities_bp.route('/opportunities/save/<string:item_type>/<int:item_id>', methods=['POST'])

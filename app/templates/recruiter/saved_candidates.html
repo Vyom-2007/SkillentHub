@@ -1,0 +1,99 @@
+{% extends "base_recruiter.html" %}
+
+{% block title %}Saved Candidates - SkillentHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">Saved Candidates</h2>
+    </div>
+
+    {% if candidates %}
+    <div class="row g-4">
+        {% for candidate in candidates %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-start">
+                        <img src="{{ candidate.profile_picture or url_for('static', filename='img/default_profile.png') }}"
+                            alt="{{ candidate.full_name }}" class="rounded-circle me-3"
+                            style="width: 64px; height: 64px; object-fit: cover;">
+                        <div>
+                            <h5 class="card-title mb-1">{{ candidate.full_name }}</h5>
+                            <p class="text-muted small mb-2">{{ candidate.headline or 'No headline' }}</p>
+                            <p class="card-text small mb-2"><i class="bi bi-geo-alt me-1"></i>{{ candidate.location or
+                                'Location not specified' }}</p>
+                        </div>
+                    </div>
+
+                    {% if candidate.note %}
+                    <div class="mt-3 p-2 bg-light rounded small">
+                        <strong>Note:</strong> {{ candidate.note }}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <small class="text-muted">Saved {{ candidate.saved_at.strftime('%b %d, %Y') }}</small>
+                        <div class="btn-group">
+                            <!-- View Profile Button (if implemented) -->
+                            <!-- <a href="#" class="btn btn-sm btn-outline-primary">View Profile</a> -->
+
+                            <button onclick="unsaveCandidate({{ candidate.user_id }}, this)"
+                                class="btn btn-sm btn-outline-danger" title="Remove">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-3">
+            <i class="bi bi-bookmark-heart display-1 text-muted"></i>
+        </div>
+        <h4 class="text-muted">No saved candidates yet</h4>
+        <p class="text-muted">Save promising candidates from applications to view them here.</p>
+        <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-primary mt-3">Go to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    async function unsaveCandidate(userId, btn) {
+        if (!confirm('Are you sure you want to remove this candidate from your saved list?')) return;
+
+        try {
+            const response = await fetch(`/recruiter/unsave_candidate/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Remove the card from DOM with a fade effect
+                const card = btn.closest('.col-md-6'); // Adjust selector based on structure
+                card.style.transition = 'opacity 0.3s ease';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                    // Check if list is empty and show empty state if needed
+                    if (document.querySelectorAll('.col-md-6').length === 0) {
+                        location.reload();
+                    }
+                }, 300);
+            } else {
+                alert('Failed to remove candidate: ' + (data.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while removing the candidate.');
+        }
+    }
+</script>
+{% endblock %}
