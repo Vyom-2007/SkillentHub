@@ -350,11 +350,11 @@ def update_application_status(application_id, new_status, recruiter_id=None):
 
                 # Send in-app notification
                 from app.services import notification_service
-                notification_service.create_notification(
-                    user_id=details['user_id'],
-                    notification_type='application_update',
-                    content=f"Your application for {details['item_title']} is now {new_status.capitalize()}.",
-                    related_id=application_id
+                notification_service.notify_application_update(
+                    details['user_id'],
+                    details['item_title'],
+                    new_status,
+                    application_id
                 )
                     
         except Exception as e:

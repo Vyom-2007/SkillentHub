@@ -33,7 +33,7 @@ def send_request(from_user_id, to_user_id):
                 WHERE connection_id = %s
             """
             execute_update(query, (from_user_id, existing['connection_id']))
-            create_connection_notification(to_user_id, from_user_id, 'connection_request')
+            notification_service.notify_connection_request(to_user_id, from_user_id)
             return True, "Request sent"
     
     # Create new connection
@@ -44,7 +44,7 @@ def send_request(from_user_id, to_user_id):
     conn_id = execute_insert(query, (user_id_1, user_id_2, from_user_id))
     
     if conn_id:
-        create_connection_notification(to_user_id, from_user_id, 'connection_request')
+        notification_service.notify_connection_request(to_user_id, from_user_id)
         return True, conn_id
     return False, "Failed to send request"
 
@@ -69,8 +69,22 @@ def accept_request(connection_id, user_id):
     execute_update(query, (connection_id,))
     
     # Notify the sender
-    create_connection_notification(connection['created_by'], user_id, 'connection_accepted')
+    notification_service.notify_connection_accepted(connection['created_by'], user_id)
     
+    
+    # Log Activity
+    try:
+        from app.services import activity_service
+        activity_service.log_activity(
+            action_type='connection_made',
+            user_id=user_id, # The person accepting
+            item_type='user',
+            item_id=connection['created_by'], # The person who requested
+            details={'target_user': connection['created_by']}
+        )
+    except Exception as e:
+        print(f"Error logging connection activity: {e}")
+
     return True, "Connection accepted"
 
 
@@ -184,35 +198,3 @@ def get_sent_requests(user_id):
     return execute_query(query, (user_id, user_id, user_id, user_id, user_id), fetch_all=True) or []
 
 
-def create_connection_notification(to_user_id, from_user_id, notif_type):
-    """Create a notification for connection events."""
-    # Get sender's name
-    query = "SELECT full_name FROM profiles WHERE user_id = %s"
-    sender = execute_query(query, (from_user_id,), fetch_one=True)
-    sender_name = sender['full_name'] if sender else 'Someone'
-    
-    if notif_type == 'connection_request':
-        content = f"{sender_name} sent you a connection request"
-    elif notif_type == 'connection_accepted':
-        content = f"{sender_name} accepted your connection request"
-    else:
-        content = "Connection update"
-    
-    notification_service.create_notification(to_user_id, notif_type, content, from_user_id)
-    
-    # Log Activity for accepted connections
-    if notif_type == 'connection_accepted':
-        try:
-            from app.services import activity_service
-            # Log for both users? Or just the one accepting?
-            # Typically "User A and User B are now connected"
-            # Let's log it as the accepter's action
-            activity_service.log_activity(
-                action_type='connection_made',
-                user_id=from_user_id,
-                item_type='user',
-                item_id=to_user_id,
-                details={'target_user': to_user_id}
-            )
-        except Exception as e:
-            print(f"Error logging connection activity: {e}")

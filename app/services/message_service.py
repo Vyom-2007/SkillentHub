@@ -157,25 +157,7 @@ def send_message(sender_id, receiver_id, content, sender_type='user', receiver_t
     if message_id:
         # Send in-app notification if receiver is a user
         if receiver_type == 'user':
-            try:
-                from app.services import notification_service
-                # Get sender name
-                sender_name = "Someone"
-                if sender_type == 'recruiter':
-                    r = execute_query("SELECT company_name FROM recruiters WHERE recruiter_id=%s", (sender_id,), fetch_one=True)
-                    if r: sender_name = r['company_name']
-                else:
-                    u = execute_query("SELECT full_name FROM profiles WHERE user_id=%s", (sender_id,), fetch_one=True)
-                    if u: sender_name = u['full_name']
-
-                notification_service.create_notification(
-                    user_id=receiver_id,
-                    notification_type='new_message',
-                    content=f"New message from {sender_name}",
-                    related_id=sender_id
-                )
-            except Exception as e:
-                print(f"Error sending message notification: {e}")
+            notification_service.notify_new_message(sender_id, receiver_id, sender_type)
 
         return get_message_by_id(message_id), None
     return None, "Failed to send message"

@@ -126,14 +126,17 @@ function getNotificationLink(notification) {
     if (type === 'message') return '/messages';
     if (type === 'post_like' || type === 'post_comment') return `/posts/${id}`; // id is post_id
     if (type === 'application_update') return '/my-applications';
-    if (type === 'team_invitation') return '/teams/invitations';
+    if (type === 'team_invitation') return '/teams';
 
     return '/notifications'; // Fallback
 }
 
 async function markAsRead(notificationId) {
     try {
-        await fetch(`/api/notifications/mark-read/${notificationId}`, { method: 'POST' });
+        await fetch(`/api/notifications/mark-read/${notificationId}`, {
+            method: 'POST',
+            keepalive: true
+        });
         updateNotificationBadge(); // Refresh badge
     } catch (e) {
         console.error('Error marking read:', e);

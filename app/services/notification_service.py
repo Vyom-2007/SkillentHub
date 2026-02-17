@@ -84,4 +84,103 @@ def get_notification_icon(notification_type):
         'event_reminder': 'bi-calendar-event text-warning',
         'connection': 'bi-person-plus-fill text-purple'
     }
-    return icons.get(notification_type, 'bi-bell-fill text-secondary')
+
+# ========== TYPED HELPER METHODS ==========
+
+def notify_connection_request(sender_id, receiver_id):
+    """Notify user of a connection request."""
+    try:
+        sender = execute_query("SELECT full_name FROM profiles WHERE user_id = %s", (sender_id,), fetch_one=True)
+        sender_name = sender['full_name'] if sender else 'Someone'
+        content = f"{sender_name} sent you a connection request"
+        create_notification(receiver_id, 'connection_request', content, related_id=sender_id)
+        return True
+    except Exception as e:
+        print(f"Error sending connection request notification: {e}")
+        return False
+
+def notify_connection_accepted(accepter_id, receiver_id):
+    """Notify user that their request was accepted."""
+    try:
+        accepter = execute_query("SELECT full_name FROM profiles WHERE user_id = %s", (accepter_id,), fetch_one=True)
+        name = accepter['full_name'] if accepter else 'Someone'
+        content = f"{name} accepted your connection request"
+        create_notification(receiver_id, 'connection_accepted', content, related_id=accepter_id)
+        return True
+    except Exception as e:
+        print(f"Error sending connection accepted notification: {e}")
+        return False
+
+def notify_interview_invite(recruiter_id, candidate_id, interview_id, scheduled_at_str):
+    """Notify candidate of a new interview."""
+    try:
+        recruiter = execute_query("SELECT company_name FROM recruiters WHERE recruiter_id=%s", (recruiter_id,), fetch_one=True)
+        company_name = recruiter['company_name'] if recruiter else "A recruiter"
+        content = f"{company_name} has scheduled an interview with you on {scheduled_at_str}. Please confirm."
+        create_notification(candidate_id, 'interview_invite', content, related_id=interview_id)
+        return True
+    except Exception as e:
+        print(f"Error sending interview invite notification: {e}")
+        return False
+
+def notify_interview_update(recruiter_id, candidate_id, interview_id, status):
+    """Notify candidate of interview status update."""
+    try:
+        content = f"Interview status updated to {status}."
+        create_notification(candidate_id, 'interview_update', content, related_id=interview_id)
+        return True
+    except Exception as e:
+        print(f"Error sending interview update notification: {e}")
+        return False
+
+def notify_new_message(sender_id, receiver_id, sender_type):
+    """Notify user of a new message."""
+    try:
+        sender_name = "Someone"
+        if sender_type == 'recruiter':
+            r = execute_query("SELECT company_name FROM recruiters WHERE recruiter_id=%s", (sender_id,), fetch_one=True)
+            if r: sender_name = r['company_name']
+        else:
+            u = execute_query("SELECT full_name FROM profiles WHERE user_id=%s", (sender_id,), fetch_one=True)
+            if u: sender_name = u['full_name']
+            
+        content = f"New message from {sender_name}"
+        create_notification(receiver_id, 'new_message', content, related_id=sender_id)
+        return True
+    except Exception as e:
+        print(f"Error sending message notification: {e}")
+        return False
+
+def notify_team_invitation(invited_user_id, inviter_id, team_name, team_id):
+    """Notify user of team invitation."""
+    try:
+        inviter = execute_query("SELECT full_name FROM profiles WHERE user_id = %s", (inviter_id,), fetch_one=True)
+        inviter_name = inviter['full_name'] if inviter else 'Someone'
+        content = f"{inviter_name} invited you to join team '{team_name}'"
+        create_notification(invited_user_id, 'team_invitation', content, related_id=team_id)
+        return True
+    except Exception as e:
+        print(f"Error sending team invitation notification: {e}")
+        return False
+
+def notify_team_joined(leader_id, joiner_id, team_name, team_id):
+    """Notify team leader that someone joined."""
+    try:
+        joiner = execute_query("SELECT full_name FROM profiles WHERE user_id = %s", (joiner_id,), fetch_one=True)
+        joiner_name = joiner['full_name'] if joiner else 'Someone'
+        content = f"{joiner_name} joined your team '{team_name}'"
+        create_notification(leader_id, 'team_invitation_accepted', content, related_id=team_id)
+        return True
+    except Exception as e:
+        print(f"Error sending team joined notification: {e}")
+        return False
+
+def notify_application_update(user_id, item_title, status, application_id):
+    """Notify user of application status update."""
+    try:
+        content = f"Your application for {item_title} is now {status.capitalize()}."
+        create_notification(user_id, 'application_update', content, related_id=application_id)
+        return True
+    except Exception as e:
+        print(f"Error sending application update notification: {e}")
+        return False

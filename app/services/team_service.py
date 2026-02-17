@@ -97,7 +97,7 @@ def invite_member(leader_id, team_id, target_user_id):
     
     if inv_id:
         # Create notification
-        create_team_notification(target_user_id, leader_id, team, 'team_invitation')
+        notification_service.notify_team_invitation(target_user_id, leader_id, team['team_name'], team['team_id'])
         return True, inv_id
     return False, "Failed to send invitation"
 
@@ -146,7 +146,7 @@ def invite_by_email(leader_id, team_id, email, name_hint=None):
     inv_id = execute_insert(query, (team_id, target_user_id, leader_id))
     
     if inv_id:
-        create_team_notification(target_user_id, leader_id, team, 'team_invitation')
+        notification_service.notify_team_invitation(target_user_id, leader_id, team['team_name'], team['team_id'])
         return True, "Invitation sent successfully"
     return False, "Failed to send invitation"
 
@@ -196,7 +196,7 @@ def accept_invitation(user_id, invitation_id):
         connection.commit()
         
         # Notify leader
-        create_team_notification(team['created_by'], user_id, team, 'team_invitation_accepted')
+        notification_service.notify_team_joined(team['created_by'], user_id, team['team_name'], team['team_id'])
         
         return True, "Joined team successfully"
     except Exception as e:
@@ -552,17 +552,4 @@ def get_connectable_users(user_id, team_id):
     ), fetch_all=True) or []
 
 
-def create_team_notification(to_user_id, from_user_id, team, notif_type):
-    """Create notification for team events."""
-    sender_query = "SELECT full_name FROM profiles WHERE user_id = %s"
-    sender = execute_query(sender_query, (from_user_id,), fetch_one=True)
-    sender_name = sender['full_name'] if sender else 'Someone'
-    
-    if notif_type == 'team_invitation':
-        content = f"{sender_name} invited you to join team '{team['team_name']}'"
-    elif notif_type == 'team_invitation_accepted':
-        content = f"{sender_name} joined your team '{team['team_name']}'"
-    else:
-        content = f"Team update for '{team['team_name']}'"
-    
-    notification_service.create_notification(to_user_id, notif_type, content, team['team_id'])
+

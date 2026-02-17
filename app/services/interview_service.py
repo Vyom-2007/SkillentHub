@@ -23,22 +23,7 @@ def schedule_interview(application_id, recruiter_id, candidate_id, scheduled_at,
     
     if interview_id:
         # Notify Candidate
-        try:
-            # Fetch recruiter name/company for nicer message
-            recruiter = execute_query("SELECT company_name FROM recruiters WHERE recruiter_id=%s", (recruiter_id,), fetch_one=True)
-            company_name = recruiter['company_name'] if recruiter else "A recruiter"
-            
-            notification_service.create_notification(
-                user_id=candidate_id,
-                notification_type='interview_invite',
-                content=f"{company_name} has scheduled an interview with you on {scheduled_at}. Please confirm.",
-                related_id=interview_id
-            )
-            
-            # TODO: Send Email as well?
-            # email_service.send_interview_invite(...)
-        except Exception as e:
-            print(f"Error sending interview notification: {e}")
+        notification_service.notify_interview_invite(recruiter_id, candidate_id, interview_id, str(scheduled_at))
             
     return interview_id
 
@@ -98,12 +83,7 @@ def update_interview_status(interview_id, new_status, user_role, user_id):
             pass 
         else:
             # Recruiter updated -> Notify Candidate
-            notification_service.create_notification(
-                user_id=interview['candidate_id'],
-                notification_type='interview_update',
-                content=f"Interview status updated to {new_status}.",
-                related_id=interview_id
-            )
+            notification_service.notify_interview_update(interview['recruiter_id'], interview['candidate_id'], interview_id, new_status)
     except Exception as e:
         print(f"Error sending status notification: {e}")
 
