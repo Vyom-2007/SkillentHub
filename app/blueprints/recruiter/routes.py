@@ -31,7 +31,7 @@ def dashboard():
                            stats=stats)
 
 # Import sub-modules to register routes
-from app.blueprints.recruiter import interviews
+from app.blueprints.recruiter import interviews, routes_manage, routes_post, routes_settings, routes_registrations
 
 
 @recruiter_bp.route('/analytics')

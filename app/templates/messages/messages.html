@@ -246,9 +246,10 @@
             <div class="conversation-list" id="conversationList">
                 {% if conversations %}
                 {% for conv in conversations %}
-                <a href="{{ url_for('messages.messages', user=conv.other_id) }}"
-                    class="conversation-item {% if target_user and target_user.id == conv.other_id %}active{% endif %}"
-                    data-user-id="{{ conv.other_id }}" data-name="{{ conv.name|default('')|lower }}">
+                <a href="{{ url_for('messages.messages', user=conv.other_id, type=conv.other_type) }}"
+                    class="conversation-item {% if target_user and target_user.id == conv.other_id and target_user.type == conv.other_type %}active{% endif %}"
+                    data-user-id="{{ conv.other_id }}" data-user-type="{{ conv.other_type }}"
+                    data-name="{{ conv.name|default('')|lower }}">
                     <div class="position-relative">
                         {% if conv.picture %}
                         <img src="{{ url_for('static', filename='uploads/profiles/' + conv.picture) }}"
@@ -275,7 +276,8 @@
                             }}...</div>
                     </div>
                     {% if conv.unread_count > 0 %}
-                    <span class="unread-badge" id="unread-{{ conv.other_id }}">{{ conv.unread_count }}</span>
+                    <span class="unread-badge" id="unread-{{ conv.other_type }}-{{ conv.other_id }}">{{
+                        conv.unread_count }}</span>
                     {% endif %}
                 </a>
                 {% endfor %}
@@ -339,7 +341,7 @@
                     </span>
                 </div>
                 {% endif %}
-                <div class="message-bubble {% if msg.sender_id == session.user_id %}message-sent{% else %}message-received{% endif %}"
+                <div class="message-bubble {% if msg.sender_id == session.user_id or (msg.sender_type == current_user_type and msg.sender_id == (session.recruiter_id or session.user_id)) %}message-sent{% else %}message-received{% endif %}"
                     data-message-id="{{ msg.message_id }}">
                     {{ msg.content }}
                     <div class="message-time">
@@ -372,8 +374,10 @@
 
 {% if target_user %}
 <input type="hidden" id="targetUserId" value="{{ target_user.id }}">
+<input type="hidden" id="targetUserType" value="{{ target_user.type }}">
 <input type="hidden" id="lastMessageId" value="{{ last_message_id }}">
-<input type="hidden" id="currentUserId" value="{{ session.user_id }}">
+<input type="hidden" id="currentUserId" value="{{ session.user_id or session.recruiter_id }}">
+<input type="hidden" id="currentUserType" value="{{ current_user_type }}">
 {% endif %}
 {% endblock %}
 

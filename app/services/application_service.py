@@ -261,15 +261,12 @@ def withdraw_application(user_id, application_id):
 # ========== STATUS WORKFLOW ==========
 
 ALLOWED_TRANSITIONS = {
-    'applied': ['reviewing', 'rejected'],
-    'reviewing': ['shortlisted', 'rejected'],
+    'applied': ['shortlisted', 'rejected'],
     'shortlisted': ['interview', 'rejected'],
     'interview': ['offer', 'rejected'],
-    'offer': ['accepted', 'rejected', 'declined'], # rejected here means rescinded
-    'accepted': ['hired'],
-    'rejected': [], # Terminal state
-    'hired': [], # Terminal state
-    'declined': [] # Terminal state
+    'offer': ['hired', 'rejected'],
+    'hired': [],        # Terminal state
+    'rejected': []      # Terminal state
 }
 
 def update_application_status(application_id, new_status, changed_by_user_id=None, notes=None):

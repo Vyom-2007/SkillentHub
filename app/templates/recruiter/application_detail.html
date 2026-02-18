@@ -161,6 +161,7 @@
                     </div>
                     <div class="text-end">
                         <label class="small text-muted d-block mb-1">Current Status</label>
+                        {% if allowed_transitions.get(app.status) %}
                         <form method="POST"
                             action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
                             class="d-inline-flex gap-2">
@@ -170,10 +171,11 @@
                                 <option value="{{ next_status }}">{{ next_status|capitalize }}</option>
                                 {% endfor %}
                             </select>
-                            {% else %}
-                            <button type="button" class="btn btn-sm btn-secondary" disabled>Locked</button>
-                            {% endif %}
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Update</button>
                         </form>
+                        {% else %}
+                        <button type="button" class="btn btn-sm btn-secondary" disabled>Status Locked</button>
+                        {% endif %}
 
                         {% if app.interview_id and app.interview_status in ['pending', 'confirmed'] %}
                         <button type="button" class="btn btn-sm btn-warning mt-2" data-bs-toggle="modal"
