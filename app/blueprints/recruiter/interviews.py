@@ -74,3 +74,31 @@ def update_interview_status(interview_id):
         flash(msg, 'danger')
         
     return redirect(request.referrer or url_for('recruiter.list_interviews'))
+
+
+@recruiter_bp.route('/interviews/<int:interview_id>/reschedule', methods=['POST'])
+@recruiter_required
+def reschedule_interview(interview_id):
+    """Reschedule an existing interview."""
+    recruiter_id = session.get('recruiter_id')
+    scheduled_at = request.form.get('scheduled_at')
+    location_url = request.form.get('location_url')
+    notes = request.form.get('notes')
+    
+    if not scheduled_at:
+        flash('New Date/Time is required', 'warning')
+        return redirect(request.referrer or url_for('recruiter.list_interviews'))
+
+    try:
+        success, msg = interview_service.reschedule_interview(
+            interview_id, scheduled_at, recruiter_id, location_url, notes
+        )
+        if success:
+            flash(msg, 'success')
+        else:
+            flash(msg, 'danger')
+            
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+
+    return redirect(request.referrer or url_for('recruiter.list_interviews'))

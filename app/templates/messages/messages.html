@@ -315,10 +315,12 @@
                     <h6 class="mb-0">{{ target_user.name or 'User' }}</h6>
                     <small class="text-muted">{{ target_user.headline or '' }}</small>
                 </div>
+                {% if target_user.type == 'user' %}
                 <a href="{{ url_for('profile.view', user_id=target_user.id) }}"
                     class="btn btn-sm btn-outline-primary ms-auto">
                     <i class="bi bi-person"></i> View Profile
                 </a>
+                {% endif %}
             </div>
 
             <!-- Messages -->

@@ -3,6 +3,8 @@ Message service.
 Handles direct messaging between users and recruiters.
 """
 from app.database.connection import execute_query, execute_insert, execute_update, get_db_connection
+from app.services import notification_service
+
 
 
 def get_conversations(entity_id, entity_type='user'):

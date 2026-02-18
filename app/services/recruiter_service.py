@@ -2,7 +2,7 @@
 Recruiter service.
 Handles dashboard statistics and recruiter-related operations using raw SQL.
 """
-from app.database.connection import execute_query
+from app.database.connection import execute_query, execute_update
 from datetime import datetime, timedelta
 from flask import current_app
 import logging
@@ -356,7 +356,7 @@ def update_application_status(application_id, new_status, recruiter_id):
                         details={'status': new_status, 'item_type': user_check['item_type'], 'item_id': user_check['item_id']}
                     )
             except Exception as e:
-                print(f"Error logging hire activity: {e}")
+                logging.error(f"Error logging hire activity: {e}")
                 
         return True, "Status updated successfully"
     return False, "Failed to update status"

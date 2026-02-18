@@ -133,6 +133,16 @@ def notify_interview_update(recruiter_id, candidate_id, interview_id, status):
         print(f"Error sending interview update notification: {e}")
         return False
 
+def notify_interview_reschedule(recruiter_id, candidate_id, interview_id, new_time_str):
+    """Notify candidate of interview reschedule."""
+    try:
+        content = f"Interview rescheduled to {new_time_str}. Please confirm."
+        create_notification(candidate_id, 'interview_update', content, related_id=interview_id)
+        return True
+    except Exception as e:
+        print(f"Error sending interview reschedule notification: {e}")
+        return False
+
 def notify_new_message(sender_id, receiver_id, sender_type):
     """Notify user of a new message."""
     try:

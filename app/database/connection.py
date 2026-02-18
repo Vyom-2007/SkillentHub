@@ -72,6 +72,7 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=False):
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
+            print(f"DEBUG EXECUTE: {query} params={params}")
             cursor.execute(query, params or ())
             
             if fetch_one:

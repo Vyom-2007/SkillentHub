@@ -82,8 +82,8 @@
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body text-center position-relative">
                     <button class="btn btn-link p-0 text-decoration-none position-absolute top-0 end-0 mt-2 me-2"
-                        onclick="toggleCandidateSave(this, {{ candidate.user_id }})"
-                        title="{{ 'Unsave' if candidate.is_saved else 'Save' }}">
+                        onclick="event.stopPropagation(); toggleCandidateSave(this, {{ candidate.user_id }})"
+                        title="{{ 'Unsave' if candidate.is_saved else 'Save' }}" style="z-index: 10;">
                         <i
                             class="bi {% if candidate.is_saved %}bi-bookmark-fill text-primary{% else %}bi-bookmark text-secondary{% endif %} fs-5"></i>
                     </button>

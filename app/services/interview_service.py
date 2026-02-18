@@ -28,6 +28,39 @@ def schedule_interview(application_id, recruiter_id, candidate_id, scheduled_at,
     return interview_id
 
 
+def reschedule_interview(interview_id, new_scheduled_at, user_id, location_url=None, notes=None):
+    """
+    Reschedule an existing interview.
+    """
+    # Verify permission and existence
+    interview = get_interview_by_id(interview_id)
+    if not interview:
+        return False, "Interview not found"
+        
+    if interview['recruiter_id'] != user_id:
+        return False, "Unauthorized"
+        
+    # Update
+    if location_url:
+        query = "UPDATE interviews SET scheduled_at = %s, location_url = %s, notes = %s, status = 'pending' WHERE interview_id = %s"
+        params = (new_scheduled_at, location_url, notes, interview_id)
+    else:
+         query = "UPDATE interviews SET scheduled_at = %s, notes = %s, status = 'pending' WHERE interview_id = %s"
+         params = (new_scheduled_at, notes, interview_id)
+         
+    execute_update(query, params)
+    
+    # Notify
+    notification_service.notify_interview_reschedule(
+        interview['recruiter_id'], 
+        interview['candidate_id'], 
+        interview_id, 
+        str(new_scheduled_at)
+    )
+    
+    return True, "Interview rescheduled successfully"
+
+
 def update_interview_status(interview_id, new_status, user_role, user_id):
     """
     Update interview status (confirmed, declined, cancelled, completed).

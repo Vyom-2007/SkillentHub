@@ -28,7 +28,8 @@ def opportunities():
     user_id = session.get('user_id')
     
     # Get initial opportunities with match scores
-    items = opportunity_service.search_opportunities(opp_type=opp_type, user_id=user_id)
+    result = opportunity_service.search_opportunities(opp_type=opp_type, user_id=user_id)
+    items = result.get('items', [])
     
     # Get filter options
     locations = opportunity_service.get_all_locations()
@@ -38,6 +39,7 @@ def opportunities():
     
     return render_template('opportunities/opportunities.html',
                            opportunities=items,
+                           pagination=result if 'total' in result else None,
                            locations=locations,
                            skills=skills,
                            experience_levels=experience_levels,

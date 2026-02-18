@@ -8,7 +8,9 @@ from app.services import notification_service
 
 def get_ordered_ids(user1, user2):
     """Return user IDs in consistent order (smaller first)."""
-    return (min(user1, user2), max(user1, user2))
+    u1 = int(user1)
+    u2 = int(user2)
+    return (min(u1, u2), max(u1, u2))
 
 
 def send_request(from_user_id, to_user_id):

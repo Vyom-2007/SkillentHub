@@ -393,10 +393,17 @@ def get_visit_stats(user_id):
     """
     result = execute_query(query, (user_id,), fetch_one=True)
     
+    if not result:
+        return {
+            'user_visits': 0,
+            'recruiter_visits': 0,
+            'total_visits': 0
+        }
+    
     return {
-        'user_visits': result['user_visits'] or 0 if result else 0,
-        'recruiter_visits': result['recruiter_visits'] or 0 if result else 0,
-        'total_visits': result['total_visits'] or 0 if result else 0
+        'user_visits': result.get('user_visits') or 0,
+        'recruiter_visits': result.get('recruiter_visits') or 0,
+        'total_visits': result.get('total_visits') or 0
     }
 
 

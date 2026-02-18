@@ -5,7 +5,7 @@
 {% block extra_css %}
 <!-- Open Graph Meta Tags for Sharing -->
 <meta property="og:title" content="{{ profile.full_name }} - SkillentHub Profile">
-<meta property="og:description" content="{{ profile.headline or profile.bio[:150] }}...">
+<meta property="og:description" content="{{ profile.headline or (profile.bio or '')[:150] }}...">
 {% if profile.profile_picture %}
 <meta property="og:image"
     content="{{ url_for('static', filename='uploads/profiles/' + profile.profile_picture, _external=True) }}">
@@ -274,7 +274,7 @@
                     <div class="timeline-item">
                         <div class="d-flex justify-content-between">
                             <div>
-                                <h5 class="mb-1 text-primary">{{ win.risk }} {{ win.rank }} Place</h5>
+                                <h5 class="mb-1 text-primary">{{ win.rank }} Place</h5>
                                 <h6 class="mb-1 fw-bold">{{ win.event_title }}</h6>
                                 <p class="mb-1 text-muted small">{{ win.event_type }} • {{ win.team_name }}</p>
                             </div>
@@ -288,17 +288,17 @@
                                 {% for member in win.members %}
                                 <a href="{{ url_for('profile.view', user_id=member.user_id) }}"
                                     class="d-flex align-items-center text-decoration-none bg-light rounded-pill px-2 py-1 border"
-                                    title="{{ member.full_name }}">
+                                    title="{{ member.full_name or 'User' }}">
                                     {% if member.profile_picture %}
                                     <img src="{{ url_for('static', filename='uploads/profiles/' + member.profile_picture) }}"
                                         class="rounded-circle me-1" width="20" height="20" style="object-fit: cover;">
                                     {% else %}
                                     <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-1"
                                         style="width: 20px; height: 20px; font-size: 10px;">
-                                        {{ member.full_name[:1].upper() }}
+                                        {{ member.full_name[:1].upper() if member.full_name else 'U' }}
                                     </div>
                                     {% endif %}
-                                    <span class="small text-dark">{{ member.full_name }}</span>
+                                    <span class="small text-dark">{{ member.full_name or 'User' }}</span>
                                 </a>
                                 {% endfor %}
                             </div>
@@ -362,7 +362,8 @@
                 {% if posts and posts|length > 0 %}
                 {% for post in posts %}
                 <div class="border-bottom pb-3 mb-3">
-                    <p class="mb-2">{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</p>
+                    <p class="mb-2">{{ (post.content or '')[:200] }}{% if (post.content or '')|length > 200 %}...{%
+                        endif %}</p>
                     <small class="text-muted">
                         <i class="bi bi-heart me-1"></i>{{ post.likes_count or 0 }} likes
                     </small>
