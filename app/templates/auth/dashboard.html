@@ -1,360 +1,554 @@
-{% extends "base.html" %}
-
-{% block title %}Dashboard - SkillentHub{% endblock %}
-
-{% block extra_css %}
-<style>
-    .dashboard-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s;
-        height: 100%;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-3px);
-    }
-
-    .card-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .card-icon.profile {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-
-    .card-icon.jobs {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-    }
-
-    .card-icon.skills {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        color: white;
-    }
-
-    .card-icon.network {
-        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        color: white;
-    }
-
-    .welcome-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 1.5rem;
-        padding: 2.5rem;
-        color: white;
-        margin-bottom: 2rem;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <!-- Welcome Section -->
-    <div class="welcome-section">
-        <div class="row align-items-center">
-            <div class="col">
-                <h1 class="mb-2">Welcome back, {{ session.get('full_name', 'User') }}! 👋</h1>
-                <p class="mb-0 opacity-75">Here's what's happening with your profile today.</p>
-            </div>
-            <div class="col-auto">
-                <a href="{{ url_for('profile.view', user_id=session.user_id) }}" class="btn btn-light btn-lg">
-                    <i class="bi bi-person me-2"></i>View Profile
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dashboard Cards -->
-    <div class="row mb-4">
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon profile">
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <h5>Complete Your Profile</h5>
-                <p class="text-muted small mb-3">Add your skills, education, and experience to stand out.</p>
-                <a href="{{ url_for('profile.edit') }}" class="btn btn-sm btn-primary">
-                    Edit Profile <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon jobs">
-                    <i class="bi bi-briefcase"></i>
-                </div>
-                <h5>Find Opportunities</h5>
-                <p class="text-muted small mb-3">Explore jobs and internships.</p>
-                <a href="{{ url_for('opportunities.opportunities') }}" class="btn btn-sm btn-outline-primary">
-                    Browse <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon skills">
-                    <i class="bi bi-lightning-charge"></i>
-                </div>
-                <h5>Showcase Skills</h5>
-                <p class="text-muted small mb-3">Add your skills to get discovered by recruiters.</p>
-                <a href="{{ url_for('profile.edit') }}" class="btn btn-sm btn-outline-primary">
-                    Add Skills <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
-                    <i class="bi bi-trophy"></i>
-                </div>
-                <h5>Events</h5>
-                <p class="text-muted small mb-3">Competitions & Hackathons to showcase your skills.</p>
-                <a href="{{ url_for('competitions.competitions_list') }}" class="btn btn-sm btn-outline-primary">
-                    Browse <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon network">
-                    <i class="bi bi-people"></i>
-                </div>
-                <h5>Build Network</h5>
-                <p class="text-muted small mb-3">Discover and connect with professionals.</p>
-                <a href="{{ url_for('network.network') }}" class="btn btn-sm btn-primary">
-                    Explore Network <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #20bf55, #01baef);">
-                    <i class="bi bi-bookmark-fill"></i>
-                </div>
-                <h5>Saved Items</h5>
-                <p class="text-muted small mb-3">View your bookmarked jobs and events.</p>
-                <a href="{{ url_for('opportunities.saved_jobs') }}" class="btn btn-sm btn-outline-primary">
-                    View Saved <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #FF6B6B, #EE5D5D);">
-                    <i class="bi bi-journal-text"></i>
-                </div>
-                <h5>My Applications</h5>
-                <p class="text-muted small mb-3">Track status of jobs and events.</p>
-                <a href="{{ url_for('auth.my_applications') }}" class="btn btn-sm btn-outline-primary">
-                    View Status <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="dashboard-card">
-                <div class="card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                    <i class="bi bi-rss"></i>
-                </div>
-                <h5>Feed</h5>
-                <p class="text-muted small mb-3">See what your network is sharing.</p>
-                <a href="#activity-feed-section" class="btn btn-sm btn-outline-primary">
-                    View Feed <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Activity Feed Section -->
-    <div id="activity-feed-section" class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Activity Feed</h5>
-                    <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-secondary active"
-                            onclick="loadFeed('all', this)">All</button>
-                        <button type="button" class="btn btn-outline-secondary"
-                            onclick="loadFeed('jobs', this)">Jobs</button>
-                        <button type="button" class="btn btn-outline-secondary"
-                            onclick="loadFeed('community', this)">Community</button>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div id="feed-container" class="list-group list-group-flush">
-                        <!-- Feed items will be loaded here -->
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-center py-3" id="load-more-container" style="display: none;">
-                        <button class="btn btn-link text-decoration-none" onclick="loadMore()">Load More</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!DOCTYPE html>
+<html lang="en" class="">
 <script>
-    let currentPage = 1;
-    let currentFilter = 'all';
+    (function () {
+        var t = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'light';
+        if (t === 'dark') document.documentElement.classList.add('dark');
+        // Expose global logic
+        window.applyTheme = function (theme) {
+            if (theme === 'dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+            localStorage.setItem('landing-theme', theme);
+            localStorage.setItem('theme', theme);
+        };
+    })();
+</script>
 
-    document.addEventListener('DOMContentLoaded', function () {
-        loadFeed();
-    });
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard - SkillEntHub</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2" />
 
-    function loadFeed(filter = 'all', btn = null) {
-        if (filter !== currentFilter || filter === 'all' && currentPage === 1) {
-            currentPage = 1;
-            document.getElementById('feed-container').innerHTML = `
-                <div class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>`;
-            document.getElementById('load-more-container').style.display = 'none';
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ===== Glass Design ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
         }
 
-        currentFilter = filter;
-
-        // Update buttons
-        if (btn) {
-            document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        fetch(`/api/activity-feed?page=${currentPage}&filter=${filter}`)
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('feed-container');
-                if (currentPage === 1) container.innerHTML = '';
-
-                if (data.activities.length === 0 && currentPage === 1) {
-                    container.innerHTML = '<div class="text-center py-4 text-muted">No recent activity.</div>';
-                    return;
-                }
-
-                data.activities.forEach(item => {
-                    const html = createFeedItemHtml(item);
-                    container.insertAdjacentHTML('beforeend', html);
-                });
-
-                if (data.has_more) {
-                    document.getElementById('load-more-container').style.display = 'block';
-                } else {
-                    document.getElementById('load-more-container').style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading feed:', error);
-                document.getElementById('feed-container').innerHTML = '<div class="text-center py-4 text-danger">Failed to load feed.</div>';
-            });
-    }
-
-    function loadMore() {
-        currentPage++;
-        loadFeed(currentFilter);
-    }
-
-    function createFeedItemHtml(item) {
-        let icon, content, link;
-        const details = item.details || {};
-
-        switch (item.action_type) {
-            case 'job_posted':
-                icon = '<i class="bi bi-briefcase text-primary"></i>';
-                content = `<strong>${item.actor_name}</strong> posted a new job: <strong>${details.title}</strong> in ${details.location}`;
-                link = `/opportunities/jobs/${item.item_id}`; // Assuming route
-                break;
-            case 'internship_posted':
-                icon = '<i class="bi bi-laptop text-info"></i>';
-                content = `<strong>${item.actor_name}</strong> posted a new internship: <strong>${details.title}</strong>`;
-                link = `/opportunities/internships/${item.item_id}`;
-                break;
-            case 'user_hired':
-                icon = '<i class="bi bi-check-circle text-success"></i>';
-                content = `<strong>${item.actor_name}</strong> hired a candidate for <strong>${details.item_type}</strong>`;
-                link = '#';
-                break;
-            case 'team_created':
-                icon = '<i class="bi bi-people text-warning"></i>';
-                content = `<strong>${item.actor_name}</strong> created a team <strong>${details.team_name}</strong>`;
-                link = '#';
-                break;
-            case 'connection_made':
-                icon = '<i class="bi bi-person-plus text-purple"></i>';
-                content = `<strong>${item.actor_name}</strong> connected with a new person`;
-                link = '#';
-                break;
-            case 'hackathon_posted':
-                icon = '<i class="bi bi-code-slash text-danger"></i>';
-                content = `<strong>${item.actor_name}</strong> posted a hackathon: <strong>${details.title}</strong>`;
-                link = '#';
-                break;
-            case 'competition_posted':
-                icon = '<i class="bi bi-trophy text-warning"></i>';
-                content = `<strong>${item.actor_name}</strong> posted a competition: <strong>${details.title}</strong>`;
-                link = '#';
-                break;
-            default:
-                icon = '<i class="bi bi-activity"></i>';
-                content = `<strong>${item.actor_name}</strong> performed an action`;
-                link = '#';
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            /* Slate-800 with opacity */
+            border-color: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
         }
 
-        let avatarHtml;
-        if (item.actor_picture) {
-            avatarHtml = `<img src="/static/uploads/profiles/${item.actor_picture}" class="rounded-circle me-3" width="40" height="40" alt="${item.actor_name}" onerror="this.src='https://via.placeholder.com/40'">`;
-        } else {
-            // Fallback for missing picture (recruiters or users without pic)
-            if (item.actor_type === 'recruiter') {
-                avatarHtml = `<div class="rounded-circle me-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-building"></i></div>`;
-            } else {
-                // User initials
-                const initials = item.actor_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                avatarHtml = `<div class="rounded-circle me-3 bg-secondary bg-opacity-10 text-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 0.85rem; font-weight: 600;">${initials}</div>`;
-            }
+        .dark .glass-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
-        return `
-            <div class="list-group-item px-4 py-3">
-                <div class="d-flex align-items-start">
-                    ${avatarHtml}
-                    <div class="flex-grow-1">
-                        <div class="d-flex justify-content-between">
-                            <span class="mb-1">${content}</span>
-                            <small class="text-muted ms-2 text-nowrap">${item.time_ago}</small>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.6);
+            /* Slate-900 with opacity */
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== Welcome Header ===== */
+        .welcome-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .dark .welcome-card {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        }
+
+        /* ===== Icons ===== */
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        /* ===== Theme Toggle ===== */
+        .theme-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            alignItems: center;
+            justifyContent: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .icon-light {
+            display: none;
+        }
+
+        .icon-dark {
+            display: block;
+        }
+
+        .dark .icon-light {
+            display: block;
+        }
+
+        .dark .icon-dark {
+            display: none;
+        }
+
+        /* ===== Feed ===== */
+        .feed-item {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .feed-item {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .feed-item:last-child {
+            border-bottom: none;
+        }
+
+        /* ===== Scrollbar ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-[#0f172a] font-display text-slate-800 dark:text-slate-100 min-h-screen relative transition-colors duration-300">
+
+    <!-- Background -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-slate-100 dark:from-[#1e293b] dark:via-[#0f172a] dark:to-[#000000]">
+        </div>
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen opacity-50">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-400/20 dark:bg-indigo-600/10 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen opacity-50">
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass-nav h-16 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+            <!-- Logo -->
+            <a href="{{ url_for('auth.landing') }}" class="flex items-center gap-3 group">
+                <div
+                    class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold italic shadow-md group-hover:scale-105 transition-transform duration-300">
+                    S</div>
+                <span class="font-bold text-lg tracking-tight text-slate-800 dark:text-white">SkillEntHub</span>
+            </a>
+
+            <!-- Desktop Links -->
+            <div class="hidden md:flex items-center gap-6">
+                {% set nav_link = "text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600
+                dark:hover:text-blue-400 transition-colors" %}
+                <a href="{{ url_for('auth.dashboard') }}"
+                    class="{{ nav_link }} text-blue-600 dark:text-blue-400">Dashboard</a>
+                <a href="{{ url_for('opportunities.opportunities') }}" class="{{ nav_link }}">Jobs</a>
+                <a href="{{ url_for('network.network') }}" class="{{ nav_link }}">Network</a>
+                <a href="{{ url_for('auth.my_applications') }}" class="{{ nav_link }}">My Apps</a>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle -->
+                <button id="themeToggle" class="theme-toggle-btn group" aria-label="Toggle theme">
+                    <span
+                        class="material-symbols-outlined text-amber-500 icon-light group-hover:rotate-45 transition-transform">light_mode</span>
+                    <span
+                        class="material-symbols-outlined text-slate-400 icon-dark group-hover:rotate-45 transition-transform">dark_mode</span>
+                </button>
+
+                <!-- Profile Dropdown (Simplified as link for now) -->
+                <div class="relative group ml-1">
+                    <a href="{{ url_for('profile.view', user_id=session.user_id) }}"
+                        class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                        {% if session.get('profile_picture') %}
+                        <img src="{{ url_for('static', filename='uploads/profiles/' + session.profile_picture) }}"
+                            class="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700"
+                            alt="Profile">
+                        {% else %}
+                        <div
+                            class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-bold ring-1 ring-blue-200 dark:ring-blue-500/30">
+                            {{ session.get('full_name', 'User')[0] }}
                         </div>
-                        <div class="mt-1">
-                            ${link !== '#' ? `<a href="${link}" class="text-decoration-none small">View Details</a>` : ''}
-                        </div>
-                    </div>
-                    <div class="ms-3 fs-5">
-                        ${icon}
-                    </div>
+                        {% endif %}
+                        <span
+                            class="hidden sm:block text-sm font-medium text-slate-700 dark:text-slate-200 max-w-[100px] truncate">{{
+                            session.get('full_name', 'User') }}</span>
+                    </a>
+                </div>
+
+                <!-- Logout -->
+                <a href="{{ url_for('auth.logout') }}"
+                    class="p-2 text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+                    title="Logout">
+                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+
+        <!-- Welcome Section -->
+        <div class="glass-card welcome-card rounded-2xl p-8 mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                <span class="material-symbols-outlined text-[150px]">waving_hand</span>
+            </div>
+            <div class="relative z-10">
+                <h1 class="text-3xl font-bold mb-2">Welcome back, {{ session.get('full_name', 'User').split(' ')[0] }}!
+                    👋</h1>
+                <p class="text-blue-100 text-lg mb-6 max-w-xl">Here's what's happening with your job search and
+                    professional network today.</p>
+
+                <div class="flex gap-4">
+                    <a href="{{ url_for('profile.view', user_id=session.user_id) }}"
+                        class="bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-xl font-medium transition-all backdrop-blur-sm border border-white/20 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">person</span> View Profile
+                    </a>
+                    <a href="{{ url_for('opportunities.opportunities') }}"
+                        class="bg-white text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">search</span> Find Jobs
+                    </a>
                 </div>
             </div>
-        `;
-    }
-</script>
-{% endblock %}
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+
+            <!-- Cards -->
+            {% set cards = [
+            {
+            'title': 'Complete Profile',
+            'desc': 'Add skills & experience.',
+            'icon': 'badge',
+            'color': 'from-indigo-500 to-purple-600',
+            'link': url_for('profile.edit'), 'btn': 'Edit Profile'
+            },
+            {
+            'title': 'Find Opportunities',
+            'desc': 'Explore jobs & internships.',
+            'icon': 'work',
+            'color': 'from-pink-500 to-rose-500',
+            'link': url_for('opportunities.opportunities'), 'btn': 'Browse'
+            },
+            {
+            'title': 'Showcase Skills',
+            'desc': 'Get discovered by recruiters.',
+            'icon': 'bolt',
+            'color': 'from-cyan-400 to-blue-500',
+            'link': url_for('profile.edit'), 'btn': 'Add Skills'
+            },
+            {
+            'title': 'Events',
+            'desc': 'Competitions & Hackathons.',
+            'icon': 'trophy',
+            'color': 'from-amber-400 to-orange-500',
+            'link': url_for('competitions.competitions_list'), 'btn': 'Browse Events'
+            },
+            {
+            'title': 'Network',
+            'desc': 'Connect with professionals.',
+            'icon': 'group',
+            'color': 'from-emerald-400 to-teal-500',
+            'link': url_for('network.network'), 'btn': 'Explore'
+            },
+            {
+            'title': 'Saved Items',
+            'desc': 'View bookmarked jobs.',
+            'icon': 'bookmark',
+            'color': 'from-blue-400 to-indigo-500',
+            'link': url_for('opportunities.saved_jobs'), 'btn': 'View Saved'
+            },
+            {
+            'title': 'My Applications',
+            'desc': 'Track status updates.',
+            'icon': 'assignment',
+            'color': 'from-red-400 to-pink-500',
+            'link': url_for('auth.my_applications'), 'btn': 'View Status'
+            }
+            ] %}
+
+            {% for card in cards %}
+            <div class="glass-card rounded-2xl p-6 flex flex-col h-full group">
+                <div
+                    class="card-icon bg-gradient-to-br {{ card.color }} shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <span class="material-symbols-outlined text-[24px]">{{ card.icon }}</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">{{ card.title }}</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-4 flex-grow">{{ card.desc }}</p>
+                <a href="{{ card.link }}"
+                    class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    {{ card.btn }} <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </a>
+            </div>
+            {% endfor %}
+
+            <!-- Feed Link Card (Static) -->
+            <div
+                class="glass-card rounded-2xl p-6 flex flex-col h-full group border-2 border-dashed border-slate-200 dark:border-slate-700 bg-transparent hover:bg-slate-50 dark:hover:bg-white/5">
+                <div
+                    class="card-icon bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 mb-4 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">rss_feed</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-1">Activity Feed</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-4 flex-grow">See what's new in your network.</p>
+                <a href="#feed-container"
+                    class="text-sm font-semibold text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1 group-hover:gap-2 transition-all">
+                    View Feed <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity Feed Section -->
+        <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-blue-500">receipt_long</span> Recent Activity
+        </h2>
+
+        <div class="glass-card rounded-2xl overflow-hidden min-h-[400px]">
+            <!-- Feed Tabs -->
+            <div class="flex items-center gap-1 p-4 border-b border-slate-200 dark:border-white/10 overflow-x-auto">
+                <button onclick="loadFeed('all', this)"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+                    id="filter-all">All</button>
+                <button onclick="loadFeed('jobs', this)"
+                    class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">Jobs</button>
+                <button onclick="loadFeed('community', this)"
+                    class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">Community</button>
+            </div>
+
+            <!-- Feed Content -->
+            <div id="feed-container" class="divide-y divide-slate-100 dark:divide-white/5">
+                <!-- Loaded via JS -->
+                <div class="p-12 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                    <span class="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
+                    <p>Loading activity...</p>
+                </div>
+            </div>
+
+            <!-- Load More -->
+            <div id="load-more-container" class="p-4 text-center border-t border-slate-200 dark:border-white/10 hidden">
+                <button onclick="loadMore()"
+                    class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">Load
+                    More</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-nav border-t border-slate-200 dark:border-white/5 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-slate-500 dark:text-slate-400">
+            &copy; 2026 SkillEntHub. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // --- Theme Toggle Global ---
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            window.applyTheme(isDark ? 'light' : 'dark');
+        });
+
+        // --- Feed Logic ---
+        let currentPage = 1;
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => loadFeed());
+
+        function loadFeed(filter = 'all', btn = null) {
+            const container = document.getElementById('feed-container');
+            const loadMoreBtn = document.getElementById('load-more-container');
+
+            if (filter !== currentFilter || (filter === 'all' && currentPage === 1)) {
+                currentPage = 1;
+                // Update active tab style
+                if (btn) {
+                    document.querySelectorAll('button[onclick^="loadFeed"]').forEach(b => {
+                        b.className = "px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors";
+                    });
+                    btn.className = "px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
+                }
+                container.innerHTML = `
+                    <div class="p-12 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                        <span class="material-symbols-outlined text-4xl mb-2 animate-spin">progress_activity</span>
+                        <p>Loading...</p>
+                    </div>`;
+                loadMoreBtn.classList.add('hidden');
+            }
+            currentFilter = filter;
+
+            fetch(`/api/activity-feed?page=${currentPage}&filter=${filter}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (currentPage === 1) container.innerHTML = '';
+
+                    if (data.activities.length === 0 && currentPage === 1) {
+                        container.innerHTML = `
+                            <div class="p-12 text-center text-slate-500 dark:text-slate-400">
+                                <span class="material-symbols-outlined text-4xl mb-2 opacity-50">inbox</span>
+                                <p>No recent activity found.</p>
+                            </div>`;
+                        return;
+                    }
+
+                    data.activities.forEach(item => {
+                        container.insertAdjacentHTML('beforeend', createFeedItemHtml(item));
+                    });
+
+                    if (data.has_more) loadMoreBtn.classList.remove('hidden');
+                    else loadMoreBtn.classList.add('hidden');
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.innerHTML = '<div class="p-8 text-center text-red-500">Failed to load feed.</div>';
+                });
+        }
+
+        function loadMore() {
+            currentPage++;
+            loadFeed(currentFilter);
+        }
+
+        function createFeedItemHtml(item) {
+            let iconCode = 'article';
+            let iconColor = 'text-slate-500';
+            let content = '';
+            let link = '#';
+            const details = item.details || {};
+
+            // Map types to icons/colors
+            switch (item.action_type) {
+                case 'job_posted':
+                    iconCode = 'work'; iconColor = 'text-blue-500';
+                    content = `posted a new job: <strong class="text-slate-900 dark:text-white">${details.title}</strong>`;
+                    link = `/opportunities/jobs/${item.item_id}`;
+                    break;
+                case 'internship_posted':
+                    iconCode = 'school'; iconColor = 'text-cyan-500';
+                    content = `posted a new internship: <strong class="text-slate-900 dark:text-white">${details.title}</strong>`;
+                    link = `/opportunities/internships/${item.item_id}`;
+                    break;
+                case 'hackathon_posted':
+                    iconCode = 'code'; iconColor = 'text-pink-500';
+                    content = `posted a hackathon: <strong class="text-slate-900 dark:text-white">${details.title}</strong>`;
+                    break;
+                case 'competition_posted':
+                    iconCode = 'trophy'; iconColor = 'text-amber-500';
+                    content = `posted a competition: <strong class="text-slate-900 dark:text-white">${details.title}</strong>`;
+                    break;
+                case 'user_hired':
+                    iconCode = 'check_circle'; iconColor = 'text-green-500';
+                    content = `hired a candidate for <strong class="text-slate-900 dark:text-white">${details.item_type}</strong>`;
+                    break;
+                case 'connection_made':
+                    iconCode = 'person_add'; iconColor = 'text-purple-500';
+                    content = `connected with a new person`;
+                    break;
+                default:
+                    content = `performed an action`;
+            }
+
+            // Avatar Logic
+            let avatarHtml = '';
+            if (item.actor_picture) {
+                avatarHtml = `<img src="/static/uploads/profiles/${item.actor_picture}" class="w-10 h-10 rounded-full object-cover border border-slate-100 dark:border-white/10" alt="${item.actor_name}" onerror="this.src='https://via.placeholder.com/40'">`;
+            } else {
+                const initials = item.actor_name.substring(0, 1).toUpperCase();
+                avatarHtml = `<div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-200 dark:border-white/5">${initials}</div>`;
+            }
+
+            return `
+                <div class="feed-item p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <div class="flex items-start gap-4">
+                        ${avatarHtml}
+                        <div class="flex-grow min-w-0">
+                            <div class="flex justify-between items-start">
+                                <p class="text-sm text-slate-600 dark:text-slate-300">
+                                    <span class="font-bold text-slate-900 dark:text-white">${item.actor_name}</span> ${content}
+                                </p>
+                                <span class="text-xs text-slate-400 ml-2 whitespace-nowrap">${item.time_ago}</span>
+                            </div>
+                            ${link !== '#' ? `<a href="${link}" class="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block">View Details</a>` : ''}
+                        </div>
+                        <span class="material-symbols-outlined ${iconColor} text-[20px] ml-2 opacity-80">${iconCode}</span>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>
