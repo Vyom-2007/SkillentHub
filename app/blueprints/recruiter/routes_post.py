@@ -8,8 +8,6 @@ from app.services import recruiter_post_service
 
 @recruiter_bp.route('/jobs/create', methods=['GET', 'POST'])
 @recruiter_required
-@recruiter_bp.route('/jobs/create', methods=['GET', 'POST'])
-@recruiter_required
 def create_job():
     if request.method == 'POST':
         recruiter_id = session.get('recruiter_id')

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify, current_app
 from app.database.connection import execute_query
-from app.utils.decorators import recruiter_required
+from app.utils.decorators import recruiter_required, api_recruiter_required
 from app.services import profile_service
 
 candidates_bp = Blueprint('recruiter_candidates', __name__)
@@ -125,9 +125,8 @@ def view_candidate(user_id):
         return redirect(url_for('recruiter.dashboard'))
 
 @candidates_bp.route('/recruiter/api/messages/send', methods=['POST'])
-@recruiter_required # Checks session['recruiter_id']
+@api_recruiter_required
 def send_message_api():
-    """Send message from recruiter to candidate."""
     from app.services import message_service
     recruiter_id = session.get('recruiter_id')
     

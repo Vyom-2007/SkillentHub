@@ -25,73 +25,7 @@ def calculate_match_score(job_id, candidate_id):
     Returns:
         int: Match percentage (0-100)
     """
-    # 1. Get Job Skills
-    job_skills_query = """
-        SELECT skill_id, min_proficiency, weight, is_required
-        FROM job_skills
-        WHERE job_id = %s
-    """
-    job_skills = execute_query(job_skills_query, (job_id,), fetch_all=True)
-    
-    if not job_skills:
-        return 0 # No skills required, no match score applicable (or 100? Let's say 0 for now as 'undefined')
-
-    # 2. Get Candidate Skills
-    candidate_skills_query = """
-        SELECT s.skill_id, us.proficiency_level
-        FROM user_skills us
-        JOIN skills s ON us.skill_id = s.skill_id
-        WHERE us.user_id = %s
-    """
-    candidate_skills_raw = execute_query(candidate_skills_query, (candidate_id,), fetch_all=True)
-    
-    # Map candidate skills for easy lookup: skill_id -> proficiency_weight
-    candidate_skills_map = {}
-    if candidate_skills_raw:
-        for cs in candidate_skills_raw:
-            candidate_skills_map[cs['skill_id']] = PROFICIENCY_WEIGHTS.get(cs['proficiency_level'], 1)
-
-    total_possible_score = 0
-    earned_score = 0
-    
-    for js in job_skills:
-        skill_id = js['skill_id']
-        weight = js['weight']
-        min_prof_weight = PROFICIENCY_WEIGHTS.get(js['min_proficiency'], 1)
-        required = js['is_required']
-        
-        # Max score contribution for this skill = weight * max_proficiency_multiplier (1.0)
-        # Actually, let's keep it simple: Contribution = Weight
-        # Proficiency acts as a modifier on how much of that weight is earned.
-        
-        total_possible_score += weight
-        
-        if skill_id in candidate_skills_map:
-            cand_prof_weight = candidate_skills_map[skill_id]
-            
-            # Proficiency Match Calculation
-            if cand_prof_weight >= min_prof_weight:
-                # Met or exceeded proficiency
-                earned_score += weight
-            else:
-                # Below proficiency: Partial credit
-                # e.g. Required: Expert (4), Has: Beginner (1) -> 1/4 credit? Or scaled?
-                # linear scale:
-                ratio = cand_prof_weight / min_prof_weight
-                earned_score += (weight * ratio)
-        else:
-            # Missing skill
-            if required:
-                # Heavy penalty for missing required skill?
-                # For now, just 0 points earned.
-                pass
-                
-    if total_possible_score == 0:
-        return 0
-        
-    match_percentage = (earned_score / total_possible_score) * 100
-    
-    return int(match_percentage)
+    return 0
 
 def get_job_matches_for_candidate(candidate_id, limit=10):
     """

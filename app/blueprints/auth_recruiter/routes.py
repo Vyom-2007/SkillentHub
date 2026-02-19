@@ -1,12 +1,12 @@
+
 """
 Recruiter authentication routes.
 Handles registration, login, and logout with session isolation.
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from functools import wraps
-import bcrypt
 import logging
-from app.models import recruiter as recruiter_model
+from app.services import recruiter_auth_service
 
 auth_recruiter_bp = Blueprint('auth_recruiter', __name__, url_prefix='/recruiter')
 
@@ -51,7 +51,7 @@ def register():
             errors.append("Passwords do not match")
         
         # Check email uniqueness
-        if recruiter_model.email_exists(email):
+        if recruiter_auth_service.email_exists(email):
             errors.append("Email already registered")
         
         if errors:
@@ -61,17 +61,14 @@ def register():
                                    company_name=company_name, 
                                    email=email)
         
-        # Hash password
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        # Create recruiter via service
+        success, result = recruiter_auth_service.register_recruiter(company_name, email, password)
         
-        # Create recruiter
-        recruiter_id, error = recruiter_model.create(company_name, email, password_hash)
-        
-        if recruiter_id:
+        if success:
             flash("Registration successful! Please log in.", 'success')
             return redirect(url_for('auth_recruiter.login'))
         else:
-            flash(error or "Registration failed", 'danger')
+            flash(result or "Registration failed", 'danger')
     
     return render_template('recruiter/register.html')
 
@@ -92,22 +89,14 @@ def login():
             flash("Email and password required", 'danger')
             return render_template('recruiter/login.html', email=email)
         
-        # Get recruiter
-        recruiter = recruiter_model.get_by_email(email)
+        # Verify credentials via service
+        success, result = recruiter_auth_service.verify_recruiter(email, password)
         
-        if not recruiter:
-            flash("Invalid email or password", 'danger')
+        if not success:
+            flash(result, 'danger')
             return render_template('recruiter/login.html', email=email)
         
-        # Check if active
-        if not recruiter.get('is_active', True):
-            flash("Account is deactivated. Contact support.", 'danger')
-            return render_template('recruiter/login.html', email=email)
-        
-        # Verify password
-        if not bcrypt.checkpw(password.encode('utf-8'), recruiter['password_hash'].encode('utf-8')):
-            flash("Invalid email or password", 'danger')
-            return render_template('recruiter/login.html', email=email)
+        recruiter = result
         
         # SUCCESS: Clear any user session first (session isolation)
         clear_user_session()
@@ -120,7 +109,6 @@ def login():
         
         flash(f"Welcome, {recruiter['company_name']}!", 'success')
         logging.info(f"DEBUG: Login successful for {email}. Redirecting to {url_for('recruiter.dashboard')}")
-        logging.info(f"DEBUG: Session: {session}")
         return redirect(url_for('recruiter.dashboard'))
     
     return render_template('recruiter/login.html')
@@ -150,35 +138,21 @@ def forgot_password():
             flash('Please enter your company email address', 'danger')
             return render_template('recruiter/forgot_password.html')
         
-        # Check if recruiter exists
-        recruiter = recruiter_model.get_by_email(email)
+        # Initiate password reset via service
+        success, result = recruiter_auth_service.initiate_password_reset(email)
         
-        if not recruiter:
-            # Don't reveal if email exists - security best practice
-            flash('If an account exists with this email, you will receive an OTP shortly.', 'info')
-            return redirect(url_for('auth_recruiter.forgot_password'))
-        
-        # Check resend cooldown
-        can_resend, seconds_remaining = otp_service.can_resend_otp(email)
-        if not can_resend:
-            flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
+        if success:
+             # Store email in session for OTP verification
+            session['recruiter_reset_email'] = email
+            flash(result, 'success')
+            return redirect(url_for('auth_recruiter.verify_otp'))
+        else:
+            # If email not found, don't reveal it (security), unless it's a validation error
+            if result == "Email not found.":
+                 flash('If an account exists with this email, you will receive an OTP shortly.', 'info')
+            else:
+                 flash(result, 'warning')
             return render_template('recruiter/forgot_password.html', email=email)
-        
-        # Generate and send OTP
-        # Pass recruiter_id explicitly
-        otp, expires_at = otp_service.create_otp(
-            user_id=None, 
-            email=email, 
-            recruiter_id=recruiter['recruiter_id']
-        )
-        
-        email_service.send_otp_email(email, recruiter['company_name'], otp)
-        
-        # Store email in session for OTP verification
-        session['recruiter_reset_email'] = email
-        
-        flash('OTP has been sent to your email address.', 'success')
-        return redirect(url_for('auth_recruiter.verify_otp'))
     
     return render_template('recruiter/forgot_password.html')
 
@@ -244,28 +218,15 @@ def resend_otp():
         flash('Please request a password reset first.', 'warning')
         return redirect(url_for('auth_recruiter.forgot_password'))
     
-    # Check resend cooldown
-    can_resend, seconds_remaining = otp_service.can_resend_otp(email)
-    if not can_resend:
-        flash(f'Please wait {seconds_remaining} seconds before requesting a new OTP.', 'warning')
+    # Initiate password reset via service (handles resend logic)
+    success, result = recruiter_auth_service.initiate_password_reset(email)
+    
+    if success:
+        flash(result, 'success')
         return redirect(url_for('auth_recruiter.verify_otp'))
-    
-    # Get recruiter
-    recruiter = recruiter_model.get_by_email(email)
-    if not recruiter:
-        flash('An error occurred. Please try again.', 'danger')
+    else:
+        flash(result, 'danger')
         return redirect(url_for('auth_recruiter.forgot_password'))
-    
-    # Generate and send new OTP
-    otp, expires_at = otp_service.create_otp(
-        user_id=None, 
-        email=email, 
-        recruiter_id=recruiter['recruiter_id']
-    )
-    email_service.send_otp_email(email, recruiter['company_name'], otp)
-    
-    flash('A new OTP has been sent to your email.', 'success')
-    return redirect(url_for('auth_recruiter.verify_otp'))
 
 
 @auth_recruiter_bp.route('/reset-password', methods=['GET', 'POST'])
@@ -308,22 +269,18 @@ def reset_password():
                 flash(error, 'danger')
             return render_template('recruiter/reset_password.html')
         
-        # Hash password and update
-        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        
         # Use recruiter_id from OTP record if available, or fetch by email
         recruiter_id = otp_record.get('recruiter_id')
         if not recruiter_id:
              # Fallback if recruiter_id wasn't in OTP (legacy?)
-             recruiter = recruiter_model.get_by_email(email)
+             recruiter = recruiter_auth_service.get_recruiter_by_email(email)
              if recruiter:
                  recruiter_id = recruiter['recruiter_id']
         
         if recruiter_id:
-            # Import execute_update to call update_password if model function doesn't work as expected
-            # But we should use model function
             try:
-                recruiter_model.update_password(recruiter_id, password_hash)
+                # Update password via service
+                recruiter_auth_service.update_password(recruiter_id, password)
                 success = True
             except Exception as e:
                 current_app.logger.error(f"Failed to update password: {e}")

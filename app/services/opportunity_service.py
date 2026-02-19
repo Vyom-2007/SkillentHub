@@ -354,14 +354,7 @@ def get_job_by_id(job_id):
     job = execute_query(query, (job_id,), fetch_one=True)
     
     if job:
-        # Fetch structured skills - REUSING execute_query from current module
-        skills_query = """
-            SELECT s.skill_name, js.min_proficiency, js.weight, js.is_required
-            FROM job_skills js
-            JOIN skills s ON js.skill_id = s.skill_id
-            WHERE js.job_id = %s
-        """
-        job['structured_skills'] = execute_query(skills_query, (job_id,), fetch_all=True)
+        job['structured_skills'] = []
         
     return _ensure_dates(job)
 

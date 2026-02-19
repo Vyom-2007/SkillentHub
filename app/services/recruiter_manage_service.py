@@ -221,18 +221,8 @@ def get_applications(recruiter_id, filters=None):
     applications = execute_query(final_sql, tuple(all_params), fetch_all=True)
     
     # Calculate match scores
-    from app.services import matching_service
     for app in applications:
-        if app.get('item_type') == 'job':
-            try:
-                # job_id is item_id
-                score = matching_service.calculate_match_score(app['item_id'], app['user_id'])
-                app['match_score'] = score
-            except Exception as e:
-                # Log error?
-                app['match_score'] = 0
-        else:
-            app['match_score'] = None
+        app['match_score'] = 0
             
     # Sort by match_score DESC, then applied_at DESC
     # Treat None match_score as -1 to put them at bottom? Or 0?
@@ -274,13 +264,7 @@ def get_application_detail(application_id, recruiter_id):
     details = execute_query(query, (application_id, recruiter_id, recruiter_id, recruiter_id, recruiter_id), fetch_one=True)
     
     if details and details.get('item_type') == 'job':
-        from app.services import matching_service
-        try:
-             # item_id is correct here as per query select a.*
-             score = matching_service.calculate_match_score(details['item_id'], details['user_id'])
-             details['match_score'] = score
-        except Exception:
-             details['match_score'] = 0
+        details['match_score'] = 0
              
     return details
 

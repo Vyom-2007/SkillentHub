@@ -1,9 +1,10 @@
+
 """
 Recruiter Settings Service.
 Handles profile updates and password changes for recruiters.
 """
 from app.database.connection import execute_query, execute_update
-from werkzeug.security import generate_password_hash, check_password_hash
+from app.services import recruiter_auth_service
 import re
 
 def get_profile(recruiter_id):
@@ -19,18 +20,6 @@ def update_profile(recruiter_id, company_name):
     """
     query = "UPDATE recruiters SET company_name = %s WHERE recruiter_id = %s"
     return execute_update(query, (company_name, recruiter_id)) > 0
-
-def verify_password(recruiter_id, password):
-    """
-    Verify current password.
-    """
-    query = "SELECT password_hash FROM recruiters WHERE recruiter_id = %s"
-    result = execute_query(query, (recruiter_id,), fetch_one=True)
-    
-    if not result:
-        return False
-        
-    return check_password_hash(result['password_hash'], password)
 
 def validate_password_complexity(password):
     """
@@ -51,7 +40,7 @@ def change_password(recruiter_id, current_password, new_password):
     Change recruiter password.
     """
     # 1. Verify current
-    if not verify_password(recruiter_id, current_password):
+    if not recruiter_auth_service.verify_recruiter_by_id(recruiter_id, current_password):
         return False, "Incorrect current password."
         
     # 2. Validate new complexity
@@ -59,9 +48,7 @@ def change_password(recruiter_id, current_password, new_password):
     if not valid:
         return False, msg
         
-    # 3. Update
-    new_hash = generate_password_hash(new_password)
-    query = "UPDATE recruiters SET password_hash = %s WHERE recruiter_id = %s"
-    execute_update(query, (new_hash, recruiter_id))
+    # 3. Update via auth service
+    recruiter_auth_service.update_password(recruiter_id, new_password)
     
     return True, "Password updated successfully."
