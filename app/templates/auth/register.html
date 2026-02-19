@@ -1,143 +1,564 @@
-{% extends "base.html" %}
-
-{% block title %}Create Account - SkillentHub{% endblock %}
-
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="auth-card">
-                <div class="text-center mb-4">
-                    <h1 class="auth-title">Create Account</h1>
-                    <p class="auth-subtitle">Join SkillentHub and unlock your potential</p>
-                </div>
-
-                <form id="registerForm" method="POST" action="{{ url_for('auth.register') }}" novalidate>
-                    <!-- Full Name -->
-                    <div class="mb-3">
-                        <label for="full_name" class="form-label">Full Name</label>
-                        <input type="text" class="form-control" id="full_name" name="full_name"
-                            value="{{ full_name or '' }}" placeholder="Enter your full name" required>
-                        <div class="invalid-feedback" id="fullNameError">
-                            Please enter your full name
-                        </div>
-                    </div>
-
-                    <!-- Email -->
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ email or '' }}"
-                            placeholder="you@example.com" required>
-                        <div class="invalid-feedback" id="emailError">
-                            Please enter a valid email address
-                        </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Create a strong password" required>
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                        <div class="invalid-feedback" id="passwordError">
-                            Password must be at least 8 characters with 1 uppercase and 1 number
-                        </div>
-                        <div class="form-text" id="passwordHint">
-                            <small>Min 8 characters, 1 uppercase letter, 1 number</small>
-                        </div>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div class="mb-4">
-                        <label for="confirm_password" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                            placeholder="Confirm your password" required>
-                        <div class="invalid-feedback" id="confirmPasswordError">
-                            Passwords do not match
-                        </div>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn-primary w-100 py-2" id="submitBtn">
-                        <i class="bi bi-person-plus me-2"></i>Create Account
-                    </button>
-                </form>
-
-                <div class="text-center mt-4">
-                    <p class="text-muted mb-2">
-                        Already have an account?
-                        <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-medium">
-                            Sign in
-                        </a>
-                    </p>
-                    <hr class="my-3">
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-building me-1"></i>Are you a recruiter?
-                        <a href="{{ url_for('auth_recruiter.register') }}" class="text-decoration-none"
-                            style="color: #0ea5e9;">
-                            Register as Recruiter
-                        </a>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<!DOCTYPE html>
+<html lang="en" class="">
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('registerForm');
-        const fullNameInput = document.getElementById('full_name');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const confirmPasswordInput = document.getElementById('confirm_password');
-        const togglePasswordBtn = document.getElementById('togglePassword');
+    (function () {
+        var t = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'light';
+        if (t === 'dark') document.documentElement.classList.add('dark');
+    })();
+</script>
 
-        // Toggle password visibility
-        if (togglePasswordBtn) {
-            togglePasswordBtn.addEventListener('click', function () {
-                const type = passwordInput.type === 'password' ? 'text' : 'password';
-                passwordInput.type = type;
-                this.querySelector('i').classList.toggle('bi-eye');
-                this.querySelector('i').classList.toggle('bi-eye-slash');
-            });
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Create Account — SkillEntHub</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "glass-border": "rgba(255, 255, 255, 0.2)",
+                        "glass-surface": "rgba(255, 255, 255, 0.05)",
+                        "primary": "#3b82f6",
+                        "primary-hover": "#2563eb",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ===== Glass Card ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
         }
 
-        // Real-time validation
-        fullNameInput.addEventListener('blur', () => validateName(fullNameInput));
-        fullNameInput.addEventListener('input', () => {
-            if (fullNameInput.classList.contains('is-invalid')) validateName(fullNameInput);
-        });
+        .dark .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
 
-        emailInput.addEventListener('blur', () => validateEmail(emailInput));
-        emailInput.addEventListener('input', () => {
-            if (emailInput.classList.contains('is-invalid')) validateEmail(emailInput);
-        });
+        /* ===== Glass Input ===== */
+        .glass-input {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+            transition: all 0.3s;
+        }
 
-        passwordInput.addEventListener('input', () => validatePassword(passwordInput));
+        .glass-input::placeholder {
+            color: #94a3b8;
+        }
 
-        confirmPasswordInput.addEventListener('input', () => validateConfirmPassword(passwordInput, confirmPasswordInput));
+        .glass-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(0, 0, 0, 0.02);
+            outline: none;
+        }
 
-        // Form submission
-        form.addEventListener('submit', function (e) {
-            let isValid = true;
+        .dark .glass-input {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
 
-            if (!validateName(fullNameInput)) isValid = false;
-            if (!validateEmail(emailInput)) isValid = false;
-            if (!validatePassword(passwordInput)) isValid = false;
-            if (!validateConfirmPassword(passwordInput, confirmPasswordInput)) isValid = false;
+        .dark .glass-input::placeholder {
+            color: #64748b;
+        }
 
-            if (!isValid) {
-                e.preventDefault();
+        .dark .glass-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== Autofill Fix ===== */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: #1e293b;
+            transition: background-color 5000s ease-in-out 0s;
+            box-shadow: inset 0 0 20px 20px rgba(255, 255, 255, 0.01);
+        }
+
+        .dark input:-webkit-autofill,
+        .dark input:-webkit-autofill:hover,
+        .dark input:-webkit-autofill:focus,
+        .dark input:-webkit-autofill:active {
+            -webkit-text-fill-color: white;
+            box-shadow: inset 0 0 20px 20px rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== Role Toggle ===== */
+        .role-toggle-bg {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .dark .role-toggle-bg {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .role-toggle-label {
+            color: #64748b;
+            transition: all 0.3s;
+        }
+
+        .role-toggle-label:hover {
+            color: #334155;
+        }
+
+        .dark .role-toggle-label {
+            color: #94a3b8;
+        }
+
+        .dark .role-toggle-label:hover {
+            color: white;
+        }
+
+        /* ===== CTA Button Inner ===== */
+        .cta-inner {
+            background: #f1f5f9;
+        }
+
+        .cta-inner:hover {
+            background: #e2e8f0;
+        }
+
+        .dark .cta-inner {
+            background: #1a2333;
+        }
+
+        .dark .cta-inner:hover {
+            background: rgba(26, 35, 51, 0.9);
+        }
+
+        /* ===== Theme Toggle ===== */
+        .theme-toggle-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.05);
+            color: #64748b;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #334155;
+        }
+
+        .dark .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+        }
+
+        .dark .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .theme-toggle-btn .icon-light {
+            display: none;
+        }
+
+        .theme-toggle-btn .icon-dark {
+            display: block;
+        }
+
+        .dark .theme-toggle-btn .icon-light {
+            display: block;
+        }
+
+        .dark .theme-toggle-btn .icon-dark {
+            display: none;
+        }
+
+        /* ===== Logo ===== */
+        .logo-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2);
+        }
+
+        .logo-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .logo-box:hover::after {
+            opacity: 1;
+        }
+
+        /* ===== Flash Messages ===== */
+        .flash-msg {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .flash-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+        }
+
+        .flash-error,
+        .flash-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .flash-warning {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            color: #ca8a04;
+        }
+
+        .flash-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #2563eb;
+        }
+
+        .dark .flash-success {
+            color: #4ade80;
+        }
+
+        .dark .flash-error,
+        .dark .flash-danger {
+            color: #f87171;
+        }
+
+        .dark .flash-warning {
+            color: #facc15;
+        }
+
+        .dark .flash-info {
+            color: #60a5fa;
+        }
+
+        /* ===== Password hint ===== */
+        .pw-hint {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-[#0f172a] font-display text-slate-800 dark:text-slate-100 antialiased min-h-screen overflow-y-auto relative transition-colors duration-300">
+
+    <!-- Background -->
+    <div class="fixed inset-0 z-0">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-slate-100 dark:from-[#1e293b] dark:via-[#0f172a] dark:to-[#000000]">
+        </div>
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-300/20 dark:bg-blue-600/20 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse opacity-60 dark:opacity-50">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-300/20 dark:bg-indigo-600/20 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen opacity-60 dark:opacity-50">
+        </div>
+        <div
+            class="absolute top-[40%] left-[60%] w-[300px] h-[300px] bg-cyan-200/20 dark:bg-cyan-500/10 rounded-full blur-[80px] mix-blend-multiply dark:mix-blend-screen opacity-50 dark:opacity-30">
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="absolute top-6 right-6 z-50">
+        <button id="themeToggle" class="theme-toggle-btn group" aria-label="Toggle Theme">
+            <span
+                class="material-symbols-outlined text-[20px] transition-transform duration-500 group-hover:rotate-180 icon-light">light_mode</span>
+            <span
+                class="material-symbols-outlined text-[20px] transition-transform duration-500 group-hover:rotate-180 icon-dark">dark_mode</span>
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 flex w-full min-h-screen items-center justify-center py-8 px-4">
+        <div
+            class="glass-card w-full max-w-[520px] p-8 md:p-10 rounded-3xl relative overflow-hidden my-4 flex flex-col justify-center">
+
+            <!-- Noise overlay -->
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+                style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAiLz4KPC9zdmc+');">
+            </div>
+
+            <!-- Logo & Title -->
+            <div class="flex flex-col items-center mb-6 relative z-10">
+                <div
+                    class="w-16 h-16 relative logo-box rounded-2xl flex items-center justify-center text-white mb-4 ring-1 ring-white/20 backdrop-blur-sm overflow-hidden group">
+                    <span
+                        class="font-bold text-4xl font-display italic bg-clip-text text-transparent bg-gradient-to-tr from-white to-blue-100 drop-shadow-sm">S</span>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">Create Account</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Join SkillEntHub today</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }} relative z-10">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- User / Recruiter Toggle -->
+            <div class="role-toggle-bg p-1 rounded-xl flex relative mb-6 backdrop-blur-sm shadow-inner">
+                <label class="flex-1 relative cursor-pointer">
+                    <input checked name="role" type="radio" value="seeker" class="peer sr-only" id="roleSeeker" />
+                    <div class="flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-300
+                                peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-600 peer-checked:text-white peer-checked:shadow-lg
+                                role-toggle-label">
+                        <span class="material-symbols-outlined mr-2 text-[18px]">person</span>
+                        User
+                    </div>
+                </label>
+                <label class="flex-1 relative cursor-pointer">
+                    <input name="role" type="radio" value="recruiter" class="peer sr-only" id="roleRecruiter" />
+                    <div class="flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-300
+                                peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-600 peer-checked:text-white peer-checked:shadow-lg
+                                role-toggle-label">
+                        <span class="material-symbols-outlined mr-2 text-[18px]">business_center</span>
+                        Recruiter
+                    </div>
+                </label>
+            </div>
+
+            <!-- Register Form -->
+            <form id="registerForm" method="POST" action="{{ url_for('auth.register') }}"
+                class="flex flex-col gap-4 relative z-10" novalidate>
+
+                <!-- Name Field (swaps between Full Name / Company Name) -->
+                <div class="space-y-1.5">
+                    <label
+                        class="block text-xs uppercase tracking-wider font-semibold ml-1 text-slate-500 dark:text-slate-400"
+                        for="nameField" id="nameLabel">Full Name</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-focus-within:text-blue-400 transition-colors text-[20px]"
+                                id="nameIcon">badge</span>
+                        </div>
+                        <input class="glass-input block w-full rounded-xl pl-11 pr-4 py-3 sm:text-sm shadow-inner"
+                            id="nameField" name="full_name" type="text" placeholder="John Doe"
+                            value="{{ full_name or company_name or '' }}" required />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="space-y-1.5">
+                    <label
+                        class="block text-xs uppercase tracking-wider font-semibold ml-1 text-slate-500 dark:text-slate-400"
+                        for="email">Email</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-focus-within:text-blue-400 transition-colors text-[20px]">mail</span>
+                        </div>
+                        <input class="glass-input block w-full rounded-xl pl-11 pr-4 py-3 sm:text-sm shadow-inner"
+                            id="email" name="email" type="email" placeholder="name@example.com"
+                            value="{{ email or '' }}" required />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-1.5">
+                    <label
+                        class="block text-xs uppercase tracking-wider font-semibold ml-1 text-slate-500 dark:text-slate-400"
+                        for="password">Password</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-focus-within:text-blue-400 transition-colors text-[20px]">lock</span>
+                        </div>
+                        <input class="glass-input block w-full rounded-xl pl-11 pr-12 py-3 sm:text-sm shadow-inner"
+                            id="password" name="password" type="password" placeholder="••••••••" required />
+                        <button
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer transition-colors text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                            type="button" id="togglePassword">
+                            <span class="material-symbols-outlined text-[20px]" id="eyeIcon">visibility_off</span>
+                        </button>
+                    </div>
+                    <p class="pw-hint">Min 8 characters, 1 uppercase letter, 1 number</p>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="space-y-1.5">
+                    <label
+                        class="block text-xs uppercase tracking-wider font-semibold ml-1 text-slate-500 dark:text-slate-400"
+                        for="confirm_password">Confirm Password</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-focus-within:text-blue-400 transition-colors text-[20px]">lock_reset</span>
+                        </div>
+                        <input class="glass-input block w-full rounded-xl pl-11 pr-4 py-3 sm:text-sm shadow-inner"
+                            id="confirm_password" name="confirm_password" type="password" placeholder="••••••••"
+                            required />
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button class="w-full relative group overflow-hidden rounded-xl p-[1px] mt-4
+                               shadow-lg dark:shadow-[0_0_20px_rgba(59,130,246,0.3)]
+                               transition-shadow hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
+                    type="submit">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 animate-[spin_4s_linear_infinite] opacity-70">
+                    </div>
+                    <div
+                        class="relative cta-inner transition-all rounded-xl py-3.5 px-4 flex items-center justify-center">
+                        <span class="text-sm font-bold tracking-wide text-slate-800 dark:text-white">Sign Up</span>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Login Link -->
+            <p class="text-center text-sm mt-6 relative z-10 text-slate-500 dark:text-slate-400">
+                Already have an account?
+                <a id="loginLink"
+                    class="font-bold text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+                    href="{{ url_for('auth.login') }}">Log In</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-6 text-xs font-medium text-slate-400 dark:text-slate-600">
+            &copy; 2026 SkillEntHub Inc.
+        </div>
+    </div>
+
+    <!-- ===== Scripts ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Role Toggle ---
+            var seekerRadio = document.getElementById('roleSeeker');
+            var recruiterRadio = document.getElementById('roleRecruiter');
+            var form = document.getElementById('registerForm');
+            var nameField = document.getElementById('nameField');
+            var nameLabel = document.getElementById('nameLabel');
+            var nameIcon = document.getElementById('nameIcon');
+            var loginLink = document.getElementById('loginLink');
+
+            var routes = {
+                seeker: {
+                    action: "{{ url_for('auth.register') }}",
+                    login: "{{ url_for('auth.login') }}",
+                    nameLabel: "Full Name",
+                    namePlaceholder: "John Doe",
+                    nameAttr: "full_name",
+                    nameIcon: "badge"
+                },
+                recruiter: {
+                    action: "{{ url_for('auth_recruiter.register') }}",
+                    login: "{{ url_for('auth_recruiter.login') }}",
+                    nameLabel: "Company Name",
+                    namePlaceholder: "Acme Inc.",
+                    nameAttr: "company_name",
+                    nameIcon: "domain"
+                }
+            };
+
+            function switchRole(role) {
+                var r = routes[role];
+                form.action = r.action;
+                loginLink.href = r.login;
+                nameLabel.textContent = r.nameLabel;
+                nameField.placeholder = r.namePlaceholder;
+                nameField.name = r.nameAttr;
+                nameIcon.textContent = r.nameIcon;
             }
+
+            seekerRadio.addEventListener('change', function () { if (this.checked) switchRole('seeker'); });
+            recruiterRadio.addEventListener('change', function () { if (this.checked) switchRole('recruiter'); });
+
+            // --- Password Visibility ---
+            var passwordInput = document.getElementById('password');
+            var toggleBtn = document.getElementById('togglePassword');
+            var eyeIcon = document.getElementById('eyeIcon');
+            toggleBtn.addEventListener('click', function () {
+                var isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                eyeIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
+            });
+
+            // --- Client-side Validation ---
+            form.addEventListener('submit', function (e) {
+                var name = nameField.value.trim();
+                var email = document.getElementById('email').value.trim();
+                var pw = passwordInput.value;
+                var cpw = document.getElementById('confirm_password').value;
+                var errors = [];
+
+                if (!name) errors.push('Name is required.');
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Valid email is required.');
+                if (pw.length < 8) errors.push('Password must be at least 8 characters.');
+                if (!/[A-Z]/.test(pw)) errors.push('Password needs at least 1 uppercase letter.');
+                if (!/[0-9]/.test(pw)) errors.push('Password needs at least 1 number.');
+                if (pw !== cpw) errors.push('Passwords do not match.');
+
+                if (errors.length > 0) {
+                    e.preventDefault();
+                    // Remove existing client errors
+                    document.querySelectorAll('.client-error').forEach(function (el) { el.remove(); });
+                    var container = document.createElement('div');
+                    container.className = 'flash-msg flash-error client-error relative z-10';
+                    container.textContent = errors.join(' ');
+                    form.parentNode.insertBefore(container, form);
+                }
+            });
+
+            // --- Theme Toggle ---
+            var themeToggle = document.getElementById('themeToggle');
+            function applyTheme(theme) {
+                if (theme === 'dark') { document.documentElement.classList.add('dark'); }
+                else { document.documentElement.classList.remove('dark'); }
+                localStorage.setItem('landing-theme', theme);
+                localStorage.setItem('theme', theme);
+            }
+            window.applyTheme = applyTheme;
+            var saved = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'dark';
+            applyTheme(saved);
+            themeToggle.addEventListener('click', function () {
+                applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+            });
         });
-    });
-</script>
-{% endblock %}
+    </script>
+</body>
+
+</html>

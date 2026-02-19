@@ -202,6 +202,16 @@ def update_profile(user_id, data, profile_picture=None, resume_file=None):
         resume_filename = result
     
     try:
+        # Defensive values for NOT NULL columns
+        full_name = data.get('full_name')
+        if full_name is None:
+            full_name = existing.get('full_name') if existing else ''
+            
+        show_skills = int(data.get('show_skills', 1))
+        show_education = int(data.get('show_education', 1)) 
+        show_experience = int(data.get('show_experience', 1))
+        show_resume = int(data.get('show_resume', 0))
+
         query = """
             UPDATE profiles 
             SET full_name = %s, headline = %s, bio = %s, 
@@ -211,23 +221,27 @@ def update_profile(user_id, data, profile_picture=None, resume_file=None):
                 updated_at = NOW()
             WHERE user_id = %s
         """
-        execute_query(query, (
-            data.get('full_name'),
+        params = (
+            full_name,
             data.get('headline'),
             data.get('bio'),
             data.get('location'),
             data.get('phone'),
             picture_filename,
             resume_filename,
-            data.get('show_skills', 1),
-            data.get('show_education', 1),
-            data.get('show_experience', 1),
-            data.get('show_resume', 0),
+            show_skills,
+            show_education,
+            show_experience,
+            show_resume,
             user_id
-        ))
+        )
+        execute_query(query, params)
         return True, "Profile updated successfully"
     except Exception as e:
-        return False, str(e)
+        current_app.logger.error(f"Error updating profile user_id={user_id}: {e}")
+        # Log params for debugging
+        current_app.logger.error(f"Params: {locals().get('params')}")
+        return False, f"Database error: {str(e)}"
 
 
 def get_profile_with_details(user_id):
@@ -238,9 +252,20 @@ def get_profile_with_details(user_id):
     
     profile['skills'] = get_user_skills(user_id)
     profile['education'] = get_user_education(user_id)
+    profile['experience'] = get_user_experience(user_id)
     profile['completion'] = calculate_profile_completion(profile)
     
     return profile
+
+
+def get_user_experience(user_id):
+    """Get experience entries for a user."""
+    query = """
+        SELECT * FROM experience 
+        WHERE user_id = %s 
+        ORDER BY start_date DESC
+    """
+    return execute_query(query, (user_id,), fetch_all=True)
 
 
 # ==================== Skills Management ====================
@@ -451,46 +476,48 @@ def get_user_wins(user_id):
     Returns list of wins with event details and team members.
     """
     # Query to get teams the user is part of that have a rank
-    query = """
-        SELECT 
-            t.team_id, t.team_name, t.rank,
-            c.title as competition_title, c.competition_id,
-            h.title as hackathon_title, h.hackathon_id,
-            CASE 
-                WHEN c.competition_id IS NOT NULL THEN 'Competition'
-                WHEN h.hackathon_id IS NOT NULL THEN 'Hackathon'
-            END as event_type,
-            CASE 
-                WHEN c.competition_id IS NOT NULL THEN c.title
-                WHEN h.hackathon_id IS NOT NULL THEN h.title
-            END as event_title,
-            CASE 
-                WHEN c.competition_id IS NOT NULL THEN c.end_date
-                WHEN h.hackathon_id IS NOT NULL THEN h.end_date
-            END as event_date
-        FROM teams t
-        JOIN team_members tm ON t.team_id = tm.team_id
-        LEFT JOIN competitions c ON t.item_type = 'competition' AND t.item_id = c.competition_id
-        LEFT JOIN hackathons h ON t.item_type = 'hackathon' AND t.item_id = h.hackathon_id
-        WHERE tm.user_id = %s 
-        AND t.rank IS NOT NULL 
-        AND t.rank != ''
-        ORDER BY event_date DESC
-    """
-    wins = execute_query(query, (user_id,), fetch_all=True)
+    # NOTE: 'rank' column is missing in teams table schema. Returning empty list to prevent crash.
+    # query = """
+    #     SELECT 
+    #         t.team_id, t.team_name, t.rank,
+    #         c.title as competition_title, c.competition_id,
+    #         h.title as hackathon_title, h.hackathon_id,
+    #         CASE 
+    #             WHEN c.competition_id IS NOT NULL THEN 'Competition'
+    #             WHEN h.hackathon_id IS NOT NULL THEN 'Hackathon'
+    #         END as event_type,
+    #         CASE 
+    #             WHEN c.competition_id IS NOT NULL THEN c.title
+    #             WHEN h.hackathon_id IS NOT NULL THEN h.title
+    #         END as event_title,
+    #         CASE 
+    #             WHEN c.competition_id IS NOT NULL THEN c.end_date
+    #             WHEN h.hackathon_id IS NOT NULL THEN h.end_date
+    #         END as event_date
+    #     FROM teams t
+    #     JOIN team_members tm ON t.team_id = tm.team_id
+    #     LEFT JOIN competitions c ON t.item_type = 'competition' AND t.item_id = c.competition_id
+    #     LEFT JOIN hackathons h ON t.item_type = 'hackathon' AND t.item_id = h.hackathon_id
+    #     WHERE tm.user_id = %s 
+    #     AND t.rank IS NOT NULL 
+    #     AND t.rank != ''
+    #     ORDER BY event_date DESC
+    # """
+    # wins = execute_query(query, (user_id,), fetch_all=True)
     
-    if not wins:
-        return []
+    # if not wins:
+    #     return []
         
-    # For each win, get team members
-    for win in wins:
-        members_query = """
-            SELECT u.user_id, p.full_name, p.profile_picture
-            FROM team_members tm
-            JOIN users u ON tm.user_id = u.user_id
-            LEFT JOIN profiles p ON u.user_id = p.user_id
-            WHERE tm.team_id = %s
-        """
-        win['members'] = execute_query(members_query, (win['team_id'],), fetch_all=True)
+    # # For each win, get team members
+    # for win in wins:
+    #     members_query = """
+    #         SELECT u.user_id, p.full_name, p.profile_picture
+    #         FROM team_members tm
+    #         JOIN users u ON tm.user_id = u.user_id
+    #         LEFT JOIN profiles p ON u.user_id = p.user_id
+    #         WHERE tm.team_id = %s
+    #     """
+    #     win['members'] = execute_query(members_query, (win['team_id'],), fetch_all=True)
         
-    return wins
+    # return wins
+    return []

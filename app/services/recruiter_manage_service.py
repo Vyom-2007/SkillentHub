@@ -348,16 +348,15 @@ def update_application_status(application_id, new_status, recruiter_id=None):
     if not success:
         return False, message
     
-    # Handle Side Effects (Emails, Notifications)
-    # These could optionally be moved to application_service, but keeping here 
-    # since they are specific to Recruiter workflows (e.g. company name in email).
+    # Handle Side Effects (Emails, Notifications, Activity Logs)
     if new_status in ['shortlisted', 'interview', 'offer', 'hired', 'accepted', 'rejected']:
         try:
-            # Fetch details for email
+            # Fetch details for email & logging
             fetch_sql = """
                 SELECT 
                     a.user_id,
                     a.item_type,
+                    a.item_id,
                     u.email, 
                     p.full_name as candidate_name,
                     COALESCE(j.title, i.title, c.title, h.title) as item_title,
@@ -382,6 +381,25 @@ def update_application_status(application_id, new_status, recruiter_id=None):
                         accepted_application_id=application_id,
                         accepted_item_type=details['item_type']
                     )
+                    
+                    # Log Activity: User Hired
+                    try:
+                        from app.services import activity_service
+                        activity_service.log_activity(
+                            action_type='user_hired',
+                            recruiter_id=recruiter_id,
+                            user_id=details['user_id'],
+                            item_type='application',
+                            item_id=application_id,
+                            details={
+                                'status': new_status, 
+                                'item_type': details['item_type'], 
+                                'item_id': details['item_id'],
+                                'item_title': details['item_title']
+                            }
+                        )
+                    except Exception as cx:
+                         print(f"Error logging hire activity: {cx}")
 
                 # Send email
                 from app.services.email_service import send_status_update_email

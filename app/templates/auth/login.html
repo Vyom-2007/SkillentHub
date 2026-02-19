@@ -1,88 +1,512 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en" class="">
+<script>
+    (function () {
+        var t = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'light';
+        if (t === 'dark') document.documentElement.classList.add('dark');
+    })();
+</script>
 
-{% block title %}Sign In - SkillentHub{% endblock %}
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sign In — SkillEntHub</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "glass-border": "rgba(255, 255, 255, 0.1)",
+                        "glass-surface": "rgba(255, 255, 255, 0.05)",
+                        "primary": "#3b82f6",
+                        "primary-hover": "#2563eb",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'neon': '0 0 20px theme("colors.blue.500"), 0 0 60px theme("colors.indigo.500")',
+                        'metallic': '0 4px 6px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        /* ===== Glass Card ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
+        }
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-5">
-            <div class="auth-card">
-                <div class="text-center mb-4">
-                    <h1 class="auth-title">Welcome Back</h1>
-                    <p class="auth-subtitle">Sign in to continue to SkillentHub</p>
-                </div>
+        .dark .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
 
-                <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}" novalidate>
-                    <!-- Email -->
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ email or '' }}"
-                            placeholder="you@example.com" required autofocus>
-                        <div class="invalid-feedback">
-                            Please enter a valid email address
-                        </div>
-                    </div>
+        /* ===== Glass Input ===== */
+        .glass-input {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+            transition: all 0.3s;
+        }
 
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Enter your password" required>
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
+        .glass-input::placeholder {
+            color: #94a3b8;
+        }
 
-                    <!-- Forgot Password Link -->
-                    <div class="mb-4 text-end">
-                        <a href="{{ url_for('auth.forgot_password') }}" class="text-decoration-none small">
-                            Forgot password?
-                        </a>
-                    </div>
+        .glass-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: rgba(0, 0, 0, 0.02);
+            outline: none;
+        }
 
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn-primary w-100 py-2">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                    </button>
-                </form>
+        .dark .glass-input {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
 
-                <div class="text-center mt-4">
-                    <p class="text-muted mb-2">
-                        Don't have an account?
-                        <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-medium">
-                            Create one
-                        </a>
-                    </p>
-                    <hr class="my-3">
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-building me-1"></i>Are you a recruiter?
-                        <a href="{{ url_for('auth_recruiter.login') }}" class="text-decoration-none"
-                            style="color: #0ea5e9;">
-                            Login as Recruiter
-                        </a>
-                    </p>
-                </div>
-            </div>
+        .dark .glass-input::placeholder {
+            color: #64748b;
+        }
+
+        .dark .glass-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== Autofill Fix ===== */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: #1e293b;
+            transition: background-color 5000s ease-in-out 0s;
+            box-shadow: inset 0 0 20px 20px rgba(255, 255, 255, 0.01);
+        }
+
+        .dark input:-webkit-autofill,
+        .dark input:-webkit-autofill:hover,
+        .dark input:-webkit-autofill:focus,
+        .dark input:-webkit-autofill:active {
+            -webkit-text-fill-color: white;
+            box-shadow: inset 0 0 20px 20px rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== Logo / Metallic ===== */
+        .logo-bg {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .dark .logo-bg {
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 60%);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+        }
+
+        .metallic-text-dark {
+            background: linear-gradient(135deg, #f1f5f9, #cbd5e1, #94a3b8, #cbd5e1, #f1f5f9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* ===== Toggle ===== */
+        .role-toggle-bg {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .dark .role-toggle-bg {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .role-toggle-label {
+            color: #64748b;
+            transition: all 0.3s;
+        }
+
+        .role-toggle-label:hover {
+            color: #334155;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .dark .role-toggle-label {
+            color: #94a3b8;
+        }
+
+        .dark .role-toggle-label:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== CTA inner ===== */
+        .cta-inner {
+            background: #f1f5f9;
+        }
+
+        .cta-inner:hover {
+            background: #e2e8f0;
+        }
+
+        .dark .cta-inner {
+            background: #0f172a;
+        }
+
+        .dark .cta-inner:hover {
+            background: #1e293b;
+        }
+
+        /* ===== Theme Toggle ===== */
+        .theme-toggle-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.05);
+            color: #64748b;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #334155;
+        }
+
+        .dark .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+        }
+
+        .dark .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .theme-toggle-btn .icon-light {
+            display: none;
+        }
+
+        .theme-toggle-btn .icon-dark {
+            display: block;
+        }
+
+        .dark .theme-toggle-btn .icon-light {
+            display: block;
+        }
+
+        .dark .theme-toggle-btn .icon-dark {
+            display: none;
+        }
+
+        /* ===== Flash Messages ===== */
+        .flash-msg {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .flash-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+        }
+
+        .flash-error,
+        .flash-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+        }
+
+        .flash-warning {
+            background: rgba(234, 179, 8, 0.1);
+            border: 1px solid rgba(234, 179, 8, 0.2);
+            color: #ca8a04;
+        }
+
+        .flash-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #2563eb;
+        }
+
+        .dark .flash-success {
+            color: #4ade80;
+        }
+
+        .dark .flash-error,
+        .dark .flash-danger {
+            color: #f87171;
+        }
+
+        .dark .flash-warning {
+            color: #facc15;
+        }
+
+        .dark .flash-info {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-[#0f172a] font-display text-slate-800 dark:text-slate-100 antialiased min-h-screen overflow-y-auto relative transition-colors duration-300">
+
+    <!-- Background -->
+    <div class="fixed inset-0 z-0">
+        <!-- Light -->
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-slate-100 dark:from-[#1e293b] dark:via-[#0f172a] dark:to-[#000000]">
+        </div>
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-300/20 dark:bg-blue-600/20 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-pulse opacity-60 dark:opacity-50">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-300/20 dark:bg-indigo-600/20 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen opacity-60 dark:opacity-50">
+        </div>
+        <div
+            class="absolute top-[40%] left-[60%] w-[300px] h-[300px] bg-cyan-200/20 dark:bg-cyan-500/10 rounded-full blur-[80px] mix-blend-multiply dark:mix-blend-screen opacity-50 dark:opacity-30">
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const passwordInput = document.getElementById('password');
-        const togglePasswordBtn = document.getElementById('togglePassword');
+    <!-- Theme Toggle (top-right) -->
+    <div class="absolute top-6 right-6 md:top-10 md:right-10 z-50">
+        <button id="themeToggle" class="theme-toggle-btn group" aria-label="Toggle Theme">
+            <span
+                class="material-symbols-outlined text-[24px] group-hover:rotate-180 transition-transform duration-500 icon-light">light_mode</span>
+            <span
+                class="material-symbols-outlined text-[24px] group-hover:rotate-180 transition-transform duration-500 icon-dark">dark_mode</span>
+        </button>
+    </div>
 
-        // Toggle password visibility
-        togglePasswordBtn.addEventListener('click', function () {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            this.querySelector('i').classList.toggle('bi-eye');
-            this.querySelector('i').classList.toggle('bi-eye-slash');
+    <!-- Main Container -->
+    <div class="relative z-10 flex w-full h-screen items-center justify-center p-4">
+        <div class="glass-card w-full max-w-[480px] p-8 md:p-12 rounded-3xl relative overflow-hidden">
+
+            <!-- Noise overlay -->
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none"
+                style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIi8+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAiLz4KPC9zdmc+');">
+            </div>
+
+            <!-- Logo & Title -->
+            <div class="flex flex-col items-center mb-8 relative z-10">
+                <div class="relative mb-6">
+                    <div class="absolute -inset-4 rounded-full blur-xl opacity-20 bg-black/5 dark:bg-white/5"></div>
+                    <div class="relative w-24 h-24 rounded-2xl flex items-center justify-center border logo-bg backdrop-blur-md
+                                border-slate-200 dark:border-white/10 bg-white/40 dark:bg-[#0f172a]/40">
+                        <span class="font-extrabold text-6xl italic relative z-10 text-slate-800 dark:hidden"
+                            style="font-family: 'Manrope', sans-serif;">S</span>
+                        <span
+                            class="font-extrabold text-6xl italic metallic-text-dark relative z-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.4)] hidden dark:inline"
+                            style="font-family: 'Manrope', sans-serif;">S</span>
+                        <div
+                            class="absolute inset-0 rounded-2xl ring-1 ring-slate-200/50 dark:ring-white/20 shadow-inner dark:shadow-[0_0_15px_rgba(255,255,255,0.1)_inset]">
+                        </div>
+                    </div>
+                </div>
+                <h1
+                    class="text-3xl font-bold tracking-tight drop-shadow-sm
+                           text-slate-800 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-white dark:via-blue-100 dark:to-slate-300">
+                    SkillEntHub
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Access your professional dashboard</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }} relative z-10">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- User / Recruiter Toggle -->
+            <div class="role-toggle-bg p-1 rounded-xl flex relative mb-8 backdrop-blur-sm shadow-inner">
+                <label class="flex-1 relative cursor-pointer group" id="seekerLabel">
+                    <input checked name="role" type="radio" value="seeker" class="peer sr-only" id="roleSeeker" />
+                    <div class="flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-300
+                                peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-600 peer-checked:text-white peer-checked:shadow-lg
+                                role-toggle-label">
+                        <span class="material-symbols-outlined mr-2 text-[18px]">person</span>
+                        User
+                    </div>
+                </label>
+                <label class="flex-1 relative cursor-pointer group" id="recruiterLabel">
+                    <input name="role" type="radio" value="recruiter" class="peer sr-only" id="roleRecruiter" />
+                    <div class="flex items-center justify-center py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-300
+                                peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-indigo-600 peer-checked:text-white peer-checked:shadow-lg
+                                role-toggle-label">
+                        <span class="material-symbols-outlined mr-2 text-[18px]">business_center</span>
+                        Recruiter
+                    </div>
+                </label>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" method="POST" action="{{ url_for('auth.login') }}"
+                class="flex flex-col gap-6 relative z-10" novalidate>
+                <!-- Email -->
+                <div class="space-y-1.5">
+                    <label
+                        class="block text-xs uppercase tracking-wider font-semibold ml-1 text-slate-500 dark:text-slate-400"
+                        for="email">Email</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-focus-within:text-blue-400 transition-colors text-[20px]">mail</span>
+                        </div>
+                        <input class="glass-input block w-full rounded-xl pl-11 pr-4 py-3.5 sm:text-sm shadow-inner"
+                            id="email" name="email" type="email" placeholder="name@example.com"
+                            value="{{ email or '' }}" required autofocus />
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-1.5">
+                    <label
+                        class="block text-xs uppercase tracking-wider font-semibold ml-1 text-slate-500 dark:text-slate-400"
+                        for="password">Password</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <span
+                                class="material-symbols-outlined text-slate-400 dark:text-slate-500 group-focus-within:text-blue-400 transition-colors text-[20px]">lock</span>
+                        </div>
+                        <input class="glass-input block w-full rounded-xl pl-11 pr-12 py-3.5 sm:text-sm shadow-inner"
+                            id="password" name="password" type="password" placeholder="••••••••" required />
+                        <button
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer transition-colors text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                            type="button" id="togglePassword">
+                            <span class="material-symbols-outlined text-[20px]" id="eyeIcon">visibility_off</span>
+                        </button>
+                    </div>
+                    <div class="flex justify-end pt-1">
+                        <a id="forgotLink"
+                            class="text-xs font-medium text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors hover:underline decoration-blue-400/30"
+                            href="{{ url_for('auth.forgot_password') }}">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="w-full relative group overflow-hidden rounded-xl p-[1px] mt-2
+                               shadow-lg dark:shadow-[0_0_20px_rgba(59,130,246,0.3)]
+                               transition-shadow hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
+                    type="submit">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-blue-500 via-indigo-400 to-blue-500 animate-[spin_4s_linear_infinite] opacity-100">
+                    </div>
+                    <div
+                        class="relative cta-inner transition-all duration-300 rounded-xl py-3.5 px-4 flex items-center justify-center h-full">
+                        <span class="text-sm font-bold tracking-wide uppercase text-slate-800 dark:text-white">Log
+                            In</span>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Register Link -->
+            <p class="text-center text-sm mt-8 relative z-10 text-slate-500 dark:text-slate-400">
+                <span id="newText">New to SkillEntHub?</span>
+                <a id="registerLink"
+                    class="font-bold text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors"
+                    href="{{ url_for('auth.register') }}">Create Account</a>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="absolute bottom-6 text-xs font-medium text-slate-400 dark:text-slate-600">
+            &copy; 2026 SkillEntHub Inc.
+        </div>
+    </div>
+
+    <!-- ===== Scripts ===== -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Role Toggle ---
+            var seekerRadio = document.getElementById('roleSeeker');
+            var recruiterRadio = document.getElementById('roleRecruiter');
+            var form = document.getElementById('loginForm');
+            var forgotLink = document.getElementById('forgotLink');
+            var registerLink = document.getElementById('registerLink');
+            var newText = document.getElementById('newText');
+
+            var routes = {
+                seeker: {
+                    action: "{{ url_for('auth.login') }}",
+                    forgot: "{{ url_for('auth.forgot_password') }}",
+                    register: "{{ url_for('auth.register') }}",
+                    newText: "New to SkillEntHub?"
+                },
+                recruiter: {
+                    action: "{{ url_for('auth_recruiter.login') }}",
+                    forgot: "{{ url_for('auth_recruiter.forgot_password') }}",
+                    register: "{{ url_for('auth_recruiter.register') }}",
+                    newText: "Don't have a company account?"
+                }
+            };
+
+            function switchRole(role) {
+                form.action = routes[role].action;
+                forgotLink.href = routes[role].forgot;
+                registerLink.href = routes[role].register;
+                newText.textContent = routes[role].newText;
+            }
+
+            seekerRadio.addEventListener('change', function () { if (this.checked) switchRole('seeker'); });
+            recruiterRadio.addEventListener('change', function () { if (this.checked) switchRole('recruiter'); });
+
+            // --- Password toggle ---
+            var passwordInput = document.getElementById('password');
+            var togglePasswordBtn = document.getElementById('togglePassword');
+            var eyeIcon = document.getElementById('eyeIcon');
+            togglePasswordBtn.addEventListener('click', function () {
+                var isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                eyeIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
+            });
+
+            // --- Theme Toggle ---
+            var themeToggle = document.getElementById('themeToggle');
+            function applyTheme(theme) {
+                if (theme === 'dark') { document.documentElement.classList.add('dark'); }
+                else { document.documentElement.classList.remove('dark'); }
+                localStorage.setItem('landing-theme', theme);
+                localStorage.setItem('theme', theme);
+            }
+            window.applyTheme = applyTheme;
+            var saved = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'dark';
+            applyTheme(saved);
+            themeToggle.addEventListener('click', function () {
+                applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+            });
         });
-    });
-</script>
-{% endblock %}
+    </script>
+</body>
+
+</html>

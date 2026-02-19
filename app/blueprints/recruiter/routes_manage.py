@@ -103,8 +103,22 @@ def update_application_status(application_id):
     recruiter_id = session.get('recruiter_id')
     new_status = request.form.get('status')
     
+    if not new_status:
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'Missing status parameter'}), 400
+        flash('Missing status parameter', 'danger')
+        return redirect(url_for('recruiter.application_detail', application_id=application_id))
+    
     success, message = recruiter_manage_service.update_application_status(application_id, new_status, recruiter_id)
     
+    # For AJAX/API calls, return JSON with proper status code
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if success:
+            return jsonify({'success': True, 'message': message})
+        else:
+            return jsonify({'error': message}), 400
+    
+    # For form submissions, flash + redirect
     if success:
         flash(message, 'success')
     else:
