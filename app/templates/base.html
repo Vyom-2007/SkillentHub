@@ -1,19 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta name="description" content="SkillentHub - Connect, Learn, and Grow Your Career">
     <title>{% block title %}SkillentHub{% endblock %}</title>
 
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<<<<<<< HEAD
+    <!-- Tailwind & Fonts -->
+=======
+    <!-- Fonts -->
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -39,15 +47,42 @@
             background: rgba(30, 41, 59, 0.8) !important;
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+=======
+    <!-- Tailwind CSS -->
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "glass-border": "rgba(255, 255, 255, 0.08)",
+                        "glass-surface": "rgba(255, 255, 255, 0.03)",
+                        "glass-surface-hover": "rgba(255, 255, 255, 0.06)",
+                        "primary": "#3b82f6",
+                        "primary-hover": "#2563eb",
+                        "accent-purple": "#818cf8",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                    }
+                },
+            },
         }
-
-        .navbar-brand {
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+    </script>
+    <style type="text/tailwindcss">
+        .glass-panel {
+            @apply bg-glass-surface backdrop-blur-2xl border border-glass-border shadow-2xl;
+>>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
         }
+        .glass-card-hover {
+            @apply hover:bg-glass-surface-hover transition-all duration-300;
+        }
+<<<<<<< HEAD
 
         .nav-link {
             color: rgba(255, 255, 255, 0.8) !important;
@@ -69,13 +104,22 @@
             padding: 0.625rem 1.5rem;
             font-weight: 500;
             transition: transform 0.2s, box-shadow 0.2s;
+=======
+        .status-badge {
+            @apply px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider;
+<<<<<<< HEAD
+>>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            background: var(--primary-gradient);
+        .status-applied { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
+        .status-shortlisted { @apply bg-purple-500/10 text-purple-400 border border-purple-500/20; }
+        .status-interview { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+        .status-offer { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+        .nav-link { @apply text-slate-400 hover:text-white transition-colors text-sm font-medium; }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
+<<<<<<< HEAD
 
         /* Forms */
         .form-control {
@@ -231,188 +275,348 @@
         .dropdown-divider {
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
+=======
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+=======
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
+        }
+        .status-applied { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
+        .status-shortlisted { @apply bg-purple-500/10 text-purple-400 border border-purple-500/20; }
+        .status-interview { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+        .status-offer { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+        .nav-link { @apply text-slate-400 hover:text-white transition-colors text-sm font-medium; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+>>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
     </style>
 
+    <!-- Bootstrap CSS for compatibility -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="d-flex flex-column">
+<body
+<<<<<<< HEAD
+    class="bg-[#0f172a] font-display text-slate-100 antialiased min-h-screen relative overflow-x-hidden selection:bg-blue-500/30">
+    <!-- Background -->
+=======
+    class="bg-[#0f172a] font-display text-slate-100 antialiased min-h-screen relative overflow-x-hidden selection:bg-blue-500/30 flex flex-col">
+    <!-- Animated Background -->
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
+    <div class="fixed inset-0 z-0 pointer-events-none">
+        <div
+            class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#111827] via-[#020617] to-[#000000]">
+        </div>
+        <div
+            class="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[140px] mix-blend-screen opacity-50">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] mix-blend-screen opacity-40">
+        </div>
+        <div
+            class="absolute top-[30%] left-[-10%] w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-[100px] mix-blend-screen opacity-30">
+        </div>
+    </div>
+
+<<<<<<< HEAD
     <!-- Navbar -->
+<<<<<<< HEAD
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand fs-4" href="/">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SkillentHub" height="40"
                     class="d-inline-block align-text-top">
+=======
+    <nav
+        class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0f172a]/70 backdrop-blur-xl px-6 lg:px-10 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-12">
+            <a class="flex items-center gap-3 group" href="{{ url_for('auth.landing') }}">
+=======
+    <!-- Navigation -->
+    <nav
+        class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0f172a]/70 backdrop-blur-xl px-6 lg:px-10 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-12">
+            <a class="flex items-center gap-3 group"
+                href="{{ url_for('auth.dashboard') if session.get('user_id') else '/' }}">
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
+                <div
+                    class="w-9 h-9 relative bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/25 ring-1 ring-white/10 group-hover:scale-105 transition-transform">
+                    <span class="font-bold text-xl italic font-serif">S</span>
+                </div>
+                <span class="font-bold text-lg tracking-tight text-white hidden sm:block">SkillEntHub</span>
+>>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+<<<<<<< HEAD
+            <div class="hidden md:flex items-center gap-8">
                 {% if session.get('user_id') %}
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.dashboard') }}">
-                            <i class="bi bi-house"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('posts.feed') }}">
-                            <i class="bi bi-rss"></i> Feed
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('network.network') }}">
-                            <i class="bi bi-people"></i> Network
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('opportunities.opportunities') }}">
-                            <i class="bi bi-briefcase"></i> Jobs
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('competitions.competitions_list') }}">
-                            <i class="bi bi-trophy"></i> Events
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('messages.messages') }}">
-                            <i class="bi bi-chat-dots"></i> Messages
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.my_applications') }}">
-                            <i class="bi bi-journal-text"></i> My Applications
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <!-- Notifications -->
-                    {% include 'components/navbar_notifications.html' %}
-                    {% from '_avatar.html' import avatar %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="d-inline-block position-relative me-1" style="vertical-align: middle;">
-                                {{ avatar(session.get('full_name', 'User'), session.get('profile_picture'), 24) }}
-                            </div>
-                            {{ session.get('full_name', 'User') }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('profile.view', user_id=session.user_id) }}">
-                                    <i class="bi bi-person me-2"></i>View Profile
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('profile.edit') }}">
-                                    <i class="bi bi-pencil me-2"></i>Edit Profile
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('opportunities.saved_jobs') }}">
-                                    <i class="bi bi-bookmark me-2"></i>Saved Items
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('settings.settings') }}">
-                                    <i class="bi bi-gear me-2"></i>Settings
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                <a class="nav-link text-white" href="{{ url_for('auth.dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ url_for('opportunities.opportunities') }}">Jobs</a>
+                <a class="nav-link" href="{{ url_for('messages.messages') }}">Messages</a>
+                <a class="nav-link" href="#">Resources</a>
                 {% elif session.get('recruiter_id') %}
-                <!-- Recruiter Navbar -->
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('recruiter.dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-building"></i> {{ session.get('company_name', 'Recruiter') }}
-                            <span class="badge bg-info ms-1" style="font-size: 0.6rem;">RECRUITER</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="{{ url_for('recruiter.dashboard') }}">
-                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                                </a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <a class="dropdown-item text-danger" href="{{ url_for('auth_recruiter.logout') }}">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                <a class="nav-link text-white" href="{{ url_for('recruiter.dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="#">Candidates</a>
+                <a class="nav-link" href="{{ url_for('messages.messages') }}">Messages</a>
                 {% else %}
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-primary ms-2" href="{{ url_for('auth.register') }}">Sign Up</a>
-                    </li>
-                </ul>
+                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                <a class="nav-link" href="{{ url_for('auth.register') }}">Sign Up</a>
                 {% endif %}
-                </ul>
+=======
+
+            {% if session.get('user_id') %}
+            <!-- Candidate Navigation -->
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-white text-sm font-semibold" href="{{ url_for('auth.dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ url_for('opportunities.opportunities') }}">Jobs</a>
+                <a class="nav-link" href="{{ url_for('messages.messages') }}">Messages</a>
+                <a class="nav-link" href="{{ url_for('posts.feed') }}">Feed</a>
+                <a class="nav-link" href="{{ url_for('network.network') }}">Network</a>
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
             </div>
+            {% elif session.get('recruiter_id') %}
+            <!-- Recruiter Navigation -->
+            <div class="hidden md:flex items-center gap-8">
+                <a class="text-white text-sm font-semibold" href="{{ url_for('recruiter.dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ url_for('recruiter.manage_opportunities') }}">Jobs</a>
+                <a class="nav-link" href="{{ url_for('recruiter.candidates_list') }}">Candidates</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flex items-center gap-5">
+            {% if session.get('user_id') or session.get('recruiter_id') %}
+            <!-- Theme Toggle -->
+            <button id="themeToggle" class="relative p-2 text-slate-400 hover:text-white transition-colors group">
+                <span class="material-symbols-outlined filled" id="themeIcon">light_mode</span>
+            </button>
+
+            <!-- Notifications -->
+            <button class="relative p-2 text-slate-400 hover:text-white transition-colors group">
+                <span class="material-symbols-outlined filled">notifications</span>
+                <!-- Logic for unread count dot would go here -->
+                {% if notifications and notifications|selectattr('is_read', 'equalto', 0)|list|length > 0 %}
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#0f172a]"></span>
+                {% endif %}
+            </button>
+            <div class="h-6 w-[1px] bg-white/10"></div>
+
+            <!-- Profile Dropdown -->
+            <div class="group relative">
+                <button class="flex items-center gap-3 focus:outline-none">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-white">{{ session.get('full_name') or
+                            session.get('company_name', 'User') }}</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider">
+                            {{ 'Recruiter' if session.get('recruiter_id') else 'Candidate' }}
+                        </p>
+                    </div>
+                    <div
+                        class="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 border border-white/10 overflow-hidden ring-2 ring-transparent group-hover:ring-blue-500/30 transition-all flex items-center justify-center">
+                        {% if session.get('profile_picture') %}
+                        <img alt="Avatar" class="w-full h-full object-cover"
+                            src="{{ url_for('static', filename=session.get('profile_picture')) }}">
+                        {% else %}
+                        <span class="text-xs font-bold text-white">{{ (session.get('full_name', 'U')[0])|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <span
+                        class="material-symbols-outlined text-slate-500 text-lg group-hover:text-white transition-colors">expand_more</span>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div
+                    class="absolute right-0 top-full mt-2 w-48 py-2 bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
+                    {% if session.get('user_id') %}
+                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+                        href="{{ url_for('profile.view', user_id=session.user_id) }}">My Profile</a>
+                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+                        href="{{ url_for('settings.settings') }}">Settings</a>
+                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+                        href="{{ url_for('opportunities.saved_jobs') }}">Saved Items</a>
+                    <div class="h-[1px] bg-white/5 my-1"></div>
+                    <a class="block px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                        href="{{ url_for('auth.logout') }}">Logout</a>
+                    {% elif session.get('recruiter_id') %}
+                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+                        href="{{ url_for('recruiter.dashboard') }}">Dashboard</a>
+                    <div class="h-[1px] bg-white/5 my-1"></div>
+                    <a class="block px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                        href="{{ url_for('auth_recruiter.logout') }}">Logout</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <!-- Guest Navigation -->
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('auth.login') }}"
+                    class="text-sm font-semibold text-slate-300 hover:text-white transition-colors">Login</a>
+                <a href="{{ url_for('auth.register') }}"
+                    class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-500/25">Sign
+                    Up</a>
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-5">
+            {% if session.get('user_id') or session.get('recruiter_id') %}
+            <button class="relative p-2 text-slate-400 hover:text-white transition-colors group">
+                <span class="material-symbols-outlined filled">notifications</span>
+                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#0f172a]"></span>
+            </button>
+            <div class="h-6 w-[1px] bg-white/10"></div>
+            <div class="group relative">
+                <button class="flex items-center gap-3 focus:outline-none">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-white">{{ session.get('full_name') or
+                            session.get('company_name', 'Recruiter') }}</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-wider">{{ 'Candidate' if
+                            session.get('user_id') else 'Recruiter' }}</p>
+                    </div>
+                    <div
+                        class="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 border border-white/10 overflow-hidden ring-2 ring-transparent group-hover:ring-blue-500/30 transition-all">
+                        <img alt="Avatar" class="w-full h-full object-cover"
+                            src="{{ session.get('profile_picture') or 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3pwNCwS1uOT5x131-RyiU2yc09XASHzZ5Ge8cN4Qerw2-LTHo4Z9Rq3VKG0demeKWHEXYwWw9KhrIBt30JTV-QrUYQrhRFLU4UXxrqDITyeS59CgbaWIeSr5YP8QNDO_v7Ij_-lmReYfOwOyK6nlet0c20L8bouqJMPWUAGQ9upOxK5ZTmwXdIZ13lvfStrFuSKZYnv50uL6hKoLR-4OTPCAVwVUYs4lsrGgI7zTEGgmhZOcPwk2sPTN3NUxGWEdS3XQ-oTwHn02h' }}" />
+                    </div>
+                    <span
+                        class="material-symbols-outlined text-slate-500 text-lg group-hover:text-white transition-colors">expand_more</span>
+                </button>
+                <div
+                    class="absolute right-0 top-full mt-2 w-48 py-2 bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                    {% if session.get('user_id') %}
+                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+                        href="{{ url_for('profile.view', user_id=session.get('user_id')) }}">My Profile</a>
+                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
+                        href="{{ url_for('profile.edit') }}">Settings</a>
+                    {% endif %}
+                    <div class="h-[1px] bg-white/5 my-1"></div>
+                    <a class="block px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                        href="{{ url_for('auth.logout') if session.get('user_id') else url_for('auth_recruiter.logout') }}">Logout</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </nav>
 
+<<<<<<< HEAD
     <!-- Flash Messages -->
-    <div class="container mt-3">
+    <div class="relative z-50 pt-24 px-6 max-w-7xl mx-auto pointer-events-none">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
-            role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="pointer-events-auto">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
+                role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
         {% endif %}
         {% endwith %}
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow-1">
+    <main class="relative z-10 flex-grow-1">
+=======
+    <!-- Main Content -->
+    <main class="relative z-10 flex-grow pt-24 pb-12 w-full max-w-7xl mx-auto px-6 lg:px-8">
+        <!-- Flash Messages -->
+        <div class="container mb-6">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div
+                class="glass-panel p-4 mb-4 rounded-xl flex items-center gap-3 border-l-4 {{ 'border-l-red-500' if category == 'error' else 'border-l-emerald-500' }}">
+                <span
+                    class="material-symbols-outlined {{ 'text-red-400' if category == 'error' else 'text-emerald-400' }}">
+                    {{ 'error' if category == 'error' else 'check_circle' }}
+                </span>
+                <p class="text-sm text-slate-300">{{ message }}</p>
+                <button type="button" class="ml-auto text-slate-500 hover:text-white"
+                    onclick="this.parentElement.remove()">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container text-center">
-            <p class="footer-text mb-0">
-                &copy; 2026 SkillentHub. All rights reserved.
-            </p>
+    <footer class="relative z-10 border-t border-white/5 bg-[#0f172a]/50 backdrop-blur-md mt-auto">
+        <div
+            class="max-w-7xl mx-auto px-8 py-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
+            <div class="flex items-center gap-2 mb-4 md:mb-0">
+                <span class="font-bold text-slate-400">SkillEntHub</span>
+                <span>© 2026</span>
+            </div>
+            <div class="flex gap-8">
+                <a class="hover:text-slate-300 transition-colors" href="#">Privacy</a>
+                <a class="hover:text-slate-300 transition-colors" href="#">Terms</a>
+                <a class="hover:text-slate-300 transition-colors" href="#">Support</a>
+            </div>
         </div>
     </footer>
 
-    <!-- Bootstrap 5.3 JS -->
+<<<<<<< HEAD
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Notifications -->
+    <!-- Notifications JS -->
     {% if session.get('user_id') %}
     <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     {% endif %}
+=======
+    <!-- Scripts -->
+    <script>
+        // Simple Theme Toggle Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                if (html.classList.contains('dark')) {
+                    html.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.textContent = 'light_mode'; // Icon for light mode
+                } else {
+                    html.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.textContent = 'dark_mode'; // Icon for dark mode (though in dark mode we usually show sun)
+                }
+            });
+
+            // Note: User snippet had "dark_mode" icon logic reversed visually usually. 
+            // Standard: Dark mode active -> Show Sun icon. Light mode active -> Show Moon icon.
+            // Adjusting based on standard UX:
+            if (html.classList.contains('dark')) {
+                themeIcon.textContent = 'light_mode';
+            } else {
+                themeIcon.textContent = 'dark_mode';
+            }
+        }
+    </script>
+>>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
 
     {% block extra_js %}{% endblock %}
 </body>

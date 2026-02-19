@@ -19,10 +19,12 @@
 
                     <div class="d-flex align-items-center gap-3">
                         <span class="badge 
-                            {% if application.status == 'accepted' or application.status == 'hired' %}bg-success
+                            {% if application.status == 'hired' %}bg-success
                             {% elif application.status == 'rejected' %}bg-danger
-                            {% elif application.status == 'shortlisted' or application.status == 'interview' %}bg-info
-                            {% else %}bg-secondary{% endif %} fs-6">
+                            {% elif application.status == 'offer' %}bg-indigo style=" background-color: #6610f2; color:
+                            white;" {% elif application.status=='interview' %}bg-primary {% elif
+                            application.status=='shortlisted' %}bg-info text-dark {% elif application.status=='applied'
+                            %}bg-warning text-dark {% else %}bg-secondary{% endif %} fs-6">
                             {{ application.status|capitalize }}
                         </span>
                         <small class="text-muted">Applied on {{ application.applied_at.strftime('%Y-%m-%d') }}</small>

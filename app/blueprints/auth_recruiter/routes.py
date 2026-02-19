@@ -57,7 +57,7 @@ def register():
         if errors:
             for error in errors:
                 flash(error, 'danger')
-            return render_template('recruiter/register.html', 
+            return render_template('auth/register.html', 
                                    company_name=company_name, 
                                    email=email)
         
@@ -70,7 +70,7 @@ def register():
         else:
             flash(result or "Registration failed", 'danger')
     
-    return render_template('recruiter/register.html')
+    return render_template('auth/register.html')
 
 
 # ========== LOGIN ==========
@@ -87,14 +87,14 @@ def login():
         
         if not email or not password:
             flash("Email and password required", 'danger')
-            return render_template('recruiter/login.html', email=email)
+            return render_template('auth/login.html', email=email)
         
         # Verify credentials via service
         success, result = recruiter_auth_service.verify_recruiter(email, password)
         
         if not success:
             flash(result, 'danger')
-            return render_template('recruiter/login.html', email=email)
+            return render_template('auth/login.html', email=email)
         
         recruiter = result
         
@@ -111,7 +111,7 @@ def login():
         logging.info(f"DEBUG: Login successful for {email}. Redirecting to {url_for('recruiter.dashboard')}")
         return redirect(url_for('recruiter.dashboard'))
     
-    return render_template('recruiter/login.html')
+    return render_template('auth/login.html')
 
 
 # ========== LOGOUT ==========

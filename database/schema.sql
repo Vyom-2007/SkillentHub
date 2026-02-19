@@ -47,6 +47,50 @@ CREATE TABLE IF NOT EXISTS `activity_logs` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `application_status_history`
+--
+
+DROP TABLE IF EXISTS `application_status_history`;
+CREATE TABLE IF NOT EXISTS `application_status_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `application_id` int NOT NULL,
+  `old_status` varchar(30) NOT NULL,
+  `new_status` varchar(30) NOT NULL,
+  `changed_by` int DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `changed_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_app_id` (`application_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `interviews`
+--
+
+DROP TABLE IF EXISTS `interviews`;
+CREATE TABLE IF NOT EXISTS `interviews` (
+  `interview_id` int NOT NULL AUTO_INCREMENT,
+  `application_id` int NOT NULL,
+  `recruiter_id` int NOT NULL,
+  `candidate_id` int NOT NULL,
+  `scheduled_at` datetime NOT NULL,
+  `mode` varchar(20) NOT NULL DEFAULT 'online',
+  `location_url` varchar(500) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`interview_id`),
+  KEY `idx_application_id` (`application_id`),
+  KEY `idx_recruiter_id` (`recruiter_id`),
+  KEY `idx_candidate_id` (`candidate_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `applications`
 --
 
@@ -359,8 +403,9 @@ DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE IF NOT EXISTS `notifications` (
   `notification_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
-  `type` enum('post_like','post_comment','new_message','application_update','connection_request','connection_accepted','team_invitation','team_invitation_accepted','team_invitation_rejected') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` json DEFAULT NULL,
   `related_id` int DEFAULT NULL,
   `is_read` tinyint(1) DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

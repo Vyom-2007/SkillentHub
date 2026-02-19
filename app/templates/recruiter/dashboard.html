@@ -441,12 +441,14 @@
                         <td>
                             {% if app.status == 'applied' %}
                             <span class="status-badge bg-warning text-dark">Applied</span>
-                            {% elif app.status == 'reviewing' %}
-                            <span class="status-badge bg-info">Reviewing</span>
                             {% elif app.status == 'shortlisted' %}
-                            <span class="status-badge bg-primary">Shortlisted</span>
-                            {% elif app.status == 'accepted' %}
-                            <span class="status-badge bg-success">Accepted</span>
+                            <span class="status-badge bg-info text-dark">Shortlisted</span>
+                            {% elif app.status == 'interview' %}
+                            <span class="status-badge bg-primary">Interview</span>
+                            {% elif app.status == 'offer' %}
+                            <span class="status-badge bg-primary">Offer</span>
+                            {% elif app.status == 'hired' %}
+                            <span class="status-badge bg-success">Hired</span>
                             {% elif app.status == 'rejected' %}
                             <span class="status-badge bg-danger">Rejected</span>
                             {% else %}

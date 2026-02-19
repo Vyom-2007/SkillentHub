@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
+<script>
+    (function () {
+        var t = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', t);
+    })();
+</script>
 
 <head>
     <meta charset="UTF-8">
@@ -15,15 +21,223 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
+        :root,
+        [data-bs-theme="light"] {
             --recruiter-primary: #0ea5e9;
             --recruiter-secondary: #0284c7;
             --recruiter-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+<<<<<<< HEAD
             --bg-dark: #0f172a;
             --text-light: #f8fafc;
             --text-muted: #94a3b8;
             --card-bg: rgba(30, 41, 59, 0.7);
             --card-border: 1px solid rgba(255, 255, 255, 0.1);
+=======
+            --bg-light: #f1f5f9;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-heading: #1e293b;
+            --text-body: #334155;
+            --input-bg: #ffffff;
+            --hover-bg: #f1f5f9;
+        }
+
+        [data-bs-theme="dark"] {
+            --recruiter-primary: #38bdf8;
+            --recruiter-secondary: #0ea5e9;
+            --recruiter-gradient: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            --bg-light: #0f172a;
+            --text-muted: #94a3b8;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-heading: #e2e8f0;
+            --text-body: #cbd5e1;
+            --input-bg: #0f172a;
+            --hover-bg: #334155;
+        }
+
+        /* Dark mode overrides */
+        [data-bs-theme="dark"] body {
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .navbar-recruiter {
+            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+        }
+
+        [data-bs-theme="dark"] .card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .stat-card {
+            background: var(--card-bg) !important;
+        }
+
+        [data-bs-theme="dark"] h1,
+        [data-bs-theme="dark"] h2,
+        [data-bs-theme="dark"] h3,
+        [data-bs-theme="dark"] h4,
+        [data-bs-theme="dark"] h5,
+        [data-bs-theme="dark"] h6,
+        [data-bs-theme="dark"] .card-title {
+            color: var(--text-heading);
+        }
+
+        [data-bs-theme="dark"] p,
+        [data-bs-theme="dark"] span,
+        [data-bs-theme="dark"] li {
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .shadow-sm {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        [data-bs-theme="dark"] .dropdown-menu {
+            background: #1e293b;
+            border-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .dropdown-item {
+            color: #e2e8f0;
+        }
+
+        [data-bs-theme="dark"] .dropdown-item:hover {
+            background: #334155;
+        }
+
+        [data-bs-theme="dark"] .dropdown-divider {
+            border-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select,
+        [data-bs-theme="dark"] textarea {
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .form-label {
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .table {
+            --bs-table-bg: var(--card-bg);
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .table> :not(caption)>*>* {
+            border-bottom-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .modal-content {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .modal-header {
+            border-bottom-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .modal-footer {
+            border-top-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        [data-bs-theme="dark"] .list-group-item {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .bg-white {
+            background-color: var(--card-bg) !important;
+        }
+
+        [data-bs-theme="dark"] .bg-light {
+            background-color: #0f172a !important;
+        }
+
+        [data-bs-theme="dark"] .text-dark {
+            color: var(--text-heading) !important;
+        }
+
+        [data-bs-theme="dark"] .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        [data-bs-theme="dark"] .border,
+        [data-bs-theme="dark"] .border-bottom,
+        [data-bs-theme="dark"] .border-top {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-bs-theme="dark"] .alert {
+            border: 1px solid var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .nav-tabs {
+            border-bottom-color: var(--border-color);
+        }
+
+        [data-bs-theme="dark"] .nav-tabs .nav-link.active {
+            background-color: var(--card-bg);
+            border-color: var(--border-color) var(--border-color) var(--card-bg);
+            color: var(--text-heading);
+        }
+
+        [data-bs-theme="dark"] .chat-area,
+        [data-bs-theme="dark"] .chat-header,
+        [data-bs-theme="dark"] .chat-messages,
+        [data-bs-theme="dark"] .chat-input-area,
+        [data-bs-theme="dark"] .chat-list {
+            background: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-bs-theme="dark"] .chat-input-area input {
+            background: var(--input-bg) !important;
+            color: var(--text-body) !important;
+        }
+
+        [data-bs-theme="dark"] .page-link {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-body);
+        }
+
+        [data-bs-theme="dark"] .footer-recruiter {
+            background: #020617;
+        }
+
+        /* Theme toggle */
+        .theme-toggle-recruiter {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .theme-toggle-recruiter:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: rotate(30deg);
+>>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
         }
 
         body {
@@ -201,6 +415,11 @@
                     class="d-inline-block align-text-top me-2">
                 <span class="recruiter-badge ms-2">RECRUITER</span>
             </a>
+            <!-- Theme Toggle -->
+            <button class="theme-toggle-recruiter me-2 d-none d-lg-flex" id="themeToggle" title="Toggle theme"
+                aria-label="Toggle dark/light theme">
+                <i class="bi bi-sun-fill" id="themeIcon"></i>
+            </button>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#recruiterNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -295,6 +514,26 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        (function () {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            if (!toggle) return;
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-bs-theme', theme);
+                localStorage.setItem('theme', theme);
+                icon.className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+                toggle.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            }
+            applyTheme(localStorage.getItem('theme') || 'light');
+            toggle.addEventListener('click', function () {
+                applyTheme(document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+            });
+        })();
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 

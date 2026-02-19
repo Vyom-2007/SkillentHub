@@ -5,6 +5,7 @@ Handles user registration, login, logout, and password reset flows.
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from datetime import timedelta
 from app.services import auth_service, otp_service, email_service
+from app.utils.decorators import candidate_required, api_candidate_required
 
 auth_bp = Blueprint('auth', __name__, url_prefix='')
 
@@ -21,10 +22,48 @@ def landing():
 
 @auth_bp.route('/dashboard')
 def dashboard():
-    """Simple dashboard for logged-in users."""
+    """Dashboard for logged-in users."""
     if not session.get('user_id'):
         return redirect(url_for('auth.login'))
-    return render_template('auth/dashboard.html')
+        
+    user_id = session['user_id']
+    from app.services import application_service, profile_service, interview_service, notification_service
+    
+    # Get stats
+    stats = application_service.get_application_counts(user_id)
+    
+    # Get recent applications (limit 5)
+    recent_apps = application_service.get_user_applications(user_id, per_page=5)
+
+    # Get profile details (completion, resume status)
+    profile = profile_service.get_profile_with_details(user_id)
+
+    # Get upcoming interview
+    next_interview = interview_service.get_next_upcoming_interview(user_id)
+
+    # Get recent notifications
+    notifications = notification_service.get_recent_notifications(user_id, limit=3)
+
+    # Time ago helper
+    from datetime import datetime
+    def time_ago(dt):
+        if not dt: return ''
+        now = datetime.now()
+        diff = now - dt
+        seconds = diff.total_seconds()
+        if seconds < 60: return 'Just now'
+        elif seconds < 3600: return f'{int(seconds/60)} min ago'
+        elif seconds < 86400: return f'{int(seconds/3600)} hr ago'
+        elif seconds < 604800: return f'{int(seconds/86400)} days ago'
+        else: return dt.strftime('%b %d')
+    
+    return render_template('auth/dashboard.html', 
+                           stats=stats, 
+                           recent_apps=recent_apps,
+                           profile=profile,
+                           next_interview=next_interview,
+                           notifications=notifications,
+                           time_ago=time_ago)
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -313,6 +352,7 @@ def reset_password():
 
 
 @auth_bp.route('/my-applications')
+@candidate_required
 def my_applications():
     """View user's applications and registrations."""
     if not session.get('user_id'):
@@ -351,6 +391,7 @@ def _is_valid_password(password):
 
 
 @auth_bp.route('/api/applications/<int:application_id>/withdraw', methods=['POST'])
+@api_candidate_required
 def withdraw_application(application_id):
     """Withdraw an application."""
     if not session.get('user_id'):
@@ -370,6 +411,7 @@ def withdraw_application(application_id):
 
 
 @auth_bp.route('/api/events/cancel', methods=['POST'])
+@api_candidate_required
 def cancel_event_registration():
     """Cancel event registration."""
     if not session.get('user_id'):
@@ -406,23 +448,44 @@ def get_activity_feed():
     
     # Format for JSON response
     feed_data = []
-    from app.services.recruiter_service import get_time_ago # Reuse util
     
-    for item in activities:
-        feed_data.append({
-            'id': item['activity_id'],
-            'actor_name': item['actor_name'] or 'Unknown',
-            'actor_picture': item['actor_picture'], # Filename
-            'actor_type': item.get('actor_type', 'user'),
-            'action_type': item['action_type'],
-            'item_type': item['item_type'],
-            'item_id': item['item_id'],
-            'details': item['details'], # Already parsed if dict
-            'created_at': item['created_at'].isoformat() if item['created_at'] else None,
-            'time_ago': get_time_ago(item['created_at'])
-        })
+    # Helper for time ago
+    from datetime import datetime
+    def get_time_ago(dt):
+        if not dt: return 'Unknown'
+        now = datetime.now()
+        if isinstance(dt, str): dt = datetime.fromisoformat(dt)
+        diff = now - dt
+        seconds = diff.total_seconds()
+        if seconds < 60: return 'Just now'
+        elif seconds < 3600: return f'{int(seconds/60)} min ago'
+        elif seconds < 86400: return f'{int(seconds/3600)} hr ago'
+        elif seconds < 604800: return f'{int(seconds/86400)} days ago'
+        else: return f'{int(seconds/604800)} wks ago'
+
+    try:
+        for item in activities:
+            try:
+                feed_data.append({
+                    'id': item['activity_id'],
+                    'actor_name': item['actor_name'] or 'Unknown',
+                    'actor_picture': item.get('actor_picture'), 
+                    'actor_type': item.get('actor_type', 'user'),
+                    'action_type': item['action_type'],
+                    'item_type': item['item_type'],
+                    'item_id': item['item_id'],
+                    'details': item['details'], 
+                    'created_at': item['created_at'].isoformat() if item.get('created_at') else None,
+                    'time_ago': get_time_ago(item.get('created_at'))
+                })
+            except Exception as e:
+                print(f"Error filtering activity item: {e}")
+                continue
+    except Exception as e:
+        print(f"Error processing activity feed: {e}")
+        return jsonify({'error': 'Failed to process feed'}), 500
         
     return jsonify({
         'activities': feed_data,
-        'has_more': len(feed_data) >= 20 # Assuming default per_page is 20
+        'has_more': len(feed_data) >= 20 
     })
