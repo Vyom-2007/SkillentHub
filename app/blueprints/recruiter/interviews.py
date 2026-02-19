@@ -33,7 +33,7 @@ def schedule_interview(application_id):
         return redirect(url_for('recruiter.application_detail', application_id=application_id))
 
     try:
-        interview_id = interview_service.schedule_interview(
+        interview_id, msg = interview_service.schedule_interview(
             application_id=application_id,
             recruiter_id=recruiter_id,
             candidate_id=app_details['user_id'],
@@ -45,11 +45,8 @@ def schedule_interview(application_id):
         
         if interview_id:
             flash('Interview scheduled successfully', 'success')
-            # Also update application status to 'Interview' if not already?
-            # Keeping it separate allows flexibility, but usually scheduling implies 'Interview' status.
-            recruiter_manage_service.update_application_status(application_id, 'interview', recruiter_id)
         else:
-            flash('Failed to schedule interview', 'danger')
+            flash(msg or 'Failed to schedule interview', 'danger')
             
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')

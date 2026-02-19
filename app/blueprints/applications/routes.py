@@ -78,9 +78,13 @@ def application_detail(application_id):
         fetch_one=True
     )
     
+    # Fetch status history timeline
+    status_history = application_service.get_application_history(application_id)
+    
     return render_template('applications/application_detail.html', 
                            application=application,
-                           interview=interview)
+                           interview=interview,
+                           status_history=status_history or [])
 
 
 @applications_bp.route('/applications/apply', methods=['POST'])

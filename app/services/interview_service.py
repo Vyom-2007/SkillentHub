@@ -10,9 +10,19 @@ from datetime import datetime
 def schedule_interview(application_id, recruiter_id, candidate_id, scheduled_at, mode, location_url=None, notes=None):
     """
     Schedule a new interview.
+    Only allowed if application status is 'interview'.
     """
-    # Validate application exists and belongs to recruiter/candidate pair? 
-    # Trusted input from route usually, but basic check is good.
+    # Validate application status
+    app = execute_query(
+        "SELECT status FROM applications WHERE application_id = %s",
+        (application_id,), fetch_one=True
+    )
+    if not app:
+        return None, "Application not found"
+    if app['status'] in ('rejected', 'hired'):
+        return None, "Cannot schedule interview for a terminated application"
+    if app['status'] != 'interview':
+        return None, f"Application must be in 'interview' status to schedule. Current: '{app['status']}'"
     
     query = """
         INSERT INTO interviews 
@@ -25,7 +35,7 @@ def schedule_interview(application_id, recruiter_id, candidate_id, scheduled_at,
         # Notify Candidate
         notification_service.notify_interview_invite(recruiter_id, candidate_id, interview_id, str(scheduled_at))
             
-    return interview_id
+    return interview_id, "Interview scheduled successfully"
 
 
 def reschedule_interview(interview_id, new_scheduled_at, user_id, location_url=None, notes=None):
@@ -39,6 +49,14 @@ def reschedule_interview(interview_id, new_scheduled_at, user_id, location_url=N
         
     if interview['recruiter_id'] != user_id:
         return False, "Unauthorized"
+    
+    # Block rescheduling if application is in terminal state
+    app = execute_query(
+        "SELECT status FROM applications WHERE application_id = %s",
+        (interview['application_id'],), fetch_one=True
+    )
+    if app and app['status'] in ('rejected', 'hired'):
+        return False, "Cannot reschedule — application is already " + app['status']
         
     # Update
     if location_url:
