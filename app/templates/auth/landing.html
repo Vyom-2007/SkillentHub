@@ -1,496 +1,396 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="SkillentHub — The all-in-one career platform for students and recruiters. Find jobs, join hackathons, compete, and grow your professional network.">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SkillentHub - Launch Your Career</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
-    <title>SkillentHub — Launch Your Career</title>
-
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"
+        onerror="document.getElementById('tailwind-error').style.display='block'"></script>
+    <script>
+        if (typeof tailwind === 'undefined') {
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('tailwind-error').style.display = 'block';
+            });
+        }
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6", // Deep blue for accents
+                        "primary-hover": "#2563eb",
+                        "background-light": "#1e293b",
+                        "background-dark": "#0f172a",
+                        "slate-grey": "#64748b",
+                        "dark-charcoal": "#1e293b",
+                        "silver-accent": "#cbd5e1",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        xl: "1rem",
+                        '2xl': "1.5rem",
+                    },
+                    backgroundImage: {
+                        'slate-radial': 'radial-gradient(circle at 10% 20%, #475569 0%, #1e293b 81.3%)', // Slate grey to dark charcoal
+                        'silver-blue-gradient': 'linear-gradient(135deg, #94a3b8 0%, #1e3a8a 100%)', // Silver to Deep Blue
+                        'grid-pattern': "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E\")",
+                    }
+                },
+            },
+        };
+    </script>
     <style>
-        /* ===== Design Tokens ===== */
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --dark: #0f172a;
-            --dark-soft: #1e293b;
-            --text: #334155;
-            --text-muted: #94a3b8;
-            --surface: #ffffff;
-            --surface-2: #f8fafc;
-            --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --radius-lg: 1.25rem;
-            --radius-xl: 1.5rem;
-            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
-            --shadow-glow: 0 0 60px rgba(102, 126, 234, 0.15);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text);
-            overflow-x: hidden;
-            background: var(--surface);
+            font-family: 'Inter', sans-serif;
         }
 
-        /* ===== Navbar ===== */
-        .landing-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1rem 0;
-            transition: background .35s, box-shadow .35s, padding .35s;
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        .landing-nav.scrolled {
-            background: rgba(255, 255, 255, .92);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 1px 12px rgba(0, 0, 0, .06);
-            padding: .65rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
         }
 
-        .landing-nav .nav-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-            background: var(--gradient-main);
+        .glass-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(148, 163, 184, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #e2e8f0, #94a3b8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
         }
 
-        .landing-nav .nav-links a {
-            color: var(--dark-soft);
-            font-weight: 500;
-            text-decoration: none;
-            padding: .5rem 1rem;
-            border-radius: .5rem;
-            transition: color .2s, background .2s;
-            font-size: .925rem;
-        }
-
-        .landing-nav .nav-links a:hover {
-            color: var(--primary);
-            background: rgba(102, 126, 234, .06);
-        }
-
-        /* ===== Buttons ===== */
-        .btn-gradient {
-            background: var(--gradient-main);
-            color: #fff;
-            border: none;
-            padding: .75rem 2rem;
-            border-radius: .75rem;
-            font-weight: 600;
-            transition: transform .2s, box-shadow .2s;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        .btn-gradient:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(102, 126, 234, .35);
-            color: #fff;
-        }
-
-        .btn-gradient-lg {
-            padding: 1rem 2.5rem;
-            font-size: 1.1rem;
-            border-radius: .875rem;
-        }
-
-        .btn-outline-landing {
-            border: 2px solid rgba(102, 126, 234, .25);
-            color: var(--primary);
-            padding: .75rem 2rem;
-            border-radius: .75rem;
-            font-weight: 600;
-            transition: all .2s;
-            text-decoration: none;
-            cursor: pointer;
-            background: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        .btn-outline-landing:hover {
-            border-color: var(--primary);
-            background: rgba(102, 126, 234, .04);
-            color: var(--primary);
-        }
-
-        /* ===== Hero ===== */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 7rem 0 5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
+        .blob {
             position: absolute;
-            top: -35%;
-            right: -15%;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(102, 126, 234, .08) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: -25%;
-            left: -10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(240, 147, 251, .06) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-            padding: .5rem 1.25rem;
-            border-radius: 2rem;
-            background: rgba(102, 126, 234, .08);
-            color: var(--primary);
-            font-weight: 600;
-            font-size: .85rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(102, 126, 234, .12);
-        }
-
-        .hero-badge i {
-            font-size: .7rem;
-        }
-
-        .hero h1 {
-            font-weight: 900;
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            line-height: 1.1;
-            color: var(--dark);
-            margin-bottom: 1.5rem;
-            letter-spacing: -.02em;
-        }
-
-        .hero h1 .gradient-text {
-            background: var(--gradient-main);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p.lead {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            max-width: 520px;
-            margin-bottom: 2.5rem;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 3rem;
-        }
-
-        /* Hero Stats */
-        .hero-stats {
-            display: flex;
-            gap: 2.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(0, 0, 0, .06);
-        }
-
-        .hero-stats .stat-item .stat-number {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--dark);
-            background: var(--gradient-main);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-stats .stat-item .stat-label {
-            font-size: .8rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* Hero Visual CSS removed */
-
-        /* ===== Sections Common ===== */
-        section {
-            padding: 6rem 0;
-        }
-
-        .section-label {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            padding: .4rem 1rem;
-            border-radius: 2rem;
-            background: rgba(102, 126, 234, .07);
-            color: var(--primary);
-            font-weight: 600;
-            font-size: .8rem;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-        }
-
-        .section-title {
-            font-weight: 800;
-            font-size: clamp(1.75rem, 3.5vw, 2.75rem);
-            color: var(--dark);
-            line-height: 1.2;
-            margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            line-height: 1.7;
-        }
-
-        /* Unused sections CSS removed for simplification */
-
-        /* ===== Footer ===== */
-        .landing-footer {
-            background: var(--dark);
-            color: rgba(255, 255, 255, .6);
-            padding: 4rem 0 2rem;
-        }
-
-        .landing-footer .footer-brand {
-            font-weight: 800;
-            font-size: 1.35rem;
-            color: #fff;
-            margin-bottom: .5rem;
-        }
-
-        .landing-footer .footer-desc {
-            font-size: .9rem;
-            max-width: 300px;
-            line-height: 1.6;
-        }
-
-        .landing-footer h6 {
-            color: #fff;
-            font-weight: 700;
-            font-size: .85rem;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            margin-bottom: 1rem;
-        }
-
-        .landing-footer ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .landing-footer ul li {
-            margin-bottom: .5rem;
-        }
-
-        .landing-footer ul li a {
-            color: rgba(255, 255, 255, .6);
-            text-decoration: none;
-            font-size: .9rem;
-            transition: color .2s;
-        }
-
-        .landing-footer ul li a:hover {
-            color: #fff;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, .08);
-            padding-top: 1.5rem;
-            margin-top: 3rem;
-            text-align: center;
-            font-size: .8rem;
-        }
-
-        /* ===== Responsive ===== */
-        @media (max-width: 991.98px) {
-            .hero-visual {
-                margin-top: 3rem;
-            }
-
-            .hero-stats {
-                gap: 1.5rem;
-            }
-
-            .floating-badge {
-                display: none;
-            }
-
-            .step-connector::after {
-                display: none;
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .hero-stats {
-                flex-direction: column;
-                gap: .75rem;
-            }
-
-            section {
-                padding: 4rem 0;
-            }
-        }
-
-        /* ===== Entrance Animations ===== */
-        .fade-up {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity .6s ease-out, transform .6s ease-out;
-        }
-
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.3;
         }
     </style>
 </head>
 
-<body>
-    <!-- ===== Navbar ===== -->
-    <nav class="landing-nav" id="landingNav">
-        <div class="container d-flex align-items-center justify-content-between">
-            <a class="nav-brand" href="/">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SkillentHub" height="40"
-                    class="d-inline-block align-text-top">
-            </a>
-            <div class="d-none d-md-flex nav-links align-items-center gap-1">
-                <!-- Links removed for simplified landing page -->
+<body
+    class="bg-slate-radial min-h-screen text-white relative overflow-x-hidden selection:bg-slate-500 selection:text-white">
+    <div id="tailwind-error"
+        style="display: none; background-color: #ef4444; color: white; padding: 1rem; text-align: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;">
+        <strong>Error:</strong> Tailwind CSS failed to load. Please check your internet connection or disable ad
+        blockers for this site.
+    </div>
+    <div class="blob w-96 h-96 rounded-full bg-slate-500 top-0 left-0 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="blob w-[500px] h-[500px] rounded-full bg-blue-900 bottom-0 right-0 translate-x-1/3 translate-y-1/3">
+    </div>
+    <div class="blob w-64 h-64 rounded-full bg-gray-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20">
+    </div>
+    <nav
+        class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/10 bg-[#1e293b]/70 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center gap-2">
+                    <a href="/" class="flex items-center gap-2 decoration-none">
+                        <div
+                            class="w-10 h-10 rounded-lg bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center shadow-lg shadow-slate-500/20">
+                            <span class="material-symbols-outlined text-white">security</span>
+                        </div>
+                        <span class="font-bold text-xl tracking-tight text-slate-100">SkillentHub</span>
+                    </a>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium"
+                        href="#features">Features</a>
+                    <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium"
+                        href="#how-it-works">How It Works</a>
+                    <a class="text-slate-300 hover:text-white transition-colors text-sm font-medium"
+                        href="#about">About</a>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a class="text-slate-200 hover:text-white font-medium text-sm transition-colors px-4 py-2"
+                        href="{{ url_for('auth.login') }}">Log In</a>
+                    <a class="bg-silver-blue-gradient hover:opacity-90 transition-opacity text-white px-5 py-2.5 rounded-lg font-medium text-sm shadow-lg shadow-blue-900/40 border border-white/10"
+                        href="{{ url_for('auth.register') }}">
+                        Sign Up <span class="material-symbols-outlined text-sm align-middle ml-1">arrow_forward</span>
+                    </a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button class="text-slate-300 hover:text-white focus:outline-none" onclick="toggleMobileMenu()">
+                        <span class="material-symbols-outlined text-3xl">menu</span>
+                    </button>
+                </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ url_for('auth.login') }}" class="btn-outline-landing"
-                    style="padding: .55rem 1.5rem; font-size: .9rem;">Log In</a>
-                <a href="{{ url_for('auth.register') }}" class="btn-gradient"
-                    style="padding: .55rem 1.5rem; font-size: .9rem;">
-                    Sign Up Free <i class="bi bi-arrow-right"></i>
-                </a>
+        </div>
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#1e293b] border-b border-white/10">
+            <div class="px-4 pt-2 pb-4 space-y-1">
+                <a class="block text-slate-300 hover:text-white hover:bg-white/5 rounded-md px-3 py-2 text-base font-medium"
+                    href="#features">Features</a>
+                <a class="block text-slate-300 hover:text-white hover:bg-white/5 rounded-md px-3 py-2 text-base font-medium"
+                    href="#how-it-works">How It Works</a>
+                <a class="block text-slate-300 hover:text-white hover:bg-white/5 rounded-md px-3 py-2 text-base font-medium"
+                    href="#about">About</a>
+                <a class="block text-slate-300 hover:text-white hover:bg-white/5 rounded-md px-3 py-2 text-base font-medium"
+                    href="{{ url_for('auth.login') }}">Log In</a>
+                <a class="block text-white bg-slate-700/50 hover:bg-slate-700 rounded-md px-3 py-2 text-base font-medium mt-2"
+                    href="{{ url_for('auth.register') }}">Sign Up</a>
             </div>
         </div>
     </nav>
-
-    <!-- ===== Hero ===== -->
-    <section class="hero text-center">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="fade-up visible">
-                        <div class="hero-badge mx-auto">
-                            <i class="bi bi-circle-fill" style="color: #22c55e;"></i>
-                            Now Open for Students & Recruiters
-                        </div>
-                        <h1 class="mb-4">
-                            Build Skills.<br>
-                            Win Competitions.<br>
-                            <span class="gradient-text">Land Your Dream Job.</span>
-                        </h1>
-                        <p class="lead mx-auto mb-5">
-                            The all-in-one career platform where students showcase talent,
-                            join hackathons, and connect with top recruiters — all in one place.
-                        </p>
-                        <div class="hero-actions justify-content-center mb-5">
-                            <a href="{{ url_for('auth.register') }}" class="btn-gradient btn-gradient-lg">
-                                Get Started — It's Free <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                        <div class="hero-stats justify-content-center border-top-0 pt-0">
-                            <div class="stat-item">
-                                <div class="stat-number">500+</div>
-                                <div class="stat-label">Companies</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">10k+</div>
-                                <div class="stat-label">Students</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">1k+</div>
-                                <div class="stat-label">Jobs Posted</div>
-                            </div>
-                        </div>
+    <div class="relative pt-32 pb-16 sm:pt-40 sm:pb-24 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel border border-white/20 mb-8 animate-fade-in-up">
+                <span class="material-symbols-outlined text-slate-300 text-sm">rocket_launch</span>
+                <span class="text-sm font-medium text-slate-200">Launch Your Career Today</span>
+            </div>
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-8">
+                <span class="block text-white mb-2">Connect. Compete.</span>
+                <span class="text-gradient">Achieve Excellence.</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-slate-300 leading-relaxed">
+                SkillentHub connects aspiring talent with top recruiters. Showcase your skills through projects, join
+                hackathons, and land your dream job — all in one ecosystem.
+            </p>
+            <div class="mt-10 flex justify-center gap-4 flex-col sm:flex-row">
+                <a class="bg-silver-blue-gradient text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/20 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 border border-white/10"
+                    href="{{ url_for('auth.register') }}">
+                    Get Started Free
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+                <a class="glass-panel text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition-all flex items-center justify-center border border-white/20"
+                    href="#features">
+                    View Features
+                </a>
+            </div>
+            <div class="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto border-t border-white/10 pt-10">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-white mb-1">500+</div>
+                    <div class="text-slate-400 text-sm uppercase tracking-wider font-medium">Companies Hiring</div>
+                </div>
+                <div class="text-center border-l-0 sm:border-l border-white/10">
+                    <div class="text-4xl font-bold text-white mb-1">10k+</div>
+                    <div class="text-slate-400 text-sm uppercase tracking-wider font-medium">Active Learners</div>
+                </div>
+                <div class="text-center border-l-0 sm:border-l border-white/10">
+                    <div class="text-4xl font-bold text-white mb-1">1k+</div>
+                    <div class="text-slate-400 text-sm uppercase tracking-wider font-medium">Opportunities</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="py-20 relative" id="features">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span
+                    class="bg-slate-500/20 text-slate-200 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase border border-slate-400/30">Features</span>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-bold text-white">Everything You Need to Succeed</h2>
+                <p class="mt-4 text-slate-400 max-w-2xl mx-auto">We provide the tools to help you stand out and get
+                    hired
+                    by the world's best companies.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 rounded-2xl">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-slate-500/20 flex items-center justify-center mb-6 text-slate-300 border border-slate-500/30">
+                        <span class="material-symbols-outlined text-3xl">work_outline</span>
                     </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Job Board</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Access curated job listings and internships from top companies looking for fresh talent like
+                        you.
+                        Filter by role, skill, and location.
+                    </p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-blue-900/30 flex items-center justify-center mb-6 text-blue-200 border border-blue-500/30">
+                        <span class="material-symbols-outlined text-3xl">emoji_events</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Competitions</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Participate in hackathons and coding challenges to prove your skills and win exciting prizes.
+                        Gain
+                        recognition on the global leaderboard.
+                    </p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-gray-600/20 flex items-center justify-center mb-6 text-gray-300 border border-gray-500/30">
+                        <span class="material-symbols-outlined text-3xl">groups</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Networking</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Connect with peers, mentors, and recruiters. Build a professional network that boosts your
+                        career
+                        trajectory and opens new doors.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
-
+    <section class="py-20 bg-black/10" id="how-it-works">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span
+                    class="bg-slate-500/20 text-slate-200 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase border border-slate-400/30">How
+                    It Works</span>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-bold text-white">Your Path to Success</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-12 relative">
+                <div
+                    class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-transparent via-slate-500/30 to-transparent">
+                </div>
+                <div class="relative text-center">
+                    <div
+                        class="w-24 h-24 mx-auto bg-gradient-to-br from-slate-500 to-gray-700 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-slate-500/20 mb-6 relative z-10 ring-8 ring-[#1e293b]/50">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Create Profile</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed px-4">
+                        Sign up and build your professional profile highlighting your skills, education, and interests.
+                    </p>
+                </div>
+                <div class="relative text-center">
+                    <div
+                        class="w-24 h-24 mx-auto bg-gradient-to-br from-blue-600 to-slate-600 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-blue-500/20 mb-6 relative z-10 ring-8 ring-[#1e293b]/50">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Build &amp; Compete</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed px-4">
+                        Join competitions, upload projects to your portfolio, and earn badges to showcase your
+                        expertise.
+                    </p>
+                </div>
+                <div class="relative text-center">
+                    <div
+                        class="w-24 h-24 mx-auto bg-gradient-to-br from-slate-400 to-slate-500 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-slate-500/20 mb-6 relative z-10 ring-8 ring-[#1e293b]/50">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Get Hired</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed px-4">
+                        Apply to jobs directly or let our AI matchmaking get you scouted by top recruiters effortlessly.
+                    </p>
+                </div>
+            </div>
+        </div>
     </section>
-
-    <!-- ===== Footer ===== -->
-    <footer class="landing-footer" style="padding: 2rem 0; margin-top: auto;">
-        <div class="container text-center">
-            <div class="footer-bottom" style="margin-top: 0; border-top: none;">
-                &copy; 2026 SkillentHub. All rights reserved. Built with <i class="bi bi-heart-fill"
-                    style="color: #ef4444;"></i> for developers.
+    <section class="py-20 px-4">
+        <div
+            class="max-w-6xl mx-auto relative rounded-3xl overflow-hidden glass-panel border border-white/10 shadow-2xl">
+            <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-800/60 to-blue-900/40 mix-blend-overlay"></div>
+            <div class="relative z-10 py-16 px-6 sm:px-12 text-center">
+                <h2 class="text-3xl sm:text-5xl font-bold text-white mb-6">Ready to Kickstart Your Career?</h2>
+                <p class="text-lg text-slate-300 max-w-2xl mx-auto mb-10">
+                    Join thousands of students and recruiters on SkillentHub today. Stop waiting for opportunities and
+                    start creating them.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="{{ url_for('auth.register') }}"
+                        class="bg-silver-blue-gradient text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-blue-500/20 transition-all transform hover:scale-105 border border-white/10 flex items-center justify-center">
+                        Create Free Account
+                    </a>
+                    <a href="{{ url_for('auth.login') }}"
+                        class="bg-transparent border border-white/20 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/5 transition-all flex items-center justify-center">
+                        Log In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer class="bg-[#0f172a]/60 border-t border-white/5 pt-16 pb-8 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-slate-400">security</span>
+                        <span class="font-bold text-xl text-white">SkillentHub</span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Empowering the next generation of tech talent. Connect, learn, and grow with SkillentHub.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a class="text-slate-400 hover:text-white transition-colors" href="#"><span
+                                class="material-symbols-outlined text-xl">thumb_up</span></a>
+                        <a class="text-slate-400 hover:text-white transition-colors" href="#"><span
+                                class="material-symbols-outlined text-xl">smart_display</span></a>
+                        <a class="text-slate-400 hover:text-white transition-colors" href="#"><span
+                                class="material-symbols-outlined text-xl">public</span></a>
+                        <a class="text-slate-400 hover:text-white transition-colors" href="#"><span
+                                class="material-symbols-outlined text-xl">photo_camera</span></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-6 uppercase text-sm tracking-wider">Platform</h4>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li><a class="hover:text-slate-200 transition-colors" href="#features">Features</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#how-it-works">How it Works</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Pricing</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Success Stories</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-6 uppercase text-sm tracking-wider">Company</h4>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">About Us</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Careers</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Blog</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-6 uppercase text-sm tracking-wider">Legal</h4>
+                    <ul class="space-y-3 text-sm text-slate-400">
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Privacy Policy</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Terms of Service</a></li>
+                        <li><a class="hover:text-slate-200 transition-colors" href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-500 text-sm">© 2026 SkillentHub Inc. All rights reserved.</p>
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                    <span>English (US)</span>
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+                </div>
             </div>
         </div>
     </footer>
-
-    <!-- ===== Scripts ===== -->
     <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            document.getElementById('landingNav')
-                .classList.toggle('scrolled', window.scrollY > 40);
-        });
-
-        // Scroll-triggered fade-up animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.15 });
-
-        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
     </script>
 </body>
 

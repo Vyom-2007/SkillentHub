@@ -19,14 +19,26 @@
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --primary-color: #667eea;
             --secondary-color: #764ba2;
-            --bg-light: #f8fafc;
-            --text-muted: #64748b;
+            --bg-dark: #0f172a;
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
+            background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(90, 92, 106, 1) 0%, rgba(32, 45, 58, 1) 81.3%);
+            background-attachment: fixed;
             min-height: 100vh;
+            color: var(--text-light);
+        }
+
+        /* Navbar Dark Theme */
+        .navbar {
+            background: rgba(30, 41, 59, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .navbar-brand {
@@ -37,6 +49,20 @@
             background-clip: text;
         }
 
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff !important;
+        }
+
+        .navbar-light .navbar-toggler-icon {
+            filter: invert(1);
+        }
+
+        /* Buttons */
         .btn-primary {
             background: var(--primary-gradient);
             border: none;
@@ -51,15 +77,38 @@
             background: var(--primary-gradient);
         }
 
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        /* Forms */
+        .form-control {
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
+        .form-control:focus {
+            background-color: rgba(15, 23, 42, 0.8);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            color: #fff;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Cards & Containers */
+        .card,
         .auth-card {
-            background: white;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: var(--card-border);
             border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Auth Card Specifics */
+        .auth-card {
             padding: 2.5rem;
             max-width: 450px;
             margin: 0 auto;
@@ -67,7 +116,7 @@
 
         .auth-title {
             font-weight: 700;
-            color: #1e293b;
+            color: #fff;
             margin-bottom: 0.5rem;
         }
 
@@ -78,7 +127,7 @@
 
         .form-label {
             font-weight: 500;
-            color: #334155;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .invalid-feedback {
@@ -92,10 +141,30 @@
         .alert {
             border-radius: 0.75rem;
             border: none;
+            background: rgba(30, 41, 59, 0.9);
+            color: #fff;
         }
 
+        .alert-success {
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-danger {
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .alert-info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Footer */
         .footer {
-            background: white;
+            background: rgba(15, 23, 42, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding: 1.5rem 0;
             margin-top: auto;
         }
@@ -111,8 +180,8 @@
             display: inline-block;
             border-radius: 50%;
             overflow: hidden;
-            background-color: #e2e8f0;
-            /* Light gray background while loading */
+            background-color: #334155;
+            flex-shrink: 0;
         }
 
         .avatar-initials {
@@ -142,6 +211,26 @@
             z-index: 2;
             transition: opacity 0.3s ease;
         }
+
+        /* Dropdowns */
+        .dropdown-menu {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .dropdown-item {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .dropdown-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
@@ -150,7 +239,7 @@
 
 <body class="d-flex flex-column">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand fs-4" href="/">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SkillentHub" height="40"

@@ -1,89 +1,262 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html class="dark" lang="en">
 
-{% block title %}Recruiter Sign In - SkillentHub{% endblock %}
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SkillentHub - Recruiter Login</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"
+        onerror="document.getElementById('tailwind-error').style.display='block'"></script>
+    <script>
+        if (typeof tailwind === 'undefined') {
+            document.addEventListener('DOMContentLoaded', function () {
+                document.getElementById('tailwind-error').style.display = 'block';
+            });
+        }
+    </script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                        "primary-hover": "#2563eb",
+                        "background-light": "#1e293b",
+                        "background-dark": "#0f172a",
+                        "slate-grey": "#64748b",
+                        "dark-charcoal": "#1e293b",
+                        "silver-accent": "#cbd5e1",
+                        "deep-blue-grey": "#334155",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        xl: "1rem",
+                        '2xl': "1.5rem",
+                    },
+                    backgroundImage: {
+                        'slate-radial': 'radial-gradient(circle at 10% 20%, #475569 0%, #1e293b 81.3%)',
+                        'silver-blue-gradient': 'linear-gradient(135deg, #94a3b8 0%, #1e3a8a 100%)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-5">
-            <div class="auth-card">
-                <div class="text-center mb-4">
-                    <h1 class="auth-title">Recruiter Login</h1>
-                    <p class="auth-subtitle">Sign in to your company dashboard</p>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-login-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-glass {
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .input-glass:focus {
+            background: rgba(15, 23, 42, 0.5);
+            border-color: rgba(148, 163, 184, 0.5);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+        }
+
+        .blob {
+            position: absolute;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Flash Message Styles */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .alert-danger,
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background-color: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .alert-warning {
+            background-color: rgba(234, 179, 8, 0.2);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            color: #fde047;
+        }
+
+        .alert-info {
+            background-color: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-radial min-h-screen text-white relative overflow-hidden flex flex-col selection:bg-slate-500 selection:text-white">
+    <div id="tailwind-error"
+        style="display: none; background-color: #ef4444; color: white; padding: 1rem; text-align: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 9999;">
+        <strong>Error:</strong> Tailwind CSS failed to load. Please check your internet connection or disable ad
+        blockers for this site.
+    </div>
+    <div class="blob w-96 h-96 rounded-full bg-slate-500 top-0 left-0 -translate-x-1/4 -translate-y-1/4"></div>
+    <div class="blob w-[500px] h-[500px] rounded-full bg-blue-900 bottom-0 right-0 translate-x-1/3 translate-y-1/3">
+    </div>
+    <div class="blob w-64 h-64 rounded-full bg-gray-500 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20">
+    </div>
+    <nav class="absolute top-0 w-full z-50 p-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <a href="/" class="flex items-center gap-2 decoration-none">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center shadow-lg shadow-slate-500/20">
+                        <span class="material-symbols-outlined text-white text-sm">security</span>
+                    </div>
+                    <span class="font-bold text-lg tracking-tight text-slate-100">SkillentHub</span>
+                </a>
+            </div>
+            <a class="text-sm text-slate-300 hover:text-white transition-colors" href="/">Back to Home</a>
+        </div>
+    </nav>
+    <main class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8 relative z-10 py-12">
+        <div class="w-full max-w-md">
+            <div class="glass-login-card rounded-2xl p-8 sm:p-10 w-full animate-fade-in-up">
+                <div class="text-center mb-8">
+                    <div
+                        class="mx-auto w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-4 border border-white/10">
+                        <span class="material-symbols-outlined text-slate-200">business_center</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Recruiter Login</h2>
+                    <p class="mt-2 text-sm text-slate-400">Access your dashboard to manage talent</p>
                 </div>
 
-                <form id="loginForm" method="POST" action="{{ url_for('auth_recruiter.login') }}" novalidate>
-                    <!-- Email -->
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Company Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ email or '' }}"
-                            placeholder="company@example.com" required autofocus>
-                        <div class="invalid-feedback">
-                            Please enter a valid email address
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-4">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('auth_recruiter.login') }}" class="space-y-6" method="POST">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2" for="email">
+                            Business Email
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-slate-500 text-lg">mail</span>
+                            </div>
+                            <input
+                                class="input-glass block w-full pl-10 pr-3 py-3 rounded-xl placeholder-slate-500 sm:text-sm"
+                                id="email" name="email" placeholder="hr@company.com" required="" type="email"
+                                value="{{ email or '' }}" />
                         </div>
                     </div>
-
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Enter your password" required>
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                                <i class="bi bi-eye"></i>
-                            </button>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-medium text-slate-300" for="password">
+                                Password
+                            </label>
+                            <a class="text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                                href="{{ url_for('auth_recruiter.forgot_password') }}">
+                                Forgot password?
+                            </a>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-slate-500 text-lg">lock</span>
+                            </div>
+                            <input
+                                class="input-glass block w-full pl-10 pr-3 py-3 rounded-xl placeholder-slate-500 sm:text-sm"
+                                id="password" name="password" placeholder="••••••••" required="" type="password" />
                         </div>
                     </div>
-
-                    <!-- Forgot Password Link -->
-                    <div class="mb-4 text-end">
-                        <a href="{{ url_for('auth_recruiter.forgot_password') }}" class="text-decoration-none small">
-                            Forgot password?
-                        </a>
+                    <div class="flex items-center">
+                        <input
+                            class="h-4 w-4 rounded border-slate-600 text-blue-600 focus:ring-blue-500 bg-slate-800/50"
+                            id="remember-me" name="remember-me" type="checkbox" />
+                        <label class="ml-2 block text-sm text-slate-300" for="remember-me">
+                            Remember me
+                        </label>
                     </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn-primary w-100 py-2">
-                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
-                    </button>
+                    <div>
+                        <button
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-[#334155] hover:bg-[#475569] hover:shadow-lg hover:shadow-slate-500/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-slate-500 transition-all transform active:scale-95"
+                            type="submit">
+                            Login
+                        </button>
+                    </div>
                 </form>
-
-                <div class="text-center mt-4">
-                    <p class="text-muted mb-2">
+                <div class="mt-8 pt-6 border-t border-white/10 text-center">
+                    <p class="text-sm text-slate-400 mb-2">
                         Don't have a company account?
-                        <a href="{{ url_for('auth_recruiter.register') }}" class="text-decoration-none fw-medium">
-                            Register Company
+                        <a class="font-medium text-slate-200 hover:text-white hover:underline transition-colors ml-1"
+                            href="{{ url_for('auth_recruiter.register') }}">
+                            Create one
                         </a>
                     </p>
-                    <hr class="my-3">
-                    <p class="text-muted small mb-0">
-                        <i class="bi bi-person me-1"></i>Looking for user login?
-                        <a href="{{ url_for('auth.login') }}" class="text-decoration-none" style="color: #0ea5e9;">
-                            Login as User
+                    <p class="text-sm text-slate-400">
+                        Looking for a job?
+                        <a class="font-medium text-slate-200 hover:text-white hover:underline transition-colors ml-1"
+                            href="{{ url_for('auth.login') }}">
+                            Login as Candidate
                         </a>
                     </p>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-{% endblock %}
+    </main>
+    <footer class="relative z-10 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 SkillentHub Inc. All rights reserved.</p>
+    </footer>
 
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const passwordInput = document.getElementById('password');
-        const togglePasswordBtn = document.getElementById('togglePassword');
+</body>
 
-        // Toggle password visibility
-        if (togglePasswordBtn) {
-            togglePasswordBtn.addEventListener('click', function () {
-                const type = passwordInput.type === 'password' ? 'text' : 'password';
-                passwordInput.type = type;
-                this.querySelector('i').classList.toggle('bi-eye');
-                this.querySelector('i').classList.toggle('bi-eye-slash');
-            });
-        }
-    });
-</script>
-{% endblock %}
+</html>
