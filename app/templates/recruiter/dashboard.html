@@ -426,16 +426,19 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                {% if app.profile_photo %}
-                                <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_photo) }}"
-                                    alt="" class="rounded-circle" width="35" height="35">
-                                {% else %}
-                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
-                                    style="width: 35px; height: 35px;">
-                                    <i class="bi bi-person"></i>
-                                </div>
-                                {% endif %}
-                                <span>{{ app.candidate_name }}</span>
+                                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
+                                    class="text-decoration-none text-dark d-flex align-items-center gap-2">
+                                    {% if app.profile_photo %}
+                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_photo) }}"
+                                        alt="" class="rounded-circle" width="35" height="35">
+                                    {% else %}
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                        style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                        {{ app.candidate_name[:2].upper() if app.candidate_name else 'U' }}
+                                    </div>
+                                    {% endif %}
+                                    <span>{{ app.candidate_name }}</span>
+                                </a>
                             </div>
                         </td>
                         <td>{{ app.item_title }}</td>
@@ -462,8 +465,8 @@
                             {% if app.item_type in ['job', 'internship'] %}
                             {% if app.user_id %}
                             <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
-                                class="btn btn-sm btn-outline-secondary ms-1">
-                                <i class="bi bi-person"></i> Profile
+                                class="btn btn-sm btn-outline-primary ms-1">
+                                <i class="bi bi-person"></i> View Profile
                             </a>
                             {% endif %}
                             {% else %}

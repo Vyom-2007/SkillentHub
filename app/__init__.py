@@ -46,6 +46,12 @@ def create_app(config_name='development'):
     
     # Register error handlers
     register_error_handlers(app)
+
+    @app.route('/favicon.ico')
+    def favicon():
+        from flask import send_from_directory
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
     
     return app
 

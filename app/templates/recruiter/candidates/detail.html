@@ -33,10 +33,10 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="#messageModal">
+                        <a href="{{ url_for('recruiter_messages.messages', user=profile.user_id, type='user') }}"
+                            class="btn btn-primary">
                             <i class="bi bi-chat-dots"></i> Message
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -176,83 +176,4 @@
         </div>
     </div>
 </div>
-
-<!-- Message Modal -->
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Message {{ profile.full_name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="messageForm">
-                    <input type="hidden" id="receiver_id" value="{{ profile.user_id }}">
-                    <div class="mb-3">
-                        <textarea class="form-control" id="messageContent" rows="4"
-                            placeholder="Type your message here..." required></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="sendMessage()">Send Message</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function sendMessage() {
-        const receiverId = document.getElementById('receiver_id').value;
-        const content = document.getElementById('messageContent').value;
-        const btn = document.querySelector('#messageModal .btn-primary');
-
-        if (!content.trim()) return;
-
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Sending...';
-
-        // Call the generic messages API, but since we are logged in as Recruiter, 
-        // we need to make sure the endpoint supports recruiter authentication.
-        // The previous update to `routes.py` in `messages` blueprint uses `session.get('user_id')`.
-        // Recruiters use `session.get('recruiter_id')`.
-        // Wait... `message_service.send_message` supports types, but the API route `/api/messages/send`
-        // was updated to take `receiver_type` but heavily relies on `user_id = session.get('user_id')` for SENDER.
-
-        // PROBLEM: Recruiters don't have `user_id` in session. They have `recruiter_id`.
-        // I need a NEW endpoint for Recruiters to send messages, OR update the existing one to handle recruiter session.
-        // Given `messages_bp` is protected by `login_required` which checks `user_id`, I should create a separate endpoint 
-        // or update the decorator/route to handle both.
-
-        // For now, I'll direct this to a new endpoint I'll creating in `candidates.py` or `recruiter/routes.py` 
-        // specifically for recruiter messaging.
-
-        fetch('/recruiter/api/messages/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                receiver_id: receiverId,
-                content: content
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Message sent successfully!');
-                    bootstrap.Modal.getInstance(document.getElementById('messageModal')).hide();
-                } else {
-                    alert(data.error || 'Failed to send message');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('An error occurred');
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = 'Send Message';
-            });
-    }
-</script>
 {% endblock %}

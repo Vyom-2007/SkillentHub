@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="SkillentHub — The all-in-one career platform for students and recruiters. Find jobs, join hackathons, compete, and grow your professional network.">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
     <title>SkillentHub — Launch Your Career</title>
 
     <!-- Bootstrap 5.3 CSS -->
@@ -398,7 +399,10 @@
     <!-- ===== Navbar ===== -->
     <nav class="landing-nav" id="landingNav">
         <div class="container d-flex align-items-center justify-content-between">
-            <a class="nav-brand" href="/"><i class="bi bi-lightning-charge-fill"></i> SkillentHub</a>
+            <a class="nav-brand" href="/">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SkillentHub" height="40"
+                    class="d-inline-block align-text-top">
+            </a>
             <div class="d-none d-md-flex nav-links align-items-center gap-1">
                 <!-- Links removed for simplified landing page -->
             </div>
@@ -438,7 +442,7 @@
                             </a>
                         </div>
                         <div class="hero-stats justify-content-center border-top-0 pt-0">
-                            
+
                         </div>
                     </div>
                 </div>
