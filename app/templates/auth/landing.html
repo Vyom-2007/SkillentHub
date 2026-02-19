@@ -633,9 +633,11 @@
                         document.documentElement.classList.remove('dark');
                     }
                     localStorage.setItem('landing-theme', theme);
-                    // Also sync with the main app's theme key
                     localStorage.setItem('theme', theme);
                 }
+
+                // Expose globally
+                window.applyTheme = applyTheme;
 
                 // Apply on load
                 var saved = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'dark';

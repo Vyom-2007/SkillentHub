@@ -499,6 +499,7 @@
                 localStorage.setItem('landing-theme', theme);
                 localStorage.setItem('theme', theme);
             }
+            window.applyTheme = applyTheme;
             var saved = localStorage.getItem('landing-theme') || localStorage.getItem('theme') || 'dark';
             applyTheme(saved);
             themeToggle.addEventListener('click', function () {
