@@ -441,9 +441,9 @@ def get_analytics_stats(recruiter_id):
         funnel_query = """
             SELECT 
                 COUNT(*) as total,
-                SUM(CASE WHEN status IN ('reviewing', 'shortlisted', 'accepted') THEN 1 ELSE 0 END) as reviewing,
-                SUM(CASE WHEN status IN ('shortlisted', 'accepted') THEN 1 ELSE 0 END) as shortlisted,
-                SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) as hired
+                SUM(CASE WHEN status IN ('applied', 'shortlisted', 'interview', 'offer', 'hired') THEN 1 ELSE 0 END) as reviewing,
+                SUM(CASE WHEN status IN ('shortlisted', 'interview', 'offer', 'hired') THEN 1 ELSE 0 END) as shortlisted,
+                SUM(CASE WHEN status = 'hired' THEN 1 ELSE 0 END) as hired
             FROM applications a
             WHERE (
                 (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
@@ -463,11 +463,11 @@ def get_analytics_stats(recruiter_id):
             }
             
         # 3. Time to Hire
-        # Average time from applied_at to updated_at for 'accepted' status
+        # Average time from applied_at to updated_at for 'hired' status
         tth_query = """
             SELECT AVG(DATEDIFF(updated_at, applied_at)) as avg_days
             FROM applications a
-            WHERE status = 'accepted'
+            WHERE status = 'hired'
             AND (
                 (a.item_type = 'job' AND a.item_id IN (SELECT job_id FROM jobs WHERE recruiter_id = %s))
                 OR (a.item_type = 'internship' AND a.item_id IN (SELECT internship_id FROM internships WHERE recruiter_id = %s))

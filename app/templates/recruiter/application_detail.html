@@ -104,7 +104,7 @@
             <!-- Progress Stepper -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    {% set steps = ['applied', 'reviewing', 'shortlisted', 'interview', 'offer', 'accepted', 'hired'] %}
+                    {% set steps = ['applied', 'shortlisted', 'interview', 'offer', 'hired'] %}
                     {% set current_step_index = steps.index(app.status) if app.status in steps else -1 %}
 
                     {% if app.status in ['rejected', 'declined'] %}

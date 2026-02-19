@@ -90,11 +90,11 @@ def apply_to_opportunity(user_id, item_type, item_id, resume_file=None, cover_le
                 res = execute_query("SELECT title FROM internships WHERE internship_id=%s", (item_id,), fetch_one=True)
                 if res: title = res['title']
                 
-            notification_service.create_notification(
+            notification_service.notify_application_submitted(
                 user_id=user_id,
-                notification_type='application_update',
-                content=f"You successfully applied for {title}",
-                related_id=application_id
+                item_title=title,
+                item_type=item_type,
+                application_id=application_id
             )
         except Exception as e:
             print(f"Error sending application notification: {e}")
@@ -216,10 +216,11 @@ def get_application_counts(user_id):
     return {
         'total': sum(counts.values()),
         'applied': counts.get('applied', 0),
-        'reviewing': counts.get('reviewing', 0),
         'shortlisted': counts.get('shortlisted', 0),
-        'rejected': counts.get('rejected', 0),
-        'accepted': counts.get('accepted', 0)
+        'interview': counts.get('interview', 0),
+        'offer': counts.get('offer', 0),
+        'hired': counts.get('hired', 0),
+        'rejected': counts.get('rejected', 0)
     }
     
     
@@ -265,6 +266,7 @@ def withdraw_application(user_id, application_id):
     return False, "Failed to withdraw application"
 
 
+
 # ========== STATUS WORKFLOW ==========
 
 ALLOWED_TRANSITIONS = {
@@ -297,14 +299,10 @@ def update_application_status(application_id, new_status, changed_by_user_id=Non
     current_status = app['status']
     
     # Validate transition
-    # Allow same status update (e.g. adding notes)? Maybe not for strict flow, but practical.
     if current_status == new_status:
         return True, "Status is already " + new_status
         
     valid_next_states = ALLOWED_TRANSITIONS.get(current_status, [])
-    
-    # Special case: Recruiter can always 'Reject' from any non-terminal state?
-    # For now, stick to strict defined flow.
     
     if new_status not in valid_next_states:
         return False, f"Invalid transition from '{current_status}' to '{new_status}'. Allowed: {', '.join(valid_next_states)}"
@@ -319,21 +317,20 @@ def update_application_status(application_id, new_status, changed_by_user_id=Non
                 (new_status, application_id)
             )
             
-            # Log History
+            # Log History (New Table)
             cursor.execute("""
-                INSERT INTO application_history 
-                (application_id, previous_status, new_status, changed_by, notes)
+                INSERT INTO application_status_history 
+                (application_id, old_status, new_status, changed_by, notes)
                 VALUES (%s, %s, %s, %s, %s)
             """, (application_id, current_status, new_status, changed_by_user_id, notes))
             
         connection.commit()
         
-        # Trigger notifications/side effects
-        if new_status == 'accepted':
-            # Auto-delete logic should be called here or handled by caller? 
-            # Caller might be user accepting, so user_id would be 'changed_by'.
-            # For correctness, let's keep side-effects separated or ensure imports don't cycle.
-            pass
+        # Trigger notifications/side effects for terminal states
+        if new_status == 'hired':
+             # Auto-delete other applications logic here if needed
+             # For now, keeping side-effects minimal as requested.
+             pass
             
         return True, f"Status updated to {new_status}"
         
@@ -347,24 +344,11 @@ def get_application_history(application_id):
     """Get audit history for an application."""
     query = """
         SELECT h.*, 
-               CASE WHEN r.recruiter_id IS NOT NULL THEN r.company_name 
-                    WHEN u.user_id IS NOT NULL THEN p.full_name
-                    ELSE 'System' END as changed_by_name
-        FROM application_history h
-        LEFT JOIN recruiters r ON h.changed_by = r.recruiter_id -- Assuming changed_by is recruiter_id (wait, user_id and recruiter_id distinct?)
-        -- If changed_by_user_id is generic ID, we need to know type. 
-        -- For now, let's assume it's recruiter ID if context implies. 
-        -- Or we need a changed_by_type column. 
-        -- Simplification: Just show ID or fetch name if needed.
-        LEFT JOIN users u ON h.changed_by = u.user_id 
-        LEFT JOIN profiles p ON u.user_id = p.user_id
+               r.company_name as changed_by_name
+        FROM application_status_history h
+        LEFT JOIN recruiters r ON h.changed_by = r.recruiter_id
         WHERE h.application_id = %s
         ORDER BY h.changed_at DESC
     """
-    # Note: This join is tricky if IDs overlap between recruiters and users. 
-    # Usually they are distinct tables. Application history 'changed_by' ideally stores Recruiter ID.
-    # But candidates can also change status (Accept/Decline).
-    # We might need 'changed_by_type' in history (added next time?)
-    # For now, simple query:
-    simple_query = "SELECT * FROM application_history WHERE application_id = %s ORDER BY changed_at DESC"
-    return execute_query(simple_query, (application_id,), fetch_all=True)
+    return execute_query(query, (application_id,), fetch_all=True)
+

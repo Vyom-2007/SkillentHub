@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from functools import wraps
 import os
 from app.services import application_service
+from app.utils.decorators import login_required, candidate_required, api_candidate_required, api_login_required
 
 applications_bp = Blueprint('applications', __name__)
 
@@ -32,7 +33,8 @@ def api_login_required(f):
 
 
 @applications_bp.route('/applications')
-@login_required
+@login_required # Keep base login check
+@candidate_required
 def my_applications():
     """Display user's applications."""
     user_id = session.get('user_id')
@@ -58,6 +60,7 @@ def my_applications():
 
 @applications_bp.route('/applications/<int:application_id>')
 @login_required
+@candidate_required
 def application_detail(application_id):
     """Display application details."""
     user_id = session.get('user_id')
@@ -81,7 +84,7 @@ def application_detail(application_id):
 
 
 @applications_bp.route('/applications/apply', methods=['POST'])
-@api_login_required
+@api_candidate_required
 def apply():
     """Apply to a job or internship."""
     user_id = session.get('user_id')
@@ -119,6 +122,7 @@ def apply():
 
 @applications_bp.route('/applications/resume/<filename>')
 @login_required
+@candidate_required
 def download_resume(filename):
     """Download a resume file."""
     user_id = session.get('user_id')
@@ -138,6 +142,7 @@ def download_resume(filename):
 
 @applications_bp.route('/interviews/<int:interview_id>/respond', methods=['POST'])
 @login_required
+@candidate_required
 def respond_interview(interview_id):
     """Candidate responds to interview (confirm/decline)."""
     user_id = session.get('user_id')
@@ -159,3 +164,15 @@ def respond_interview(interview_id):
         flash(msg, 'danger')
         
     return redirect(request.referrer)
+
+
+@applications_bp.route('/interviews')
+@login_required
+@candidate_required
+def my_interviews():
+    """Candidate views their interviews."""
+    user_id = session.get('user_id')
+    from app.services import interview_service
+    interviews = interview_service.get_interviews_for_candidate(user_id)
+    return render_template('applications/interviews.html', interviews=interviews)
+
