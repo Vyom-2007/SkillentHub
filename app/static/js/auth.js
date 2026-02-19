@@ -47,6 +47,44 @@ function validatePassword(input) {
 }
 
 /**
+ * Validate name (Full Name or Company Name)
+ * @param {HTMLInputElement} input - Name input element
+ * @param {number} minLength - Minimum length (default 2)
+ * @returns {boolean} True if valid
+ */
+function validateName(input, minLength = 2) {
+    const value = input.value.trim();
+    if (value.length < minLength) {
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+        return false;
+    }
+    input.classList.remove('is-invalid');
+    input.classList.add('is-valid');
+    return true;
+}
+
+/**
+ * Validate confirm password
+ * @param {HTMLInputElement} passwordInput - Original password input
+ * @param {HTMLInputElement} confirmInput - Confirm password input
+ * @returns {boolean} True if matching
+ */
+function validateConfirmPassword(passwordInput, confirmInput) {
+    const password = passwordInput.value;
+    const confirm = confirmInput.value;
+
+    if (confirm && password !== confirm) {
+        confirmInput.classList.add('is-invalid');
+        confirmInput.classList.remove('is-valid');
+        return false;
+    }
+    confirmInput.classList.remove('is-invalid');
+    if (confirm) confirmInput.classList.add('is-valid'); // Only mark valid if not empty
+    return true;
+}
+
+/**
  * Initialize OTP input boxes with auto-focus, backspace, and paste handling
  * @param {NodeList} inputs - NodeList of OTP input elements
  */
@@ -247,6 +285,8 @@ function clearError(input) {
 if (typeof window !== 'undefined') {
     window.validateEmail = validateEmail;
     window.validatePassword = validatePassword;
+    window.validateName = validateName;
+    window.validateConfirmPassword = validateConfirmPassword;
     window.initOTPInputs = initOTPInputs;
     window.collectOTP = collectOTP;
     window.startOTPTimer = startOTPTimer;

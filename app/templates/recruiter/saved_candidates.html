@@ -15,9 +15,8 @@
             <div class="card h-100 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-start">
-                        <img src="{{ candidate.profile_picture or url_for('static', filename='img/default_profile.png') }}"
-                            alt="{{ candidate.full_name }}" class="rounded-circle me-3"
-                            style="width: 64px; height: 64px; object-fit: cover;">
+                        {% from '_avatar.html' import avatar %}
+                        {{ avatar(candidate.full_name, candidate.profile_picture, 64, 'me-3') }}
                         <div>
                             <h5 class="card-title mb-1">{{ candidate.full_name }}</h5>
                             <p class="text-muted small mb-2">{{ candidate.headline or 'No headline' }}</p>

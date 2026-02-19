@@ -35,6 +35,22 @@ def toggle_opportunity(item_type, item_id):
     else:
         return jsonify({'success': False, 'message': 'Failed to update status'}), 400
 
+@recruiter_bp.route('/opportunities/<item_type>/<int:item_id>/delete', methods=['POST'])
+@recruiter_required
+def delete_opportunity_route(item_type, item_id):
+    recruiter_id = session.get('recruiter_id')
+    success, message = recruiter_manage_service.delete_opportunity(item_type, item_id, recruiter_id)
+    
+    if success:
+        flash(message, 'success')
+        return jsonify({'success': True, 'message': message})
+    else:
+        # If API call
+        if request.is_json:
+             return jsonify({'success': False, 'message': message}), 400
+        flash(message, 'danger')
+        return redirect(url_for('recruiter.manage_opportunities'))
+
 # --- ATS (APPLICATIONS) ---
 
 @recruiter_bp.route('/applications')

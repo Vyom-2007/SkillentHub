@@ -18,9 +18,8 @@
             <div class="card h-100 shadow-sm hover-shadow transition">
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
-                        <img src="{{ candidate.profile_picture or url_for('static', filename='img/default_profile.png') }}"
-                            alt="{{ candidate.full_name }}" class="rounded-circle me-3"
-                            style="width: 50px; height: 50px; object-fit: cover;">
+                        {% from '_avatar.html' import avatar %}
+                        {{ avatar(candidate.full_name, candidate.profile_picture, 50, 'me-3') }}
                         <div>
                             <h5 class="card-title mb-0">
                                 <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"

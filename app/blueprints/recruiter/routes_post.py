@@ -158,3 +158,92 @@ def create_hackathon():
             flash(f'Error: {str(e)}', 'danger')
 
     return render_template('recruiter/hackathon_form.html')
+    return render_template('recruiter/hackathon_form.html')
+
+# --- EDIT ROUTES ---
+
+@recruiter_bp.route('/jobs/<int:job_id>/edit', methods=['GET', 'POST'])
+@recruiter_required
+def edit_job(job_id):
+    recruiter_id = session.get('recruiter_id')
+    job = recruiter_post_service.get_job_by_id(job_id, recruiter_id)
+    
+    if not job:
+        flash('Job not found or access denied.', 'danger')
+        return redirect(url_for('recruiter.manage_opportunities'))
+        
+    if request.method == 'POST':
+        data = {
+            'title': request.form.get('title'),
+            'location': request.form.get('location'),
+            'job_type': request.form.get('job_type'),
+            'work_mode': request.form.get('work_mode'),
+            'experience_required': request.form.get('experience_required'),
+            'skills_required': request.form.get('skills_required'),
+            'salary_range': request.form.get('salary_range'),
+            'description': request.form.get('description'),
+            'requirements': request.form.get('requirements'),
+            'openings': request.form.get('openings', 1),
+            'deadline': request.form.get('deadline')
+        }
+        
+        # Validation (Same as create)
+        required_fields = ['title', 'location', 'job_type', 'work_mode', 'salary_range', 'description', 'openings', 'skills_required', 'deadline']
+        if any(not data.get(k) for k in required_fields):
+            flash('All fields marked with * are required.', 'danger')
+            return render_template('recruiter/job_form.html', job=job)
+            
+        try:
+            success = recruiter_post_service.update_job(job_id, recruiter_id, data)
+            if success:
+                flash('Job updated successfully!', 'success')
+                return redirect(url_for('recruiter.manage_opportunities'))
+            else:
+                flash('Failed to update job.', 'danger')
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+            
+    return render_template('recruiter/job_form.html', job=job)
+
+@recruiter_bp.route('/internships/<int:internship_id>/edit', methods=['GET', 'POST'])
+@recruiter_required
+def edit_internship(internship_id):
+    recruiter_id = session.get('recruiter_id')
+    internship = recruiter_post_service.get_internship_by_id(internship_id, recruiter_id)
+    
+    if not internship:
+        flash('Internship not found or access denied.', 'danger')
+        return redirect(url_for('recruiter.manage_opportunities'))
+        
+    if request.method == 'POST':
+        data = {
+            'title': request.form.get('title'),
+            'location': request.form.get('location'),
+            'duration': request.form.get('duration'),
+            'stipend': request.form.get('stipend'),
+            'work_mode': request.form.get('work_mode'),
+            'certificate_provided': 'certificate_provided' in request.form,
+            'skills_required': request.form.get('skills_required'),
+            'description': request.form.get('description'),
+            'requirements': request.form.get('requirements'),
+            'deadline': request.form.get('deadline'),
+            'openings': request.form.get('openings', 1)
+        }
+
+        # Validation
+        required_fields = ['title', 'location', 'duration', 'stipend', 'work_mode', 'description', 'deadline', 'skills_required']
+        if any(not data.get(k) for k in required_fields):
+            flash('All fields marked with * are required.', 'danger')
+            return render_template('recruiter/internship_form.html', internship=internship)
+        
+        try:
+            success = recruiter_post_service.update_internship(internship_id, recruiter_id, data)
+            if success:
+                flash('Internship updated successfully!', 'success')
+                return redirect(url_for('recruiter.manage_opportunities'))
+            else:
+                flash('Failed to update internship.', 'danger')
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+            
+    return render_template('recruiter/internship_form.html', internship=internship)

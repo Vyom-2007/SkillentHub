@@ -287,14 +287,8 @@
                             <div class="col-md-6 col-lg-4 mb-4">
                                 <div class="user-card">
                                     <a href="{{ url_for('profile.view', user_id=user.user_id) }}">
-                                        {% if user.profile_picture %}
-                                        <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_picture) }}"
-                                            class="user-avatar" alt="{{ user.full_name }}">
-                                        {% else %}
-                                        <div class="user-avatar avatar-initials" style="font-size: 1.5rem;">
-                                            {{ user.full_name[:2].upper() if user.full_name else 'U' }}
-                                        </div>
-                                        {% endif %}
+                                        {% from '_avatar.html' import avatar %}
+                                        {{ avatar(user.full_name, user.profile_picture, 80, 'user-avatar') }}
                                     </a>
                                     <h6 class="user-name">{{ user.full_name }}</h6>
                                     <p class="user-headline">{{ user.headline or 'No headline' }}</p>
@@ -352,14 +346,7 @@
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="user-card">
                                 <a href="{{ url_for('profile.view', user_id=conn.connected_user_id) }}">
-                                    {% if conn.profile_picture %}
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + conn.profile_picture) }}"
-                                        class="user-avatar" alt="{{ conn.full_name }}">
-                                    {% else %}
-                                    <div class="user-avatar avatar-initials" style="font-size: 1.5rem;">
-                                        {{ conn.full_name[:2].upper() if conn.full_name else 'U' }}
-                                    </div>
-                                    {% endif %}
+                                    {{ avatar(conn.full_name, conn.profile_picture, 80, 'user-avatar') }}
                                 </a>
                                 <h6 class="user-name">{{ conn.full_name }}</h6>
                                 <p class="user-headline">{{ conn.headline or 'No headline' }}</p>
@@ -384,15 +371,7 @@
                         {% for req in pending_requests %}
                         <div class="request-card" id="request-{{ req.connection_id }}">
                             <a href="{{ url_for('profile.view', user_id=req.user_id) }}">
-                                {% if req.profile_picture %}
-                                <img src="{{ url_for('static', filename='uploads/profiles/' + req.profile_picture) }}"
-                                    class="avatar" alt="{{ req.full_name }}">
-                                {% else %}
-                                <div class="avatar avatar-initials"
-                                    style="width: 60px; height: 60px; font-size: 1.1rem;">
-                                    {{ req.full_name[:2].upper() if req.full_name else 'U' }}
-                                </div>
-                                {% endif %}
+                                {{ avatar(req.full_name, req.profile_picture, 60, 'avatar') }}
                             </a>
                             <div class="info">
                                 <h6 class="mb-0">{{ req.full_name }}</h6>

@@ -66,9 +66,15 @@ def search_opportunities(opp_type='all', q=None, location=None, work_mode=None,
         results.extend(internships)
     
     # Calculate match scores if user_id provided
+    # Calculate match scores and set status flags if user_id provided
     if user_id:
-        from app.services import matching_service
+        from app.services import matching_service, user_service, application_service
+        
+        saved_ids = user_service.get_saved_ids(user_id)
+        applied_ids = application_service.get_applied_ids(user_id)
+        
         for item in results:
+             # Match score
              if item.get('type') == 'job':
                  try:
                      score = matching_service.calculate_match_score(item['id'], user_id)
@@ -77,6 +83,15 @@ def search_opportunities(opp_type='all', q=None, location=None, work_mode=None,
                      item['match_score'] = None
              else:
                  item['match_score'] = None
+                 
+             # Status flags
+             item['is_saved'] = (item['type'], item['id']) in saved_ids
+             item['has_applied'] = (item['type'], item['id']) in applied_ids
+    else:
+        for item in results:
+            item['match_score'] = None
+            item['is_saved'] = False
+            item['has_applied'] = False
 
     # Sort by posted_at desc (Default)
     # But if user_id is present, maybe we should sort by match_score?

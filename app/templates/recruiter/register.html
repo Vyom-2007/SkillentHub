@@ -89,6 +89,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('registerForm');
@@ -109,82 +110,33 @@
         }
 
         // Real-time validation
-        companyNameInput.addEventListener('blur', function () {
-            validateCompanyName();
+        companyNameInput.addEventListener('blur', () => validateName(companyNameInput));
+        companyNameInput.addEventListener('input', () => {
+            if (companyNameInput.classList.contains('is-invalid')) validateName(companyNameInput);
         });
 
-        emailInput.addEventListener('blur', function () {
-            validateEmail(this);
+        emailInput.addEventListener('blur', () => validateEmail(emailInput));
+        emailInput.addEventListener('input', () => {
+            if (emailInput.classList.contains('is-invalid')) validateEmail(emailInput);
         });
 
-        passwordInput.addEventListener('input', function () {
-            validatePassword(this);
-        });
+        passwordInput.addEventListener('input', () => validatePassword(passwordInput));
 
-        confirmPasswordInput.addEventListener('input', function () {
-            validateConfirmPassword();
-        });
+        confirmPasswordInput.addEventListener('input', () => validateConfirmPassword(passwordInput, confirmPasswordInput));
 
         // Form submission
         form.addEventListener('submit', function (e) {
             let isValid = true;
 
-            if (!validateCompanyName()) isValid = false;
+            if (!validateName(companyNameInput)) isValid = false;
             if (!validateEmail(emailInput)) isValid = false;
             if (!validatePassword(passwordInput)) isValid = false;
-            if (!validateConfirmPassword()) isValid = false;
+            if (!validateConfirmPassword(passwordInput, confirmPasswordInput)) isValid = false;
 
             if (!isValid) {
                 e.preventDefault();
             }
         });
-
-        function validateCompanyName() {
-            const value = companyNameInput.value.trim();
-            if (value.length < 2) {
-                companyNameInput.classList.add('is-invalid');
-                return false;
-            }
-            companyNameInput.classList.remove('is-invalid');
-            return true;
-        }
-
-        function validateEmail(input) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(input.value)) {
-                input.classList.add('is-invalid');
-                return false;
-            }
-            input.classList.remove('is-invalid');
-            return true;
-        }
-
-        function validatePassword(input) {
-            const value = input.value;
-            // Min 8 chars, 1 uppercase, 1 number
-            const hasUpperCase = /[A-Z]/.test(value);
-            const hasNumber = /[0-9]/.test(value);
-            const isLengthValid = value.length >= 8;
-
-            if (!isLengthValid || !hasUpperCase || !hasNumber) {
-                input.classList.add('is-invalid');
-                return false;
-            }
-            input.classList.remove('is-invalid');
-            return true;
-        }
-
-        function validateConfirmPassword() {
-            const password = passwordInput.value;
-            const confirm = confirmPasswordInput.value;
-
-            if (confirm && password !== confirm) {
-                confirmPasswordInput.classList.add('is-invalid');
-                return false;
-            }
-            confirmPasswordInput.classList.remove('is-invalid');
-            return true;
-        }
     });
 </script>
 {% endblock %}

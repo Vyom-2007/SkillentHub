@@ -91,7 +91,11 @@ def apply():
     cover_letter = request.form.get('cover_letter', '')
     resume = request.files.get('resume')
     
+    print(f"DEBUG: apply form: {request.form}")
+    print(f"DEBUG: apply files: {request.files}")
+    
     if not item_type or not item_id:
+        print("DEBUG: Missing item_type or item_id")
         return jsonify({'error': 'Invalid request'}), 400
     
     if item_type not in ['job', 'internship']:
@@ -127,7 +131,6 @@ def download_resume(filename):
     ) if hasattr(application_service, 'execute_query') else None
     
     # For now, allow download if logged in
-    resume_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
     # For now, allow download if logged in
     resume_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
     return send_from_directory(resume_dir, filename, as_attachment=True)

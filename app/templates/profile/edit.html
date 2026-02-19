@@ -196,6 +196,9 @@
                             {% if profile.education %}
                             {% for edu in profile.education %}
                             <div class="education-entry" data-id="{{ edu.education_id }}">
+                                <button type="button" class="remove-btn" onclick="removeEducation(this)">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
                                 <div class="row">
                                     <div class="col-md-6 mb-2">
                                         <input type="text" class="form-control" name="edu_institution[]"
@@ -245,6 +248,11 @@
                                         <input type="number" class="form-control" name="edu_end[]"
                                             placeholder="End Year" min="1950" max="2030">
                                     </div>
+                                </div>
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="addEducation">
+                                        <i class="bi bi-plus-circle me-1"></i>Add Education
+                                    </button>
                                 </div>
                             </div>
                             {% endif %}

@@ -8,34 +8,40 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                    <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-briefcase me-2"></i>Post New Job</h4>
-                    <p class="text-muted small">Create a new job listing for candidates</p>
+                    <h4 class="mb-0 fw-bold text-primary"><i class="bi bi-briefcase me-2"></i>{{ 'Edit Job' if job else
+                        'Post New Job' }}</h4>
+                    <p class="text-muted small">{{ 'Update job details below' if job else 'Create a new job listing for
+                        candidates' }}</p>
                 </div>
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('recruiter.create_job') }}" class="needs-validation"
-                        novalidate id="postForm">
+                    <form method="POST"
+                        action="{{ url_for('recruiter.edit_job', job_id=job.job_id) if job else url_for('recruiter.create_job') }}"
+                        class="needs-validation" novalidate id="postForm">
 
                         <!-- Basic Info -->
                         <h6 class="text-uppercase text-muted fw-bold mb-3 fs-7">Basic Information</h6>
                         <div class="mb-3">
                             <label class="form-label">Job Title <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="title" required
-                                placeholder="e.g. Senior Software Engineer">
+                                placeholder="e.g. Senior Software Engineer" value="{{ job.title if job else '' }}">
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Location <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="location" required
-                                    placeholder="City, State">
+                                    placeholder="City, State" value="{{ job.location if job else '' }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Job Type <span class="text-danger">*</span></label>
                                 <select class="form-select" name="job_type" required>
                                     <option value="">Select Type</option>
-                                    <option value="full-time">Full-time</option>
-                                    <option value="part-time">Part-time</option>
-                                    <option value="contract">Contract</option>
+                                    <option value="full-time" {% if job and job.job_type=='full-time' %}selected{% endif
+                                        %}>Full-time</option>
+                                    <option value="part-time" {% if job and job.job_type=='part-time' %}selected{% endif
+                                        %}>Part-time</option>
+                                    <option value="contract" {% if job and job.job_type=='contract' %}selected{% endif
+                                        %}>Contract</option>
                                 </select>
                             </div>
                         </div>
@@ -44,19 +50,27 @@
                             <div class="col-md-6">
                                 <label class="form-label">Work Mode <span class="text-danger">*</span></label>
                                 <select class="form-select" name="work_mode" required>
-                                    <option value="on-site">On-site</option>
-                                    <option value="remote">Remote</option>
-                                    <option value="hybrid">Hybrid</option>
+                                    <option value="on-site" {% if job and job.work_mode=='on-site' %}selected{% endif
+                                        %}>On-site</option>
+                                    <option value="remote" {% if job and job.work_mode=='remote' %}selected{% endif %}>
+                                        Remote</option>
+                                    <option value="hybrid" {% if job and job.work_mode=='hybrid' %}selected{% endif %}>
+                                        Hybrid</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Experience</label>
                                 <select class="form-select" name="experience_required">
-                                    <option value="0-1">0-1 Years</option>
-                                    <option value="1-3">1-3 Years</option>
-                                    <option value="3-5">3-5 Years</option>
-                                    <option value="5-10">5-10 Years</option>
-                                    <option value="10+">10+ Years</option>
+                                    <option value="0-1" {% if job and job.experience_required=='0-1' %}selected{% endif
+                                        %}>0-1 Years</option>
+                                    <option value="1-3" {% if job and job.experience_required=='1-3' %}selected{% endif
+                                        %}>1-3 Years</option>
+                                    <option value="3-5" {% if job and job.experience_required=='3-5' %}selected{% endif
+                                        %}>3-5 Years</option>
+                                    <option value="5-10" {% if job and job.experience_required=='5-10' %}selected{%
+                                        endif %}>5-10 Years</option>
+                                    <option value="10+" {% if job and job.experience_required=='10+' %}selected{% endif
+                                        %}>10+ Years</option>
                                 </select>
                             </div>
                         </div>
@@ -68,7 +82,8 @@
                             <label class="form-label">Skills Required (Text Summary) <span
                                     class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="skills_required" required
-                                placeholder="e.g. Python, Flask, React (Comma separated)">
+                                placeholder="e.g. Python, Flask, React (Comma separated)"
+                                value="{{ job.skills_required if job else '' }}">
                         </div>
 
 
@@ -76,19 +91,22 @@
                         <div class="mb-3">
                             <label class="form-label">Salary Range <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="salary_range" required
-                                placeholder="e.g. $80k - $100k or Market Rate">
+                                placeholder="e.g. $80k - $100k or Market Rate"
+                                value="{{ job.salary_range if job else '' }}">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Description <span class="text-danger">*</span></label>
                             <textarea class="form-control" name="description" rows="5" required maxlength="5000"
-                                id="descInput"></textarea>
-                            <div class="form-text text-end"><span id="descCount">0</span>/5000 characters</div>
+                                id="descInput">{{ job.description if job else '' }}</textarea>
+                            <div class="form-text text-end"><span id="descCount">{{ job.description|length if job else 0
+                                    }}</span>/5000 characters</div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Requirements</label>
-                            <textarea class="form-control" name="requirements" rows="4"></textarea>
+                            <textarea class="form-control" name="requirements"
+                                rows="4">{{ job.requirements if job else '' }}</textarea>
                         </div>
 
                         <!-- Settings -->
@@ -98,17 +116,21 @@
                             <div class="col-md-6">
                                 <label class="form-label">Application Deadline <span
                                         class="text-danger">*</span></label>
-                                <input type="date" class="form-control" name="deadline" id="deadlineInput" required>
+                                <input type="date" class="form-control" name="deadline" id="deadlineInput" required
+                                    value="{{ job.deadline.strftime('%Y-%m-%d') if job and job.deadline else '' }}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Number of Openings <span class="text-danger">*</span></label>
-                                <input type="number" class="form-control" name="openings" value="1" min="1" required>
+                                <input type="number" class="form-control" name="openings"
+                                    value="{{ job.number_of_openings if job else 1 }}" min="1" required>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-light">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4">Post Job</button>
+                            <a href="{{ url_for('recruiter.manage_opportunities') if job else url_for('recruiter.dashboard') }}"
+                                class="btn btn-light">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">{{ 'Update Job' if job else 'Post Job'
+                                }}</button>
                         </div>
 
                     </form>

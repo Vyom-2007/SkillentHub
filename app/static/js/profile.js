@@ -199,6 +199,9 @@ function addEducationEntry(prefilled = null) {
 
     const html = `
         <div class="education-entry" data-index="${eduIndex}">
+            <button type="button" class="remove-btn" onclick="removeEducation(this)">
+                <i class="bi bi-x-circle"></i>
+            </button>
             <div class="row">
                 <div class="col-md-6 mb-2">
                     <input type="text" class="form-control" name="edu_institution[]"

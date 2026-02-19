@@ -101,65 +101,43 @@
         const togglePasswordBtn = document.getElementById('togglePassword');
 
         // Toggle password visibility
-        togglePasswordBtn.addEventListener('click', function () {
-            const type = passwordInput.type === 'password' ? 'text' : 'password';
-            passwordInput.type = type;
-            this.querySelector('i').classList.toggle('bi-eye');
-            this.querySelector('i').classList.toggle('bi-eye-slash');
-        });
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', function () {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.querySelector('i').classList.toggle('bi-eye');
+                this.querySelector('i').classList.toggle('bi-eye-slash');
+            });
+        }
 
         // Real-time validation
-        fullNameInput.addEventListener('blur', function () {
-            validateFullName();
+        fullNameInput.addEventListener('blur', () => validateName(fullNameInput));
+        fullNameInput.addEventListener('input', () => {
+            if (fullNameInput.classList.contains('is-invalid')) validateName(fullNameInput);
         });
 
-        emailInput.addEventListener('blur', function () {
-            validateEmail(this);
+        emailInput.addEventListener('blur', () => validateEmail(emailInput));
+        emailInput.addEventListener('input', () => {
+            if (emailInput.classList.contains('is-invalid')) validateEmail(emailInput);
         });
 
-        passwordInput.addEventListener('input', function () {
-            validatePassword(this);
-        });
+        passwordInput.addEventListener('input', () => validatePassword(passwordInput));
 
-        confirmPasswordInput.addEventListener('input', function () {
-            validateConfirmPassword();
-        });
+        confirmPasswordInput.addEventListener('input', () => validateConfirmPassword(passwordInput, confirmPasswordInput));
 
         // Form submission
         form.addEventListener('submit', function (e) {
             let isValid = true;
 
-            if (!validateFullName()) isValid = false;
+            if (!validateName(fullNameInput)) isValid = false;
             if (!validateEmail(emailInput)) isValid = false;
             if (!validatePassword(passwordInput)) isValid = false;
-            if (!validateConfirmPassword()) isValid = false;
+            if (!validateConfirmPassword(passwordInput, confirmPasswordInput)) isValid = false;
 
             if (!isValid) {
                 e.preventDefault();
             }
         });
-
-        function validateFullName() {
-            const value = fullNameInput.value.trim();
-            if (value.length < 2) {
-                fullNameInput.classList.add('is-invalid');
-                return false;
-            }
-            fullNameInput.classList.remove('is-invalid');
-            return true;
-        }
-
-        function validateConfirmPassword() {
-            const password = passwordInput.value;
-            const confirm = confirmPasswordInput.value;
-
-            if (confirm && password !== confirm) {
-                confirmPasswordInput.classList.add('is-invalid');
-                return false;
-            }
-            confirmPasswordInput.classList.remove('is-invalid');
-            return true;
-        }
     });
 </script>
 {% endblock %}

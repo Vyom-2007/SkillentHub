@@ -428,15 +428,8 @@
                             <div class="d-flex align-items-center gap-2">
                                 <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
                                     class="text-decoration-none text-dark d-flex align-items-center gap-2">
-                                    {% if app.profile_photo %}
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_photo) }}"
-                                        alt="" class="rounded-circle" width="35" height="35">
-                                    {% else %}
-                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
-                                        style="width: 35px; height: 35px; font-size: 0.8rem;">
-                                        {{ app.candidate_name[:2].upper() if app.candidate_name else 'U' }}
-                                    </div>
-                                    {% endif %}
+                                    {% from '_avatar.html' import avatar %}
+                                    {{ avatar(app.candidate_name, app.profile_photo, 35) }}
                                     <span>{{ app.candidate_name }}</span>
                                 </a>
                             </div>

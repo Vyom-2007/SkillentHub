@@ -144,6 +144,19 @@
 
         <div class="col-md-4 mb-4">
             <div class="dashboard-card">
+                <div class="card-icon" style="background: linear-gradient(135deg, #20bf55, #01baef);">
+                    <i class="bi bi-bookmark-fill"></i>
+                </div>
+                <h5>Saved Items</h5>
+                <p class="text-muted small mb-3">View your bookmarked jobs and events.</p>
+                <a href="{{ url_for('opportunities.saved_jobs') }}" class="btn btn-sm btn-outline-primary">
+                    View Saved <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="dashboard-card">
                 <div class="card-icon" style="background: linear-gradient(135deg, #FF6B6B, #EE5D5D);">
                     <i class="bi bi-journal-text"></i>
                 </div>
@@ -309,14 +322,24 @@
                 link = '#';
         }
 
-        const avatar = item.actor_picture
-            ? `/static/uploads/profiles/${item.actor_picture}`
-            : 'https://via.placeholder.com/40';
+        let avatarHtml;
+        if (item.actor_picture) {
+            avatarHtml = `<img src="/static/uploads/profiles/${item.actor_picture}" class="rounded-circle me-3" width="40" height="40" alt="${item.actor_name}" onerror="this.src='https://via.placeholder.com/40'">`;
+        } else {
+            // Fallback for missing picture (recruiters or users without pic)
+            if (item.actor_type === 'recruiter') {
+                avatarHtml = `<div class="rounded-circle me-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-building"></i></div>`;
+            } else {
+                // User initials
+                const initials = item.actor_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                avatarHtml = `<div class="rounded-circle me-3 bg-secondary bg-opacity-10 text-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 0.85rem; font-weight: 600;">${initials}</div>`;
+            }
+        }
 
         return `
             <div class="list-group-item px-4 py-3">
                 <div class="d-flex align-items-start">
-                    <img src="${avatar}" class="rounded-circle me-3" width="40" height="40" alt="${item.actor_name}" onerror="this.src='https://via.placeholder.com/40'">
+                    ${avatarHtml}
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
                             <span class="mb-1">${content}</span>

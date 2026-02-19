@@ -28,16 +28,8 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    {% if interview.profile_picture %}
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + interview.profile_picture) }}"
-                                        class="rounded-circle me-2"
-                                        style="width: 30px; height: 30px; object-fit: cover;">
-                                    {% else %}
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2"
-                                        style="width: 30px; height: 30px;">
-                                        {{ interview.candidate_name[:1] }}
-                                    </div>
-                                    {% endif %}
+                                    {% from '_avatar.html' import avatar %}
+                                    {{ avatar(interview.candidate_name, interview.profile_picture, 30, 'me-2') }}
                                     <a href="{{ url_for('recruiter.application_detail', application_id=interview.application_id) }}"
                                         class="text-decoration-none text-dark fw-bold">
                                         {{ interview.candidate_name }}

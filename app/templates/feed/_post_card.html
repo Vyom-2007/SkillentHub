@@ -1,14 +1,8 @@
 <div class="post-card" data-post-id="{{ post.post_id }}">
     <!-- Post Header -->
     <div class="d-flex align-items-start gap-3">
-        {% if post.profile_picture %}
-        <img src="{{ url_for('static', filename='uploads/profiles/' + post.profile_picture) }}"
-            alt="{{ post.full_name }}" class="post-author-pic">
-        {% else %}
-        <div class="post-author-pic avatar-initials" style="width: 48px; height: 48px; font-size: 1rem;">
-            {{ post.full_name[:2].upper() if post.full_name else 'U' }}
-        </div>
-        {% endif %}
+        {% from '_avatar.html' import avatar %}
+        {{ avatar(post.full_name, post.profile_picture, 48, 'post-author-pic') }}
         <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start">
                 <div>

@@ -75,41 +75,15 @@
                         {% for app in applications %}
                         <tr>
                             <td class="ps-4">
-                                {% if app.user_id %}
-                                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
-                                    class="text-decoration-none text-dark d-flex align-items-center" target="_blank">
-                                    {% if app.profile_picture %}
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_picture) }}"
-                                        class="rounded-circle me-3 border" width="40" height="40" alt="Profile">
-                                    {% else %}
-                                    <div class="avatar-initials me-3"
-                                        style="width: 40px; height: 40px; font-size: 0.85rem;">
-                                        {{ app.full_name[:2].upper() if app.full_name else 'U' }}
-                                    </div>
-                                    {% endif %}
+                                {% from '_avatar.html' import avatar %}
+                                <a href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}"
+                                    class="text-decoration-none text-dark d-flex align-items-center">
+                                    {{ avatar(app.full_name, app.profile_picture, 40, 'me-3 border') }}
                                     <div>
                                         <h6 class="mb-0 fw-bold">{{ app.full_name }}</h6>
                                         <small class="text-muted">{{ app.email }}</small>
                                     </div>
                                 </a>
-                                {% else %}
-                                {# Fallback for guests/missing user_id #}
-                                <div class="d-flex align-items-center">
-                                    {% if app.profile_picture %}
-                                    <img src="{{ url_for('static', filename='uploads/profiles/' + app.profile_picture) }}"
-                                        class="rounded-circle me-3 border" width="40" height="40" alt="Profile">
-                                    {% else %}
-                                    <div class="avatar-initials me-3"
-                                        style="width: 40px; height: 40px; font-size: 0.85rem;">
-                                        {{ app.full_name[:2].upper() if app.full_name else 'U' }}
-                                    </div>
-                                    {% endif %}
-                                    <div>
-                                        <h6 class="mb-0 fw-bold">{{ app.full_name }}</h6>
-                                        <small class="text-muted">{{ app.email }}</small>
-                                    </div>
-                                </div>
-                                {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if app.match_score is defined and app.match_score is not none %}

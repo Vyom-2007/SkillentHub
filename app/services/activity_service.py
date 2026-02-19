@@ -56,11 +56,12 @@ def get_activity_feed(page=1, per_page=20, filter_type=None):
             END as actor_name,
             CASE 
                 WHEN al.user_id IS NOT NULL THEN p_actor.profile_picture
+                ELSE NULL
             END as actor_picture,
-            
-            -- Target user details (for connection_made, user_hired etc)
-            -- Note: details usually contains target info, but we can try to join if item_type='payment' etc.
-            -- For simplicity, we rely on 'details' column for complex text generation in UI or minimal structure here.
+            CASE 
+                WHEN al.recruiter_id IS NOT NULL THEN 'recruiter'
+                ELSE 'user'
+            END as actor_type,
             
             -- Timestamps
             al.created_at
@@ -79,8 +80,8 @@ def get_activity_feed(page=1, per_page=20, filter_type=None):
     # Post-process to parse details if JSON
     for activity in activities:
         try:
-            if activity['details'] and (activity['details'].startswith('{') or activity['details'].startswith('[')):
-                activity['details'] = json.loads(activity['details'])
+            if isinstance(activity['details'], str):
+                 activity['details'] = json.loads(activity['details'])
         except:
             pass
             

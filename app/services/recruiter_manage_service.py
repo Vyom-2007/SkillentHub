@@ -86,6 +86,42 @@ def toggle_opportunity_status(item_type, item_id, recruiter_id):
     return execute_update(update_sql, (new_status, item_id, recruiter_id)) > 0
 
 
+def delete_opportunity(item_type, item_id, recruiter_id):
+    """
+    Delete an opportunity.
+    """
+    table_map = {
+        'job': 'jobs', 'internship': 'internships', 
+        'competition': 'competitions', 'hackathon': 'hackathons'
+    }
+    id_col_map = {
+        'job': 'job_id', 'internship': 'internship_id', 
+        'competition': 'competition_id', 'hackathon': 'hackathon_id'
+    }
+    
+    if item_type not in table_map:
+        return False, "Invalid item type"
+        
+    table = table_map[item_type]
+    id_col = id_col_map[item_type]
+    
+    # Check ownership
+    check_sql = f"SELECT 1 FROM {table} WHERE {id_col} = %s AND recruiter_id = %s"
+    if not execute_query(check_sql, (item_id, recruiter_id), fetch_one=True):
+        return False, "Opportunity not found or access denied"
+
+    # Delete
+    # Note: Foreign keys (applications) might prevent delete. 
+    # Ideal: Soft delete (is_deleted column). But current schema relies on DELETE.
+    # If standard DELETE fails due to constraints, we catch exception.
+    try:
+        delete_sql = f"DELETE FROM {table} WHERE {id_col} = %s AND recruiter_id = %s"
+        execute_update(delete_sql, (item_id, recruiter_id))
+        return True, "Deleted successfully"
+    except Exception as e:
+        return False, f"Cannot delete: {str(e)}"
+
+
 # --- ATS (APPLICATION TRACKING) ---
 
 def get_applications(recruiter_id, filters=None):

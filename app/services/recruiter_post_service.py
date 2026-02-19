@@ -196,3 +196,49 @@ def create_hackathon(recruiter_id, data):
             print(f"Error logging hackathon activity: {e}")
             
     return hack_id
+    return hack_id
+
+# --- UPDATE OPERATIONS ---
+
+def get_job_by_id(job_id, recruiter_id):
+    from app.database.connection import execute_query
+    return execute_query("SELECT * FROM jobs WHERE job_id = %s AND recruiter_id = %s", (job_id, recruiter_id), fetch_one=True)
+
+def update_job(job_id, recruiter_id, data):
+    from app.database.connection import execute_update
+    query = """
+        UPDATE jobs SET 
+            title=%s, location=%s, job_type=%s, work_mode=%s, 
+            experience_required=%s, skills_required=%s, salary_range=%s, 
+            description=%s, requirements=%s, deadline=%s, number_of_openings=%s
+        WHERE job_id=%s AND recruiter_id=%s
+    """
+    params = (
+        data.get('title'), data.get('location'), data.get('job_type'), data.get('work_mode'),
+        data.get('experience_required'), data.get('skills_required'), data.get('salary_range'),
+        data.get('description'), data.get('requirements'), data.get('deadline'), data.get('openings'),
+        job_id, recruiter_id
+    )
+    return execute_update(query, params) > 0
+
+def get_internship_by_id(internship_id, recruiter_id):
+    from app.database.connection import execute_query
+    return execute_query("SELECT * FROM internships WHERE internship_id = %s AND recruiter_id = %s", (internship_id, recruiter_id), fetch_one=True)
+
+def update_internship(internship_id, recruiter_id, data):
+    from app.database.connection import execute_update
+    query = """
+        UPDATE internships SET 
+            title=%s, location=%s, duration=%s, stipend=%s, work_mode=%s,
+            certificate_provided=%s, skills_required=%s, description=%s, 
+            requirements=%s, deadline=%s, number_of_openings=%s
+        WHERE internship_id=%s AND recruiter_id=%s
+    """
+    params = (
+        data.get('title'), data.get('location'), data.get('duration'), data.get('stipend'),
+        data.get('work_mode'), 1 if data.get('certificate_provided') else 0,
+        data.get('skills_required'), data.get('description'), data.get('requirements'),
+        data.get('deadline'), data.get('openings'),
+        internship_id, recruiter_id
+    )
+    return execute_update(query, params) > 0

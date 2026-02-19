@@ -97,7 +97,9 @@ def search_opportunities():
             'duration': item.get('duration'),
             'skills_required': item.get('skills_required'),
             'posted_at': item['posted_at'].isoformat() if item.get('posted_at') else None,
-            'match_score': item.get('match_score')
+            'match_score': item.get('match_score'),
+            'is_saved': item.get('is_saved', False),
+            'has_applied': item.get('has_applied', False)
         })
     
     return jsonify({

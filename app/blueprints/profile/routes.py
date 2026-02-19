@@ -313,22 +313,20 @@ def download_resume(filename):
         # profile_service? I should check.
         # Assuming all in 'static/uploads/resumes' or we check both.
         
-        directory = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
-        if os.path.exists(os.path.join(directory, filename)):
-             return send_from_directory(directory, filename)
-             
-        # Fallback to profiles dir if different?
-        # Let's assume resumes are centralized or try both.
+        # Check profile resumes first
+        profile_resumes_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'profile_resumes')
+        if os.path.exists(os.path.join(profile_resumes_dir, filename)):
+             return send_from_directory(profile_resumes_dir, filename, as_attachment=True)
+
+        # Check application resumes (legacy or job applications)
+        app_resumes_dir = os.path.join(current_app.root_path, 'static', 'uploads', 'resumes')
+        if os.path.exists(os.path.join(app_resumes_dir, filename)):
+             return send_from_directory(app_resumes_dir, filename, as_attachment=True)
         
-        return abort(404)
+        abort(404)
     except Exception as e:
         current_app.logger.error(f"Error serving resume: {e}")
         abort(404)
-    import os
-    from flask import current_app
-    
-    directory = os.path.join(current_app.root_path, 'static', 'uploads', 'profile_resumes')
-    return send_from_directory(directory, filename, as_attachment=True)
 
 
 @profile_bp.route('/education/delete/<int:education_id>', methods=['POST'])

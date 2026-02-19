@@ -91,10 +91,26 @@
                                     <i class="bi bi-people"></i>
                                 </a>
                                 {% endif %}
-                                <a href="#" class="btn btn-sm btn-light text-muted" title="Edit"><i
+
+                                {% if item.type == 'job' %}
+                                <a href="{{ url_for('recruiter.edit_job', job_id=item.id) }}"
+                                    class="btn btn-sm btn-light text-muted" title="Edit"><i
                                         class="bi bi-pencil"></i></a>
-                                <a href="#" class="btn btn-sm btn-light text-danger" title="Delete"><i
-                                        class="bi bi-trash"></i></a>
+                                {% elif item.type == 'internship' %}
+                                <a href="{{ url_for('recruiter.edit_internship', internship_id=item.id) }}"
+                                    class="btn btn-sm btn-light text-muted" title="Edit"><i
+                                        class="bi bi-pencil"></i></a>
+                                {% else %}
+                                <!-- Edit not yet implemented for events -->
+                                <a href="#" class="btn btn-sm btn-light text-muted disabled"
+                                    title="Edit (Coming Soon)"><i class="bi bi-pencil"></i></a>
+                                {% endif %}
+
+                                <button class="btn btn-sm btn-light text-danger delete-opportunity-btn"
+                                    data-url="{{ url_for('recruiter.delete_opportunity_route', item_type=item.type, item_id=item.id) }}"
+                                    title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         {% else %}

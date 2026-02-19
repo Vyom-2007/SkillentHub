@@ -413,6 +413,7 @@ def get_activity_feed():
             'id': item['activity_id'],
             'actor_name': item['actor_name'] or 'Unknown',
             'actor_picture': item['actor_picture'], # Filename
+            'actor_type': item.get('actor_type', 'user'),
             'action_type': item['action_type'],
             'item_type': item['item_type'],
             'item_id': item['item_id'],

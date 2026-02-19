@@ -56,4 +56,32 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Delete Opportunity
+    const deleteBtns = document.querySelectorAll('.delete-opportunity-btn');
+    deleteBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (confirm('Are you sure you want to delete this opportunity? This action cannot be undone.')) {
+                const url = this.dataset.url;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Failed to delete: ' + data.message);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('An error occurred.');
+                    });
+            }
+        });
+    });
+
 });

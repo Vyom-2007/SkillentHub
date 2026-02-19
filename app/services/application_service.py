@@ -113,6 +113,13 @@ def has_applied(user_id, item_type, item_id):
     return result is not None
 
 
+def get_applied_ids(user_id):
+    """Get set of (item_type, item_id) for all applications by user."""
+    query = "SELECT item_type, item_id FROM applications WHERE user_id = %s"
+    results = execute_query(query, (user_id,), fetch_all=True) or []
+    return {(r['item_type'], r['item_id']) for r in results}
+
+
 def get_user_applications(user_id, item_type=None, status=None, page=1, per_page=20):
     """Get all applications for a user with optional filters."""
     offset = (page - 1) * per_page
