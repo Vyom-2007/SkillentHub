@@ -1,502 +1,291 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}Dashboard - Recruiter Portal{% endblock %}
 
-{% block extra_css %}
-<style>
-    .welcome-section {
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
-        color: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .stat-card .icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-    }
-
-    .quick-action {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        text-align: center;
-        transition: all 0.2s;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-        height: 100%;
-    }
-
-    .quick-action:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        color: inherit;
-    }
-
-    .quick-action .icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        margin: 0 auto 1rem;
-    }
-
-    .activity-table {
-        background: white;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .activity-table th {
-        background: #f8fafc;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #64748b;
-    }
-
-    .status-badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container py-4">
+<div class="max-w-7xl mx-auto px-6 lg:px-8 pt-0 pb-12">
     <!-- Welcome Section -->
-    <div class="welcome-section">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h2 class="mb-1">Welcome, {{ recruiter.company_name }}!</h2>
-                <p class="text-white-50 mb-0">Here's an overview of your recruiting activity</p>
-            </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <span class="badge bg-success fs-6">
-                    <i class="bi bi-check-circle me-1"></i>Active
-                </span>
-            </div>
+    <div
+        class="glass-panel rounded-3xl p-8 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
+        <div
+            class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full pointer-events-none">
         </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="icon bg-primary bg-opacity-10 text-primary">
-                        <i class="bi bi-briefcase"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ stats.total_jobs }}</h3>
-                        <small class="text-muted">Jobs Posted</small>
-                    </div>
+        <div class="relative z-10 w-full">
+            <div class="flex items-center justify-between w-full">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Welcome, {{ session.get('company_name', 'Recruiter')
+                        }}!</h1>
+                    <p class="text-slate-400">Here's an overview of your recruiting activity</p>
                 </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="icon bg-info bg-opacity-10 text-info">
-                        <i class="bi bi-laptop"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ stats.total_internships }}</h3>
-                        <small class="text-muted">Internships</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="icon bg-warning bg-opacity-10 text-warning">
-                        <i class="bi bi-trophy"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ stats.total_competitions }}</h3>
-                        <small class="text-muted">Competitions</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3">
-            <div class="card stat-card h-100">
-                <div class="card-body d-flex align-items-center gap-3">
-                    <div class="icon bg-danger bg-opacity-10 text-danger">
-                        <i class="bi bi-code-slash"></i>
-                    </div>
-                    <div>
-                        <h3 class="mb-0">{{ stats.total_hackathons }}</h3>
-                        <small class="text-muted">Hackathons</small>
-                    </div>
+                <div
+                    class="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Active</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Application Stats Row -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card stat-card h-100 border-start border-4 border-success">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-0 text-success">{{ stats.total_applications }}</h2>
-                            <small class="text-muted">Total Applications</small>
-                        </div>
-                        <i class="bi bi-file-earmark-person text-success" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                    </div>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Jobs Posted -->
+        <div class="glass-panel glass-card-hover rounded-2xl p-6 group">
+            <div class="flex items-center gap-4 mb-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">work</span>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Jobs Posted</p>
                 </div>
             </div>
+            <p class="text-4xl font-extrabold text-white">{{ stats.total_jobs }}</p>
         </div>
-        <div class="col-md-4">
-            <div class="card stat-card h-100 border-start border-4 border-primary">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-0 text-primary">{{ stats.applications_this_week }}</h2>
-                            <small class="text-muted">This Week</small>
-                        </div>
-                        <i class="bi bi-calendar-week text-primary" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                    </div>
+
+        <!-- Internships -->
+        <div class="glass-panel glass-card-hover rounded-2xl p-6 group">
+            <div class="flex items-center gap-4 mb-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">school</span>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Internships</p>
                 </div>
             </div>
+            <p class="text-4xl font-extrabold text-white">{{ stats.total_internships }}</p>
         </div>
-        <div class="col-md-4">
-            <div class="card stat-card h-100 border-start border-4 border-warning">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-0 text-warning">{{ stats.new_applications_24h }}</h2>
-                            <small class="text-muted">Last 24 Hours</small>
-                        </div>
-                        <i class="bi bi-clock-history text-warning" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                    </div>
+
+        <!-- Competitions -->
+        <div class="glass-panel glass-card-hover rounded-2xl p-6 group">
+            <div class="flex items-center gap-4 mb-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">emoji_events</span>
                 </div>
+                <div>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Competitions</p>
+                </div>
+            </div>
+            <p class="text-4xl font-extrabold text-white">{{ stats.total_competitions }}</p>
+        </div>
+
+        <!-- Hackathons -->
+        <div class="glass-panel glass-card-hover rounded-2xl p-6 group">
+            <div class="flex items-center gap-4 mb-4">
+                <div
+                    class="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">code</span>
+                </div>
+                <div>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Hackathons</p>
+                </div>
+            </div>
+            <p class="text-4xl font-extrabold text-white">{{ stats.total_hackathons }}</p>
+        </div>
+    </div>
+
+    <!-- Application Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+            <div class="flex justify-between items-center relative z-10">
+                <div>
+                    <p class="text-4xl font-extrabold text-emerald-400 mb-1">{{ stats.total_applications }}</p>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total Applications</p>
+                </div>
+                <span
+                    class="material-symbols-outlined text-[48px] text-emerald-500/20 group-hover:scale-110 transition-transform">person_search</span>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+            <div class="flex justify-between items-center relative z-10">
+                <div>
+                    <p class="text-4xl font-extrabold text-blue-400 mb-1">{{ stats.applications_this_week }}</p>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">This Week</p>
+                </div>
+                <span
+                    class="material-symbols-outlined text-[48px] text-blue-500/20 group-hover:scale-110 transition-transform">date_range</span>
+            </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-6 relative overflow-hidden group">
+            <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+            <div class="flex justify-between items-center relative z-10">
+                <div>
+                    <p class="text-4xl font-extrabold text-amber-400 mb-1">{{ stats.new_applications_24h }}</p>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-wider">Last 24 Hours</p>
+                </div>
+                <span
+                    class="material-symbols-outlined text-[48px] text-amber-500/20 group-hover:scale-110 transition-transform">history</span>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <h5 class="mb-3"><i class="bi bi-lightning-charge me-2"></i>Quick Actions</h5>
-    <div class="row g-4 mb-4">
-        <div class="col-6 col-lg-3">
-            <a href="{{ url_for('recruiter.create_job') }}" class="quick-action">
-                <div class="icon bg-primary bg-opacity-10 text-primary">
-                    <i class="bi bi-plus-circle"></i>
+    <div class="mb-8">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-yellow-400">bolt</span>
+            Quick Actions
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <a href="{{ url_for('recruiter.create_job') }}"
+                class="glass-panel glass-card-hover p-4 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-all group">
+                <div
+                    class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">add_circle</span>
                 </div>
-                <h6 class="mb-1">Post New Job</h6>
-                <small class="text-muted">Create job listing</small>
+                <div>
+                    <p class="text-sm font-bold text-white">Post Job</p>
+                    <p class="text-[10px] text-slate-400">Create listing</p>
+                </div>
             </a>
-        </div>
-        <div class="col-6 col-lg-3">
-            <a href="{{ url_for('recruiter.create_internship') }}" class="quick-action">
-                <div class="icon bg-info bg-opacity-10 text-info">
-                    <i class="bi bi-laptop"></i>
+
+            <a href="{{ url_for('recruiter.create_internship') }}"
+                class="glass-panel glass-card-hover p-4 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-all group">
+                <div
+                    class="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">school</span>
                 </div>
-                <h6 class="mb-1">Post Internship</h6>
-                <small class="text-muted">Create internship</small>
+                <div>
+                    <p class="text-sm font-bold text-white">Post Internship</p>
+                    <p class="text-[10px] text-slate-400">Create offering</p>
+                </div>
             </a>
-        </div>
-        <div class="col-6 col-lg-3">
-            <a href="{{ url_for('recruiter.create_competition') }}" class="quick-action">
-                <div class="icon bg-warning bg-opacity-10 text-warning">
-                    <i class="bi bi-trophy"></i>
+
+            <a href="{{ url_for('recruiter.create_competition') }}"
+                class="glass-panel glass-card-hover p-4 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-all group">
+                <div
+                    class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">trophy</span>
                 </div>
-                <h6 class="mb-1">Create Competition</h6>
-                <small class="text-muted">Host a challenge</small>
+                <div>
+                    <p class="text-sm font-bold text-white">Create Challenge</p>
+                    <p class="text-[10px] text-slate-400">Host competition</p>
+                </div>
             </a>
-        </div>
-        <div class="col-6 col-lg-3">
-            <a href="{{ url_for('recruiter.create_hackathon') }}" class="quick-action">
-                <div class="icon bg-danger bg-opacity-10 text-danger">
-                    <i class="bi bi-code-slash"></i>
+
+            <a href="{{ url_for('recruiter.create_hackathon') }}"
+                class="glass-panel glass-card-hover p-4 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-all group">
+                <div
+                    class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">code</span>
                 </div>
-                <h6 class="mb-1">Host Hackathon</h6>
-                <small class="text-muted">Organize event</small>
+                <div>
+                    <p class="text-sm font-bold text-white">Host Hackathon</p>
+                    <p class="text-[10px] text-slate-400">Organize event</p>
+                </div>
             </a>
-        </div>
-        <div class="col-6 col-lg-3">
-            <a href="{{ url_for('recruiter.analytics') }}" class="quick-action">
-                <div class="icon bg-purple bg-opacity-10 text-purple" style="color: #6f42c1;">
-                    <i class="bi bi-graph-up"></i>
+
+            <a href="{{ url_for('recruiter.analytics') }}"
+                class="glass-panel glass-card-hover p-4 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-all group">
+                <div
+                    class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">monitoring</span>
                 </div>
-                <h6 class="mb-1">Analytics</h6>
-                <small class="text-muted">Performance stats</small>
+                <div>
+                    <p class="text-sm font-bold text-white">Analytics</p>
+                    <p class="text-[10px] text-slate-400">View stats</p>
+                </div>
             </a>
         </div>
     </div>
 
-    <!-- Activity Feed Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Activity Feed</h5>
-                    <div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-outline-secondary active"
-                            onclick="loadFeed('all', this)">All</button>
-                        <button type="button" class="btn btn-outline-secondary"
-                            onclick="loadFeed('jobs', this)">Jobs</button>
-                        <button type="button" class="btn btn-outline-secondary"
-                            onclick="loadFeed('community', this)">Community</button>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div id="feed-container" class="list-group list-group-flush">
-                        <!-- Feed items will be loaded here -->
-                        <div class="text-center py-4">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-center py-3" id="load-more-container" style="display: none;">
-                        <button class="btn btn-link text-decoration-none" onclick="loadMore()">Load More</button>
-                    </div>
-                </div>
-            </div>
+    <!-- Recent Applications -->
+    <div class="glass-panel rounded-3xl overflow-hidden">
+        <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-400">recent_actors</span>
+                Recent Applications
+            </h2>
+            <a href="{{ url_for('recruiter.applications') }}"
+                class="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                View All
+            </a>
         </div>
-    </div>
-
-    <script>
-        let currentPage = 1;
-        let currentFilter = 'all';
-
-        document.addEventListener('DOMContentLoaded', function () {
-            loadFeed();
-        });
-
-        function loadFeed(filter = 'all', btn = null) {
-            if (filter !== currentFilter || filter === 'all' && currentPage === 1) {
-                currentPage = 1;
-                document.getElementById('feed-container').innerHTML = `
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>`;
-                document.getElementById('load-more-container').style.display = 'none';
-            }
-
-            currentFilter = filter;
-
-            // Update buttons
-            if (btn) {
-                document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            }
-
-            fetch(`/api/activity-feed?page=${currentPage}&filter=${filter}`)
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById('feed-container');
-                    if (currentPage === 1) container.innerHTML = '';
-
-                    if (data.activities.length === 0 && currentPage === 1) {
-                        container.innerHTML = '<div class="text-center py-4 text-muted">No recent activity.</div>';
-                        return;
-                    }
-
-                    data.activities.forEach(item => {
-                        const html = createFeedItemHtml(item);
-                        container.insertAdjacentHTML('beforeend', html);
-                    });
-
-                    if (data.has_more) {
-                        document.getElementById('load-more-container').style.display = 'block';
-                    } else {
-                        document.getElementById('load-more-container').style.display = 'none';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading feed:', error);
-                    document.getElementById('feed-container').innerHTML = '<div class="text-center py-4 text-danger">Failed to load feed.</div>';
-                });
-        }
-
-        function loadMore() {
-            currentPage++;
-            loadFeed(currentFilter);
-        }
-
-        function createFeedItemHtml(item) {
-            let icon, content, link;
-            const details = item.details || {};
-
-            switch (item.action_type) {
-                case 'job_posted':
-                    icon = '<i class="bi bi-briefcase text-primary"></i>';
-                    content = `<strong>${item.actor_name}</strong> posted a new job: <strong>${details.title}</strong> in ${details.location}`;
-                    link = `/opportunities/jobs/${item.item_id}`;
-                    break;
-                case 'internship_posted':
-                    icon = '<i class="bi bi-laptop text-info"></i>';
-                    content = `<strong>${item.actor_name}</strong> posted a new internship: <strong>${details.title}</strong>`;
-                    link = `/opportunities/internships/${item.item_id}`;
-                    break;
-                case 'user_hired':
-                    icon = '<i class="bi bi-check-circle text-success"></i>';
-                    content = `<strong>${item.actor_name}</strong> hired a candidate for <strong>${details.item_type}</strong>`;
-                    link = '#';
-                    break;
-                case 'team_created':
-                    icon = '<i class="bi bi-people text-warning"></i>';
-                    content = `<strong>${item.actor_name}</strong> created a team <strong>${details.team_name}</strong>`;
-                    link = '#';
-                    break;
-                case 'connection_made':
-                    icon = '<i class="bi bi-person-plus text-purple"></i>';
-                    content = `<strong>${item.actor_name}</strong> connected with a new person`;
-                    link = '#';
-                    break;
-                case 'hackathon_posted':
-                    icon = '<i class="bi bi-code-slash text-danger"></i>';
-                    content = `<strong>${item.actor_name}</strong> posted a hackathon: <strong>${details.title}</strong>`;
-                    link = '#';
-                    break;
-                case 'competition_posted':
-                    icon = '<i class="bi bi-trophy text-warning"></i>';
-                    content = `<strong>${item.actor_name}</strong> posted a competition: <strong>${details.title}</strong>`;
-                    link = '#';
-                    break;
-                default:
-                    icon = '<i class="bi bi-activity"></i>';
-                    content = `<strong>${item.actor_name}</strong> performed an action`;
-                    link = '#';
-            }
-
-            const avatar = item.actor_picture
-                ? `/static/uploads/profiles/${item.actor_picture}`
-                : 'https://via.placeholder.com/40';
-
-            return `
-                <div class="list-group-item px-4 py-3">
-                    <div class="d-flex align-items-start">
-                        <img src="${avatar}" class="rounded-circle me-3" width="40" height="40" alt="${item.actor_name}" onerror="this.src='https://via.placeholder.com/40'">
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between">
-                                <span class="mb-1">${content}</span>
-                                <small class="text-muted ms-2 text-nowrap">${item.time_ago}</small>
-                            </div>
-                            <div class="mt-1">
-                                ${link !== '#' ? `<a href="${link}" class="text-decoration-none small">View Details</a>` : ''}
-                            </div>
-                        </div>
-                        <div class="ms-3 fs-5">
-                            ${icon}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    </script>
-
-    <!-- Recent Activity -->
-    <h5 class="mb-3"><i class="bi bi-clock-history me-2"></i>Recent Applications</h5>
-    <div class="card activity-table">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr>
-                        <th>Candidate</th>
-                        <th>Applied For</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Time</th>
-                        <th>Action</th>
+                    <tr class="text-slate-500 text-xs uppercase tracking-wider border-b border-white/5 bg-white/[0.01]">
+                        <th class="px-6 py-4 font-semibold pl-8">Candidate</th>
+                        <th class="px-6 py-4 font-semibold">Applied For</th>
+                        <th class="px-6 py-4 font-semibold">Type</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Time</th>
+                        <th class="px-6 py-4 font-semibold text-right pr-8">Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-white/5">
                     {% if stats.recent_applications %}
                     {% for app in stats.recent_applications %}
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
-                                    class="text-decoration-none text-dark d-flex align-items-center gap-2">
-                                    {% from '_avatar.html' import avatar %}
-                                    {{ avatar(app.candidate_name, app.profile_photo, 35) }}
-                                    <span>{{ app.candidate_name }}</span>
-                                </a>
+                    <tr class="hover:bg-white/[0.03] transition-colors group">
+                        <td class="px-6 py-4 pl-8">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-xs font-bold text-white border border-white/10">
+                                    {% if app.profile_photo %}
+                                    <img src="{{ url_for('static', filename=app.profile_photo) }}"
+                                        alt="{{ app.candidate_name }}" class="w-full h-full rounded-full object-cover">
+                                    {% else %}
+                                    {{ app.candidate_name[0]|upper }}
+                                    {% endif %}
+                                </div>
+                                <span
+                                    class="font-medium text-white group-hover:text-blue-400 transition-colors text-sm">
+                                    {{ app.candidate_name }}
+                                </span>
                             </div>
                         </td>
-                        <td>{{ app.item_title }}</td>
-                        <td>
-                            <span class="badge bg-secondary">{{ app.item_type | capitalize }}</span>
+                        <td class="px-6 py-4 text-sm text-slate-300">{{ app.item_title }}</td>
+                        <td class="px-6 py-4">
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-slate-700/50 text-slate-300 border border-white/5">
+                                {{ app.item_type | capitalize }}
+                            </span>
                         </td>
-                        <td>
+                        <td class="px-6 py-4">
                             {% if app.status == 'applied' %}
-                            <span class="status-badge bg-warning text-dark">Applied</span>
+                            <span class="status-badge status-applied">Applied</span>
                             {% elif app.status == 'shortlisted' %}
-                            <span class="status-badge bg-info text-dark">Shortlisted</span>
+                            <span class="status-badge status-shortlisted">Shortlisted</span>
                             {% elif app.status == 'interview' %}
-                            <span class="status-badge bg-primary">Interview</span>
+                            <span class="status-badge status-interview">Interview</span>
                             {% elif app.status == 'offer' %}
-                            <span class="status-badge bg-primary">Offer</span>
+                            <span class="status-badge status-offer">Offer</span>
                             {% elif app.status == 'hired' %}
-                            <span class="status-badge bg-success">Hired</span>
+                            <span class="status-badge status-hired">Hired</span>
                             {% elif app.status == 'rejected' %}
-                            <span class="status-badge bg-danger">Rejected</span>
+                            <span class="status-badge status-rejected">Rejected</span>
                             {% else %}
-                            <span class="status-badge bg-secondary">{{ app.status }}</span>
+                            <span class="text-xs text-slate-400">{{ app.status }}</span>
                             {% endif %}
                         </td>
-                        <td class="text-muted">{{ app.time_ago }}</td>
-                        <td>
-                            {% if app.item_type in ['job', 'internship'] %}
+                        <td class="px-6 py-4 text-xs text-slate-500">{{ app.time_ago }}</td>
+                        <td class="px-6 py-4 text-right pr-8">
                             {% if app.user_id %}
                             <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
-                                class="btn btn-sm btn-outline-primary ms-1">
-                                <i class="bi bi-person"></i> View Profile
-                            </a>
-                            {% endif %}
-                            {% else %}
-                            {% if app.user_id %}
-                            <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=app.user_id) }}"
-                                class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-person"></i> View Profile
+                                class="text-xs font-bold text-slate-400 hover:text-white border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all inline-flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span> View
                             </a>
                             {% else %}
-                            <button class="btn btn-sm btn-outline-secondary" disabled>
-                                <i class="bi bi-person"></i> Guest User
-                            </button>
-                            {% endif %}
+                            <span class="text-xs text-slate-600 italic">Guest</span>
                             {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
-                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-                            <p class="mb-0 mt-2">No applications yet</p>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <span class="material-symbols-outlined text-4xl mb-2 opacity-20">inbox</span>
+                            <p class="text-sm">No applications received yet.</p>
                         </td>
                     </tr>
                     {% endif %}
                 </tbody>
             </table>
         </div>
-        {% if stats.recent_applications %}
-        <div class="card-footer bg-white text-center">
-            <a href="{{ url_for('recruiter.applications') }}" class="text-decoration-none">
-                View All Applications <i class="bi bi-arrow-right"></i>
-            </a>
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
