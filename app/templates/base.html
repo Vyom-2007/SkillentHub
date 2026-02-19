@@ -7,49 +7,15 @@
     <meta name="description" content="SkillentHub - Connect, Learn, and Grow Your Career">
     <title>{% block title %}SkillentHub{% endblock %}</title>
 
-<<<<<<< HEAD
-    <!-- Tailwind & Fonts -->
-=======
     <!-- Fonts -->
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-<<<<<<< HEAD
-=======
 
-<<<<<<< HEAD
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --bg-dark: #0f172a;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(90, 92, 106, 1) 0%, rgba(32, 45, 58, 1) 81.3%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: var(--text-light);
-        }
-
-        /* Navbar Dark Theme */
-        .navbar {
-            background: rgba(30, 41, 59, 0.8) !important;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-=======
     <!-- Tailwind CSS -->
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
         tailwind.config = {
@@ -77,216 +43,12 @@
     <style type="text/tailwindcss">
         .glass-panel {
             @apply bg-glass-surface backdrop-blur-2xl border border-glass-border shadow-2xl;
->>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
         }
         .glass-card-hover {
             @apply hover:bg-glass-surface-hover transition-all duration-300;
         }
-<<<<<<< HEAD
-
-        .nav-link {
-            color: rgba(255, 255, 255, 0.8) !important;
-            transition: color 0.2s;
-        }
-
-        .nav-link:hover {
-            color: #fff !important;
-        }
-
-        .navbar-light .navbar-toggler-icon {
-            filter: invert(1);
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-            padding: 0.625rem 1.5rem;
-            font-weight: 500;
-            transition: transform 0.2s, box-shadow 0.2s;
-=======
         .status-badge {
             @apply px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider;
-<<<<<<< HEAD
->>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
-        }
-        .status-applied { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
-        .status-shortlisted { @apply bg-purple-500/10 text-purple-400 border border-purple-500/20; }
-        .status-interview { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
-        .status-offer { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
-        .nav-link { @apply text-slate-400 hover:text-white transition-colors text-sm font-medium; }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-<<<<<<< HEAD
-
-        /* Forms */
-        .form-control {
-            background-color: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-        }
-
-        .form-control:focus {
-            background-color: rgba(15, 23, 42, 0.8);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            color: #fff;
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Cards & Containers */
-        .card,
-        .auth-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: var(--card-border);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            color: var(--text-light);
-            margin-bottom: 1.5rem;
-        }
-
-        /* Auth Card Specifics */
-        .auth-card {
-            padding: 2.5rem;
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        .auth-title {
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 0.5rem;
-        }
-
-        .auth-subtitle {
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .invalid-feedback {
-            display: none;
-        }
-
-        .form-control.is-invalid~.invalid-feedback {
-            display: block;
-        }
-
-        .alert {
-            border-radius: 0.75rem;
-            border: none;
-            background: rgba(30, 41, 59, 0.9);
-            color: #fff;
-        }
-
-        .alert-success {
-            border-left: 4px solid #10b981;
-        }
-
-        .alert-danger {
-            border-left: 4px solid #ef4444;
-        }
-
-        .alert-warning {
-            border-left: 4px solid #f59e0b;
-        }
-
-        .alert-info {
-            border-left: 4px solid #3b82f6;
-        }
-
-        /* Footer */
-        .footer {
-            background: rgba(15, 23, 42, 0.8);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 1.5rem 0;
-            margin-top: auto;
-        }
-
-        .footer-text {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-        }
-
-        /* Default Avatar Initials */
-        .avatar-wrapper {
-            position: relative;
-            display: inline-block;
-            border-radius: 50%;
-            overflow: hidden;
-            background-color: #334155;
-            flex-shrink: 0;
-        }
-
-        .avatar-initials {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            z-index: 1;
-        }
-
-        .avatar-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 2;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Dropdowns */
-        .dropdown-menu {
-            background: #1e293b;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .dropdown-item {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .dropdown-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-
-        .dropdown-divider {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-=======
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-=======
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
         }
         .status-applied { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
         .status-shortlisted { @apply bg-purple-500/10 text-purple-400 border border-purple-500/20; }
@@ -299,7 +61,6 @@
         ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
->>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
     </style>
 
     <!-- Bootstrap CSS for compatibility -->
@@ -312,13 +73,8 @@
 </head>
 
 <body
-<<<<<<< HEAD
-    class="bg-[#0f172a] font-display text-slate-100 antialiased min-h-screen relative overflow-x-hidden selection:bg-blue-500/30">
-    <!-- Background -->
-=======
     class="bg-[#0f172a] font-display text-slate-100 antialiased min-h-screen relative overflow-x-hidden selection:bg-blue-500/30 flex flex-col">
     <!-- Animated Background -->
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
     <div class="fixed inset-0 z-0 pointer-events-none">
         <div
             class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#111827] via-[#020617] to-[#000000]">
@@ -334,50 +90,18 @@
         </div>
     </div>
 
-<<<<<<< HEAD
-    <!-- Navbar -->
-<<<<<<< HEAD
-    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fs-4" href="/">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SkillentHub" height="40"
-                    class="d-inline-block align-text-top">
-=======
-    <nav
-        class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0f172a]/70 backdrop-blur-xl px-6 lg:px-10 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-12">
-            <a class="flex items-center gap-3 group" href="{{ url_for('auth.landing') }}">
-=======
     <!-- Navigation -->
     <nav
         class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0f172a]/70 backdrop-blur-xl px-6 lg:px-10 py-3 flex items-center justify-between">
         <div class="flex items-center gap-12">
             <a class="flex items-center gap-3 group"
                 href="{{ url_for('auth.dashboard') if session.get('user_id') else '/' }}">
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
                 <div
                     class="w-9 h-9 relative bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/25 ring-1 ring-white/10 group-hover:scale-105 transition-transform">
                     <span class="font-bold text-xl italic font-serif">S</span>
                 </div>
                 <span class="font-bold text-lg tracking-tight text-white hidden sm:block">SkillEntHub</span>
->>>>>>> 24ac9cf587386f5bff4b7ae5bd726046c85c7f10
             </a>
-<<<<<<< HEAD
-            <div class="hidden md:flex items-center gap-8">
-                {% if session.get('user_id') %}
-                <a class="nav-link text-white" href="{{ url_for('auth.dashboard') }}">Dashboard</a>
-                <a class="nav-link" href="{{ url_for('opportunities.opportunities') }}">Jobs</a>
-                <a class="nav-link" href="{{ url_for('messages.messages') }}">Messages</a>
-                <a class="nav-link" href="#">Resources</a>
-                {% elif session.get('recruiter_id') %}
-                <a class="nav-link text-white" href="{{ url_for('recruiter.dashboard') }}">Dashboard</a>
-                <a class="nav-link" href="#">Candidates</a>
-                <a class="nav-link" href="{{ url_for('messages.messages') }}">Messages</a>
-                {% else %}
-                <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
-                <a class="nav-link" href="{{ url_for('auth.register') }}">Sign Up</a>
-                {% endif %}
-=======
 
             {% if session.get('user_id') %}
             <!-- Candidate Navigation -->
@@ -387,7 +111,6 @@
                 <a class="nav-link" href="{{ url_for('messages.messages') }}">Messages</a>
                 <a class="nav-link" href="{{ url_for('posts.feed') }}">Feed</a>
                 <a class="nav-link" href="{{ url_for('network.network') }}">Network</a>
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
             </div>
             {% elif session.get('recruiter_id') %}
             <!-- Recruiter Navigation -->
@@ -472,67 +195,8 @@
             </div>
             {% endif %}
         </div>
-        <div class="flex items-center gap-5">
-            {% if session.get('user_id') or session.get('recruiter_id') %}
-            <button class="relative p-2 text-slate-400 hover:text-white transition-colors group">
-                <span class="material-symbols-outlined filled">notifications</span>
-                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#0f172a]"></span>
-            </button>
-            <div class="h-6 w-[1px] bg-white/10"></div>
-            <div class="group relative">
-                <button class="flex items-center gap-3 focus:outline-none">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-xs font-bold text-white">{{ session.get('full_name') or
-                            session.get('company_name', 'Recruiter') }}</p>
-                        <p class="text-[10px] text-slate-500 uppercase tracking-wider">{{ 'Candidate' if
-                            session.get('user_id') else 'Recruiter' }}</p>
-                    </div>
-                    <div
-                        class="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 border border-white/10 overflow-hidden ring-2 ring-transparent group-hover:ring-blue-500/30 transition-all">
-                        <img alt="Avatar" class="w-full h-full object-cover"
-                            src="{{ session.get('profile_picture') or 'https://lh3.googleusercontent.com/aida-public/AB6AXuA3pwNCwS1uOT5x131-RyiU2yc09XASHzZ5Ge8cN4Qerw2-LTHo4Z9Rq3VKG0demeKWHEXYwWw9KhrIBt30JTV-QrUYQrhRFLU4UXxrqDITyeS59CgbaWIeSr5YP8QNDO_v7Ij_-lmReYfOwOyK6nlet0c20L8bouqJMPWUAGQ9upOxK5ZTmwXdIZ13lvfStrFuSKZYnv50uL6hKoLR-4OTPCAVwVUYs4lsrGgI7zTEGgmhZOcPwk2sPTN3NUxGWEdS3XQ-oTwHn02h' }}" />
-                    </div>
-                    <span
-                        class="material-symbols-outlined text-slate-500 text-lg group-hover:text-white transition-colors">expand_more</span>
-                </button>
-                <div
-                    class="absolute right-0 top-full mt-2 w-48 py-2 bg-[#1e293b]/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
-                    {% if session.get('user_id') %}
-                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
-                        href="{{ url_for('profile.view', user_id=session.get('user_id')) }}">My Profile</a>
-                    <a class="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5"
-                        href="{{ url_for('profile.edit') }}">Settings</a>
-                    {% endif %}
-                    <div class="h-[1px] bg-white/5 my-1"></div>
-                    <a class="block px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                        href="{{ url_for('auth.logout') if session.get('user_id') else url_for('auth_recruiter.logout') }}">Logout</a>
-                </div>
-            </div>
-            {% endif %}
-        </div>
     </nav>
 
-<<<<<<< HEAD
-    <!-- Flash Messages -->
-    <div class="relative z-50 pt-24 px-6 max-w-7xl mx-auto pointer-events-none">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="pointer-events-auto">
-            {% for category, message in messages %}
-            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show"
-                role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        {% endwith %}
-    </div>
-
-    <!-- Main Content -->
-    <main class="relative z-10 flex-grow-1">
-=======
     <!-- Main Content -->
     <main class="relative z-10 flex-grow pt-24 pb-12 w-full max-w-7xl mx-auto px-6 lg:px-8">
         <!-- Flash Messages -->
@@ -557,7 +221,6 @@
             {% endwith %}
         </div>
 
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
         {% block content %}{% endblock %}
     </main>
 
@@ -577,15 +240,6 @@
         </div>
     </footer>
 
-<<<<<<< HEAD
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Notifications JS -->
-    {% if session.get('user_id') %}
-    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
-    {% endif %}
-=======
     <!-- Scripts -->
     <script>
         // Simple Theme Toggle Logic
@@ -602,13 +256,10 @@
                 } else {
                     html.classList.add('dark');
                     localStorage.setItem('theme', 'dark');
-                    themeIcon.textContent = 'dark_mode'; // Icon for dark mode (though in dark mode we usually show sun)
+                    themeIcon.textContent = 'dark_mode'; // Icon for dark mode
                 }
             });
 
-            // Note: User snippet had "dark_mode" icon logic reversed visually usually. 
-            // Standard: Dark mode active -> Show Sun icon. Light mode active -> Show Moon icon.
-            // Adjusting based on standard UX:
             if (html.classList.contains('dark')) {
                 themeIcon.textContent = 'light_mode';
             } else {
@@ -616,7 +267,14 @@
             }
         }
     </script>
->>>>>>> 590d0918851de1425876d3558122cf6d06a1b50f
+
+    <!-- Bootstrap JS (optional, kept for compatibility) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Notifications JS -->
+    {% if session.get('user_id') %}
+    <script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+    {% endif %}
 
     {% block extra_js %}{% endblock %}
 </body>
