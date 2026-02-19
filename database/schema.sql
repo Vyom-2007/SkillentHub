@@ -24,6 +24,29 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `activity_logs`
+--
+
+DROP TABLE IF EXISTS `activity_logs`;
+CREATE TABLE IF NOT EXISTS `activity_logs` (
+  `log_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `recruiter_id` int DEFAULT NULL,
+  `action_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `item_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `item_id` int DEFAULT NULL,
+  `details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`),
+  KEY `idx_user_activity` (`user_id`),
+  KEY `idx_recruiter_activity` (`recruiter_id`),
+  KEY `idx_action_type` (`action_type`),
+  KEY `idx_created_at` (`created_at`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `applications`
 --
 
@@ -288,6 +311,21 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   KEY `idx_is_active` (`is_active`),
   KEY `idx_jobs_status` (`status`,`posted_at`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `job_skills`
+--
+
+DROP TABLE IF EXISTS `job_skills`;
+CREATE TABLE IF NOT EXISTS `job_skills` (
+  `job_id` int NOT NULL,
+  `skill_id` int NOT NULL,
+  `min_proficiency` enum('beginner','intermediate','advanced') COLLATE utf8mb4_unicode_ci DEFAULT 'beginner',
+  `weight` int DEFAULT '1',
+  `is_required` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`job_id`,`skill_id`),
+  KEY `fk_job_skills_skill` (`skill_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 --
