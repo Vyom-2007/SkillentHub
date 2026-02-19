@@ -202,6 +202,16 @@ def update_profile(user_id, data, profile_picture=None, resume_file=None):
         resume_filename = result
     
     try:
+        # Defensive values for NOT NULL columns
+        full_name = data.get('full_name')
+        if full_name is None:
+            full_name = existing.get('full_name') if existing else ''
+            
+        show_skills = int(data.get('show_skills', 1))
+        show_education = int(data.get('show_education', 1)) 
+        show_experience = int(data.get('show_experience', 1))
+        show_resume = int(data.get('show_resume', 0))
+
         query = """
             UPDATE profiles 
             SET full_name = %s, headline = %s, bio = %s, 
@@ -211,23 +221,27 @@ def update_profile(user_id, data, profile_picture=None, resume_file=None):
                 updated_at = NOW()
             WHERE user_id = %s
         """
-        execute_query(query, (
-            data.get('full_name'),
+        params = (
+            full_name,
             data.get('headline'),
             data.get('bio'),
             data.get('location'),
             data.get('phone'),
             picture_filename,
             resume_filename,
-            data.get('show_skills', 1),
-            data.get('show_education', 1),
-            data.get('show_experience', 1),
-            data.get('show_resume', 0),
+            show_skills,
+            show_education,
+            show_experience,
+            show_resume,
             user_id
-        ))
+        )
+        execute_query(query, params)
         return True, "Profile updated successfully"
     except Exception as e:
-        return False, str(e)
+        current_app.logger.error(f"Error updating profile user_id={user_id}: {e}")
+        # Log params for debugging
+        current_app.logger.error(f"Params: {locals().get('params')}")
+        return False, f"Database error: {str(e)}"
 
 
 def get_profile_with_details(user_id):

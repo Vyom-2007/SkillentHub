@@ -191,3 +191,27 @@ def get_interviews_for_recruiter(recruiter_id):
         ORDER BY i.scheduled_at DESC
     """
     return execute_query(query, (recruiter_id,), fetch_all=True)
+
+
+def get_next_upcoming_interview(user_id):
+    """
+    Get the next upcoming interview for a candidate.
+    Excludes cancelled, declined, or completed interviews.
+    """
+    query = """
+        SELECT i.*, r.company_name, 
+               COALESCE(j.title, intn.title, c.title, h.title) as item_title
+        FROM interviews i
+        JOIN recruiters r ON i.recruiter_id = r.recruiter_id
+        JOIN applications a ON i.application_id = a.application_id
+        LEFT JOIN jobs j ON a.item_type='job' AND a.item_id = j.job_id
+        LEFT JOIN internships intn ON a.item_type='internship' AND a.item_id = intn.internship_id
+        LEFT JOIN competitions c ON a.item_type='competition' AND a.item_id = c.competition_id
+        LEFT JOIN hackathons h ON a.item_type='hackathon' AND a.item_id = h.hackathon_id
+        WHERE i.candidate_id = %s
+        AND i.status NOT IN ('cancelled', 'declined', 'completed')
+        AND i.scheduled_at >= NOW()
+        ORDER BY i.scheduled_at ASC
+        LIMIT 1
+    """
+    return execute_query(query, (user_id,), fetch_one=True)
