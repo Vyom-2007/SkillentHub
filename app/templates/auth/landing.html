@@ -2,496 +2,413 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="SkillentHub — The all-in-one career platform for students and recruiters. Find jobs, join hackathons, compete, and grow your professional network.">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=2">
-    <title>SkillentHub — Launch Your Career</title>
-
-    <!-- Bootstrap 5.3 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-
-    <style>
-        /* ===== Design Tokens ===== */
-        :root {
-            --primary: #667eea;
-            --secondary: #764ba2;
-            --accent: #f093fb;
-            --dark: #0f172a;
-            --dark-soft: #1e293b;
-            --text: #334155;
-            --text-muted: #94a3b8;
-            --surface: #ffffff;
-            --surface-2: #f8fafc;
-            --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --radius-lg: 1.25rem;
-            --radius-xl: 1.5rem;
-            --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
-            --shadow-glow: 0 0 60px rgba(102, 126, 234, 0.15);
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>SkillEntHub Structured Landing Page</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "glass-border": "rgba(255, 255, 255, 0.1)",
+                        "glass-surface": "rgba(255, 255, 255, 0.05)",
+                        "glass-surface-hover": "rgba(255, 255, 255, 0.08)",
+                        "primary": "#3b82f6",
+                        "primary-hover": "#2563eb",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    backdropBlur: {
+                        'xs': '2px',
+                    },
+                    boxShadow: {
+                        'neon': '0 0 20px theme("colors.blue.500"), 0 0 60px theme("colors.indigo.500")',
+                        'neon-inner': 'inset 0 0 20px theme("colors.blue.500")',
+                        'metallic': '0 4px 6px -1px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                    }
+                },
+            },
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    </script>
+    <style type="text/tailwindcss">
+        .glass-card {
+            @apply bg-glass-surface backdrop-blur-[15px] border border-glass-border shadow-2xl;
         }
-
-        html {
-            scroll-behavior: smooth;
+        .glass-nav {
+            @apply bg-glass-surface backdrop-blur-md border-b border-glass-border;
         }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text);
-            overflow-x: hidden;
-            background: var(--surface);
-        }
-
-        /* ===== Navbar ===== */
-        .landing-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding: 1rem 0;
-            transition: background .35s, box-shadow .35s, padding .35s;
-        }
-
-        .landing-nav.scrolled {
-            background: rgba(255, 255, 255, .92);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 1px 12px rgba(0, 0, 0, .06);
-            padding: .65rem 0;
-        }
-
-        .landing-nav .nav-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-            background: var(--gradient-main);
+        .metallic-text {
+            background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 25%, #94a3b8 50%, #cbd5e1 75%, #f1f5f9 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
-
-        .landing-nav .nav-links a {
-            color: var(--dark-soft);
-            font-weight: 500;
-            text-decoration: none;
-            padding: .5rem 1rem;
-            border-radius: .5rem;
-            transition: color .2s, background .2s;
-            font-size: .925rem;
+        .metallic-logo-bg {
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent 60%);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
         }
-
-        .landing-nav .nav-links a:hover {
-            color: var(--primary);
-            background: rgba(102, 126, 234, .06);
+        .feature-icon-wrapper {
+            @apply w-12 h-12 rounded-xl flex items-center justify-center mb-4 border border-white/10 bg-white/5 shadow-inner;
         }
-
-        /* ===== Buttons ===== */
-        .btn-gradient {
-            background: var(--gradient-main);
-            color: #fff;
-            border: none;
-            padding: .75rem 2rem;
-            border-radius: .75rem;
-            font-weight: 600;
-            transition: transform .2s, box-shadow .2s;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
+        .step-line {
+            @apply absolute top-[15px] left-0 w-full h-0.5 bg-white/10 -z-10;
         }
-
-        .btn-gradient:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(102, 126, 234, .35);
-            color: #fff;
-        }
-
-        .btn-gradient-lg {
-            padding: 1rem 2.5rem;
-            font-size: 1.1rem;
-            border-radius: .875rem;
-        }
-
-        .btn-outline-landing {
-            border: 2px solid rgba(102, 126, 234, .25);
-            color: var(--primary);
-            padding: .75rem 2rem;
-            border-radius: .75rem;
-            font-weight: 600;
-            transition: all .2s;
-            text-decoration: none;
-            cursor: pointer;
-            background: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        .btn-outline-landing:hover {
-            border-color: var(--primary);
-            background: rgba(102, 126, 234, .04);
-            color: var(--primary);
-        }
-
-        /* ===== Hero ===== */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding: 7rem 0 5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -35%;
-            right: -15%;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(102, 126, 234, .08) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: -25%;
-            left: -10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(240, 147, 251, .06) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: .5rem;
-            padding: .5rem 1.25rem;
-            border-radius: 2rem;
-            background: rgba(102, 126, 234, .08);
-            color: var(--primary);
-            font-weight: 600;
-            font-size: .85rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid rgba(102, 126, 234, .12);
-        }
-
-        .hero-badge i {
-            font-size: .7rem;
-        }
-
-        .hero h1 {
-            font-weight: 900;
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            line-height: 1.1;
-            color: var(--dark);
-            margin-bottom: 1.5rem;
-            letter-spacing: -.02em;
-        }
-
-        .hero h1 .gradient-text {
-            background: var(--gradient-main);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p.lead {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            max-width: 520px;
-            margin-bottom: 2.5rem;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 3rem;
-        }
-
-        /* Hero Stats */
-        .hero-stats {
-            display: flex;
-            gap: 2.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(0, 0, 0, .06);
-        }
-
-        .hero-stats .stat-item .stat-number {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--dark);
-            background: var(--gradient-main);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero-stats .stat-item .stat-label {
-            font-size: .8rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        /* Hero Visual CSS removed */
-
-        /* ===== Sections Common ===== */
-        section {
-            padding: 6rem 0;
-        }
-
-        .section-label {
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
-            padding: .4rem 1rem;
-            border-radius: 2rem;
-            background: rgba(102, 126, 234, .07);
-            color: var(--primary);
-            font-weight: 600;
-            font-size: .8rem;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-        }
-
-        .section-title {
-            font-weight: 800;
-            font-size: clamp(1.75rem, 3.5vw, 2.75rem);
-            color: var(--dark);
-            line-height: 1.2;
-            margin-bottom: 1rem;
-        }
-
-        .section-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            line-height: 1.7;
-        }
-
-        /* Unused sections CSS removed for simplification */
-
-        /* ===== Footer ===== */
-        .landing-footer {
-            background: var(--dark);
-            color: rgba(255, 255, 255, .6);
-            padding: 4rem 0 2rem;
-        }
-
-        .landing-footer .footer-brand {
-            font-weight: 800;
-            font-size: 1.35rem;
-            color: #fff;
-            margin-bottom: .5rem;
-        }
-
-        .landing-footer .footer-desc {
-            font-size: .9rem;
-            max-width: 300px;
-            line-height: 1.6;
-        }
-
-        .landing-footer h6 {
-            color: #fff;
-            font-weight: 700;
-            font-size: .85rem;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            margin-bottom: 1rem;
-        }
-
-        .landing-footer ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .landing-footer ul li {
-            margin-bottom: .5rem;
-        }
-
-        .landing-footer ul li a {
-            color: rgba(255, 255, 255, .6);
-            text-decoration: none;
-            font-size: .9rem;
-            transition: color .2s;
-        }
-
-        .landing-footer ul li a:hover {
-            color: #fff;
-        }
-
-        .footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, .08);
-            padding-top: 1.5rem;
-            margin-top: 3rem;
-            text-align: center;
-            font-size: .8rem;
-        }
-
-        /* ===== Responsive ===== */
-        @media (max-width: 991.98px) {
-            .hero-visual {
-                margin-top: 3rem;
+        @media (min-width: 768px) {
+            .step-line {
+               @apply top-[24px]; 
             }
-
-            .hero-stats {
-                gap: 1.5rem;
-            }
-
-            .floating-badge {
-                display: none;
-            }
-
-            .step-connector::after {
-                display: none;
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .hero-stats {
-                flex-direction: column;
-                gap: .75rem;
-            }
-
-            section {
-                padding: 4rem 0;
-            }
-        }
-
-        /* ===== Entrance Animations ===== */
-        .fade-up {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity .6s ease-out, transform .6s ease-out;
-        }
-
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
         }
     </style>
 </head>
 
-<body>
-    <!-- ===== Navbar ===== -->
-    <nav class="landing-nav" id="landingNav">
-        <div class="container d-flex align-items-center justify-content-between">
-            <a class="nav-brand" href="/">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="SkillentHub" height="40"
-                    class="d-inline-block align-text-top">
-            </a>
-            <div class="d-none d-md-flex nav-links align-items-center gap-1">
-                <!-- Links removed for simplified landing page -->
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ url_for('auth.login') }}" class="btn-outline-landing"
-                    style="padding: .55rem 1.5rem; font-size: .9rem;">Log In</a>
-                <a href="{{ url_for('auth.register') }}" class="btn-gradient"
-                    style="padding: .55rem 1.5rem; font-size: .9rem;">
-                    Sign Up Free <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
+<body class="bg-[#0f172a] font-display text-slate-100 antialiased min-h-screen relative selection:bg-blue-500/30">
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1e293b] via-[#0f172a] to-[#000000]">
         </div>
-    </nav>
-
-    <!-- ===== Hero ===== -->
-    <section class="hero text-center">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="fade-up visible">
-                        <div class="hero-badge mx-auto">
-                            <i class="bi bi-circle-fill" style="color: #22c55e;"></i>
-                            Now Open for Students & Recruiters
-                        </div>
-                        <h1 class="mb-4">
-                            Build Skills.<br>
-                            Win Competitions.<br>
-                            <span class="gradient-text">Land Your Dream Job.</span>
-                        </h1>
-                        <p class="lead mx-auto mb-5">
-                            The all-in-one career platform where students showcase talent,
-                            join hackathons, and connect with top recruiters — all in one place.
-                        </p>
-                        <div class="hero-actions justify-content-center mb-5">
-                            <a href="{{ url_for('auth.register') }}" class="btn-gradient btn-gradient-lg">
-                                Get Started — It's Free <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                        <div class="hero-stats justify-content-center border-top-0 pt-0">
-                            <div class="stat-item">
-                                <div class="stat-number">500+</div>
-                                <div class="stat-label">Companies</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">10k+</div>
-                                <div class="stat-label">Students</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number">1k+</div>
-                                <div class="stat-label">Jobs Posted</div>
-                            </div>
-                        </div>
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-[120px] mix-blend-screen opacity-50">
+        </div>
+        <div
+            class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[100px] mix-blend-screen opacity-50">
+        </div>
+        <div
+            class="absolute top-[30%] left-[50%] transform -translate-x-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[80px] mix-blend-screen opacity-30">
+        </div>
+    </div>
+    <nav class="fixed top-0 w-full z-50 glass-nav transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer">
+                    <div
+                        class="relative w-10 h-10 rounded-lg flex items-center justify-center border border-white/10 metallic-logo-bg shadow-metallic bg-[#0f172a]/40 backdrop-blur-md">
+                        <span
+                            class="font-extrabold text-2xl italic metallic-text relative z-10 drop-shadow-[0_0_5px_rgba(255,255,255,0.4)]">S</span>
                     </div>
+                    <span class="font-bold text-xl tracking-tight text-white">SkillEntHub</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <a class="text-slate-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            href="#">Solutions</a>
+                        <a class="text-slate-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            href="#">Explore</a>
+                        <a class="text-slate-300 hover:text-white hover:bg-white/5 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            href="#">For Recruiters</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+
+                    <a class="group relative inline-flex items-center justify-center px-6 py-2 text-sm font-bold text-white transition-all duration-200 bg-white/5 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 border border-white/10 hover:bg-white/10"
+                        href="{{ url_for('auth.login') }}">
+                        Login
+                    </a>
                 </div>
             </div>
         </div>
-    </section>
-
-    </section>
-
-    <!-- ===== Footer ===== -->
-    <footer class="landing-footer" style="padding: 2rem 0; margin-top: auto;">
-        <div class="container text-center">
-            <div class="footer-bottom" style="margin-top: 0; border-top: none;">
-                &copy; 2026 SkillentHub. All rights reserved. Built with <i class="bi bi-heart-fill"
-                    style="color: #ef4444;"></i> for developers.
+    </nav>
+    <main class="relative z-10 pt-20">
+        <div
+            class="flex flex-col items-center justify-center min-h-[85vh] px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center pt-10">
+            <div
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm font-medium mb-8 backdrop-blur-sm">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                Next Generation Workflow Platform
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 max-w-5xl leading-tight">
+                Structured Hiring. <br />
+                <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-cyan-400">Transparent
+                    Tracking.</span>
+            </h1>
+            <p class="mt-4 max-w-2xl text-lg md:text-xl text-slate-400 mb-12">
+                A workflow-driven platform designed to eliminate chaos. Streamline your recruitment process or career
+                journey with clear milestones and real-time status updates.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-6 w-full sm:w-auto justify-center">
+                <a href="{{ url_for('auth.register') }}"
+                    class="glass-card px-8 py-4 rounded-xl text-base font-bold text-white hover:bg-blue-500/20 border-white/10 hover:border-blue-400/30 transition-all duration-300 flex items-center justify-center gap-2 group">
+                    Join as Candidate
+                    <span
+                        class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">person</span>
+                </a>
+                <a href="{{ url_for('auth_recruiter.register') }}"
+                    class="glass-card px-8 py-4 rounded-xl text-base font-bold text-white hover:bg-indigo-500/20 border-white/10 hover:border-indigo-400/30 transition-all duration-300 flex items-center justify-center gap-2 group">
+                    Join as Recruiter
+                    <span
+                        class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">business_center</span>
+                </a>
+            </div>
+        </div>
+        <section class="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-24 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-10">Hiring Shouldn’t Be Chaotic.</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-6 text-left border-l-4 border-l-red-500/50">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-outlined text-red-400">visibility_off</span>
+                        <h3 class="font-bold text-white">Ghosting</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm">Lack of communication leaves candidates guessing their status for
+                        weeks.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-left border-l-4 border-l-orange-500/50">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-outlined text-orange-400">sync_problem</span>
+                        <h3 class="font-bold text-white">Disorganization</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm">Resumes get lost in email threads and scattered spreadsheets.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-left border-l-4 border-l-yellow-500/50">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-outlined text-yellow-400">timer_off</span>
+                        <h3 class="font-bold text-white">Slow Cycles</h3>
+                    </div>
+                    <p class="text-slate-400 text-sm">Inefficient manual scheduling delays the entire hiring pipeline.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <section class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white">How SkillEntHub Works</h2>
+                <p class="text-slate-400 mt-4">A unified ecosystem for talent and acquisition.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card rounded-3xl p-8 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                        <span class="material-symbols-outlined text-9xl text-white">person</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <span
+                            class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 text-sm border border-blue-500/30">01</span>
+                        For Candidates
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-blue-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Create Profile</strong>
+                                <span class="text-sm text-slate-500">Build your verified digital resume.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-blue-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Apply with One Click</strong>
+                                <span class="text-sm text-slate-500">Submit applications to tailored roles
+                                    instantly.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-blue-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Track Progress</strong>
+                                <span class="text-sm text-slate-500">See real-time status updates on your
+                                    dashboard.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-blue-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Get Hired</strong>
+                                <span class="text-sm text-slate-500">Receive offers and sign contracts digitally.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="glass-card rounded-3xl p-8 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+                        <span class="material-symbols-outlined text-9xl text-white">domain</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                        <span
+                            class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 text-sm border border-indigo-500/30">02</span>
+                        For Recruiters
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-indigo-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Post Jobs</strong>
+                                <span class="text-sm text-slate-500">Define requirements and required skills
+                                    clearly.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-indigo-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Review Applicants</strong>
+                                <span class="text-sm text-slate-500">Filter candidates with smart AI matching.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-indigo-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Manage Workflow</strong>
+                                <span class="text-sm text-slate-500">Move candidates through stages effortlessly.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4 text-slate-300">
+                            <span class="material-symbols-outlined text-indigo-400 mt-0.5">check_circle</span>
+                            <div>
+                                <strong class="block text-white text-sm">Onboard Talent</strong>
+                                <span class="text-sm text-slate-500">Transition from offer letter to onboarding.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <section class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-y border-white/5 bg-white/[0.02]">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white">The Transparent Pipeline</h2>
+                <p class="text-slate-400 mt-2">Always know where you stand.</p>
+            </div>
+            <div class="relative max-w-5xl mx-auto">
+                <div class="relative flex flex-col md:flex-row justify-between items-center w-full gap-8 md:gap-4">
+                    <div
+                        class="hidden md:block absolute top-[2.5rem] left-0 w-full h-[2px] bg-gradient-to-r from-blue-500/20 via-blue-500/50 to-blue-500/20 z-0">
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center group">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-[#0f172a] border border-blue-500/30 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(59,130,246,0.2)] group-hover:border-blue-400 transition-colors">
+                            <span class="material-symbols-outlined text-blue-400 text-3xl">assignment_turned_in</span>
+                        </div>
+                        <h4 class="text-white font-bold mb-1">Applied</h4>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Step 01</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center group">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-[#0f172a] border border-indigo-500/30 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(99,102,241,0.2)] group-hover:border-indigo-400 transition-colors">
+                            <span class="material-symbols-outlined text-indigo-400 text-3xl">filter_list</span>
+                        </div>
+                        <h4 class="text-white font-bold mb-1">Shortlisted</h4>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Step 02</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center group">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-[#0f172a] border border-purple-500/30 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(168,85,247,0.2)] group-hover:border-purple-400 transition-colors">
+                            <span class="material-symbols-outlined text-purple-400 text-3xl">groups</span>
+                        </div>
+                        <h4 class="text-white font-bold mb-1">Interview</h4>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Step 03</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center group">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-[#0f172a] border border-cyan-500/30 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(6,182,212,0.2)] group-hover:border-cyan-400 transition-colors">
+                            <span class="material-symbols-outlined text-cyan-400 text-3xl">handshake</span>
+                        </div>
+                        <h4 class="text-white font-bold mb-1">Offer</h4>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Step 04</span>
+                    </div>
+                    <div class="relative z-10 flex flex-col items-center group">
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-[#0f172a] border border-emerald-500/30 flex items-center justify-center mb-4 shadow-[0_0_15px_rgba(16,185,129,0.2)] group-hover:border-emerald-400 transition-colors">
+                            <span class="material-symbols-outlined text-emerald-400 text-3xl">celebration</span>
+                        </div>
+                        <h4 class="text-white font-bold mb-1">Hired</h4>
+                        <span class="text-xs text-slate-500 uppercase tracking-wider">Step 05</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24">
+            <h2 class="text-3xl font-bold text-white text-center mb-16">Platform Capabilities</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-2xl p-6 hover:bg-glass-surface-hover transition-all duration-300">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 mb-4 border border-blue-500/20">
+                        <span class="material-symbols-outlined">admin_panel_settings</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Role-Based Access</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Secure dashboards customized for admins,
+                        recruiters, and candidates.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover:bg-glass-surface-hover transition-all duration-300">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4 border border-indigo-500/20">
+                        <span class="material-symbols-outlined">timeline</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Status Tracking</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Visual kanban boards to monitor applications
+                        through every stage.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover:bg-glass-surface-hover transition-all duration-300">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 mb-4 border border-purple-500/20">
+                        <span class="material-symbols-outlined">calendar_month</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Interview Scheduling</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Integrated calendar tools to book interviews
+                        without conflict.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover:bg-glass-surface-hover transition-all duration-300">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 mb-4 border border-cyan-500/20">
+                        <span class="material-symbols-outlined">notifications_active</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Smart Notifications</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Instant alerts for status changes, messages, and
+                        upcoming tasks.</p>
+                </div>
+            </div>
+        </section>
+        <section class="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto pb-24 text-center">
+            <div class="glass-card rounded-3xl p-10 md:p-16 border-t border-white/20 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 relative z-10">Start Your Hiring Journey Today
+                </h2>
+                <p class="text-lg text-slate-300 mb-10 max-w-2xl mx-auto relative z-10">
+                    Join thousands of professionals and companies building the future workforce with SkillEntHub.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+                    <a href="{{ url_for('auth.register') }}"
+                        class="relative group overflow-hidden rounded-xl p-[1px] shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-shadow hover:shadow-[0_0_40px_rgba(59,130,246,0.6)] inline-block">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-100">
+                        </div>
+                        <div
+                            class="relative bg-[#0f172a] group-hover:bg-[#1e293b] transition-all duration-300 rounded-xl py-4 px-8 flex items-center justify-center h-full">
+                            <span class="text-base font-bold text-white tracking-wide">Join as Candidate</span>
+                        </div>
+                    </a>
+                    <a href="{{ url_for('auth_recruiter.register') }}"
+                        class="px-8 py-4 rounded-xl text-base font-bold text-slate-300 hover:text-white border border-white/10 hover:bg-white/5 transition-all duration-300 backdrop-blur-sm inline-flex items-center justify-center">
+                        Join as Recruiter
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="relative z-10 border-t border-white/5 bg-[#0f172a]/50 backdrop-blur-lg mt-auto">
+        <div
+            class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 opacity-70 hover:opacity-100 transition-opacity cursor-pointer">
+                <div
+                    class="w-8 h-8 rounded bg-white/5 border border-white/10 flex items-center justify-center metallic-logo-bg">
+                    <span class="font-extrabold italic text-slate-400 text-lg">S</span>
+                </div>
+                <span class="text-sm text-slate-400 font-medium">© 2024 SkillEntHub</span>
+            </div>
+            <div class="flex gap-6 text-sm text-slate-400 items-center">
+                <a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
+                <a class="hover:text-white transition-colors" href="#">Terms of Service</a>
+                <a class="hover:text-white transition-colors flex items-center gap-1" href="#">
+                    <span>GitHub</span>
+                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                </a>
             </div>
         </div>
     </footer>
-
-    <!-- ===== Scripts ===== -->
-    <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            document.getElementById('landingNav')
-                .classList.toggle('scrolled', window.scrollY > 40);
-        });
-
-        // Scroll-triggered fade-up animations
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.15 });
-
-        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-    </script>
 </body>
 
 </html>
