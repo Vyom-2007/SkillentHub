@@ -1,239 +1,292 @@
 {% extends "base.html" %}
 
-{% block title %}{{ item.title }} - SkillentHub{% endblock %}
-
-{% block extra_css %}
-<style>
-    .detail-container {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-
-    .detail-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    .company-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .company-logo {
-        width: 64px;
-        height: 64px;
-        border-radius: 0.75rem;
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-
-    .detail-badge {
-        display: inline-block;
-        padding: 0.375rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .badge-type {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .badge-mode {
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .badge-salary {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .section-title {
-        font-weight: 600;
-        margin: 1.5rem 0 0.75rem;
-        color: #1e293b;
-    }
-
-    .skill-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        background: linear-gradient(135deg, #667eea22, #764ba222);
-        color: var(--primary-color);
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        margin: 0.25rem;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .info-item {
-        padding: 1rem;
-        background: #f8fafc;
-        border-radius: 0.75rem;
-    }
-
-    .info-label {
-        font-size: 0.75rem;
-        color: #64748b;
-        text-transform: uppercase;
-    }
-
-    .info-value {
-        font-weight: 600;
-        color: #1e293b;
-    }
-</style>
-{% endblock %}
+{% block title %}{{ item.title }} - SkillEntHub{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="detail-container">
-        <a href="{{ url_for('opportunities.opportunities') }}" class="btn btn-link mb-3 ps-0">
-            <i class="bi bi-arrow-left me-1"></i>Back to Opportunities
-        </a>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Link -->
+    <a href="{{ url_for('opportunities.opportunities', type='job') }}"
+        class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 group">
+        <span
+            class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        Back to Jobs
+    </a>
 
-        <div class="detail-card">
-            <!-- Header -->
-            <div class="company-header">
-                <div class="company-logo">{{ (item.company_name or 'C')[0] }}</div>
+    <div class="glass-panel rounded-3xl p-8 md:p-10 relative overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none">
+        </div>
+
+        <!-- Header Section -->
+        <div class="relative z-10 flex flex-col md:flex-row gap-8 items-start mb-10">
+            <div
+                class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 border border-white/10 shadow-2xl shadow-blue-500/20 text-4xl font-bold text-white">
+                {{ (item.company_name or 'C')[0] }}
+            </div>
+
+            <div class="flex-1 w-full">
+                <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2">{{ item.title }}</h1>
+                        <p class="text-xl text-blue-400 font-medium">{{ item.company_name or 'Company' }}</p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <button
+                            class="w-12 h-12 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-slate-400 hover:text-blue-400 transition-all"
+                            onclick="toggleSave(this, '{{ item_type }}', {{ item.job_id }} )"
+                            title="{{ 'Unsave' if is_saved else 'Save' }}">
+                            <span
+                                class="material-symbols-outlined text-[24px] {% if is_saved %}text-blue-400 fill-current{% endif %}">
+                                bookmark
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-3">
+                    <span
+                        class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        {{ item_type|capitalize }}
+                    </span>
+                    <span
+                        class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-white/5 text-slate-300 border border-white/10 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">
+                            {% if item.work_mode == 'remote' %}public
+                            {% elif item.work_mode == 'hybrid' %}safety_divider
+                            {% else %}apartment{% endif %}
+                        </span>
+                        {{ (item.work_mode or 'on-site')|replace('-', ' ')|title }}
+                    </span>
+                    {% if item.job_type %}
+                    <span
+                        class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-white/5 text-slate-300 border border-white/10 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">work</span>
+                        {{ item.job_type|replace('-', ' ')|title }}
+                    </span>
+                    {% endif %}
+                    {% if item.salary_range %}
+                    <span
+                        class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-green-500/10 text-green-400 border border-green-500/20 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">payments</span>
+                        {{ item.salary_range }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Content -->
+            <div class="lg:col-span-2 space-y-10">
+
+                <!-- Description -->
                 <div>
-                    <h4 class="mb-1">{{ item.title }}</h4>
-                    <p class="text-muted mb-0">{{ item.company_name or 'Company' }}</p>
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-400">description</span>
+                        Description
+                    </h3>
+                    <div class="text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
+                        {{ item.description }}
+                    </div>
                 </div>
-            </div>
 
-            <!-- Badges -->
-            <div class="mb-4">
-                <span class="detail-badge badge-type">{{ item_type|capitalize }}</span>
-                <span class="detail-badge badge-mode">{{ item.work_mode|replace('-', ' ')|title if item.work_mode else
-                    'On-site' }}</span>
-                {% if item.job_type %}
-                <span class="detail-badge badge-type">{{ item.job_type|replace('-', ' ')|title }}</span>
-                {% endif %}
-                {% if item.salary_range %}
-                <span class="detail-badge badge-salary">₹{{ item.salary_range }}</span>
-                {% endif %}
-            </div>
-
-            <!-- Info Grid -->
-            <div class="info-grid mb-4">
-                <div class="info-item">
-                    <div class="info-label">Location</div>
-                    <div class="info-value"><i class="bi bi-geo-alt me-1"></i>{{ item.location }}</div>
+                <!-- Requirements -->
+                {% if item.requirements %}
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-400">fact_check</span>
+                        Requirements
+                    </h3>
+                    <div class="text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
+                        {{ item.requirements }}
+                    </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">Experience</div>
-                    <div class="info-value"><i class="bi bi-briefcase me-1"></i>{{ item.experience_required or 'Not
-                        specified' }}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Deadline</div>
-                    <div class="info-value"><i class="bi bi-calendar me-1"></i>{{ item.deadline.strftime('%b %d, %Y') if
-                        item.deadline else 'Open' }}</div>
-                </div>
-            </div>
-
-            <!-- Skills -->
-            {% if item.skills_required %}
-            <h6 class="section-title">Skills Required</h6>
-            <div class="mb-4">
-                {% for skill in item.skills_required.split(',') %}
-                <span class="skill-badge">{{ skill.strip() }}</span>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <!-- Description -->
-            <h6 class="section-title">Description</h6>
-            <p style="white-space: pre-line;">{{ item.description }}</p>
-
-            <!-- Requirements -->
-            {% if item.requirements %}
-            <h6 class="section-title">Requirements</h6>
-            <p style="white-space: pre-line;">{{ item.requirements }}</p>
-            {% endif %}
-
-            <!-- Apply Button -->
-            <hr class="my-4">
-            <div class="d-flex gap-3">
-                {% if has_applied %}
-                <button class="btn btn-success btn-lg" disabled>
-                    <i class="bi bi-check-circle me-2"></i>Applied ✓
-                </button>
-                {% else %}
-                <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#applyModal">
-                    <i class="bi bi-send me-2"></i>Apply Now
-                </button>
                 {% endif %}
 
-                <button class="btn btn-outline-primary btn-lg"
-                    onclick="toggleSave(this, '{{ item_type }}', {{ item.job_id }})"
-                    title="{{ 'Unsave' if is_saved else 'Save' }}">
-                    <i class="bi {{ 'bi-bookmark-fill' if is_saved else 'bi-bookmark' }} me-2"></i>
-                    {{ 'Saved' if is_saved else 'Save' }}
-                </button>
+                <!-- Skills -->
+                {% if item.skills_required %}
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-400">bolt</span>
+                        Skills Required
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in item.skills_required.split(',') %}
+                        <span
+                            class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+                            {{ skill.strip() }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Right Column: Sidebar Info -->
+            <div class="space-y-6">
+                <div class="glass-card p-6 rounded-2xl space-y-6">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Job Overview</h3>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">location_on</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Location</p>
+                            <p class="text-white font-medium">{{ item.location }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">bar_chart</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Experience</p>
+                            <p class="text-white font-medium">{{ item.experience_required or 'Not specified' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">calendar_month</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Deadline</p>
+                            <p class="text-white font-medium">{{ item.deadline.strftime('%b %d, %Y') if item.deadline
+                                else 'Open' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/10">
+                        {% if has_applied %}
+                        <button
+                            class="w-full py-3 bg-green-500/20 border border-green-500/30 text-green-400 font-bold rounded-xl flex items-center justify-center gap-2 cursor-default">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            Applied
+                        </button>
+                        {% else %}
+                        <button onclick="document.getElementById('applyModal').classList.remove('hidden')"
+                            class="w-full relative group overflow-hidden rounded-xl p-[1px] shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/40 hover:scale-[1.02]">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 animate-gradient-x">
+                            </div>
+                            <div
+                                class="relative bg-slate-900 group-hover:bg-slate-900/90 transition-colors rounded-xl px-4 py-3 flex items-center justify-center gap-2">
+                                <span class="font-bold text-white tracking-wide">Apply Now</span>
+                                <span class="material-symbols-outlined text-white">send</span>
+                            </div>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Apply Modal -->
+<!-- Apply Modal (Glassmorphism) -->
 {% if not has_applied %}
-<div class="modal fade" id="applyModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-send me-2"></i>Apply to {{ item.title }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="applyForm" enctype="multipart/form-data">
-                <div class="modal-body">
+<div id="applyModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity"
+        onclick="document.getElementById('applyModal').classList.add('hidden')"></div>
+
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative w-full max-w-2xl transform transition-all">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                <!-- Close Button -->
+                <button onclick="document.getElementById('applyModal').classList.add('hidden')"
+                    class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-2xl">close</span>
+                </button>
+
+                <div class="text-center mb-8">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-blue-500/20">
+                        <span class="material-symbols-outlined text-3xl">send</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white">Apply to {{ item.title }}</h3>
+                    <p class="text-slate-400 mt-2">{{ item.company_name or 'SkillEntHub' }}</p>
+                </div>
+
+                <form id="applyForm" enctype="multipart/form-data" class="space-y-6">
                     <input type="hidden" name="item_type" value="{{ item_type }}">
                     <input type="hidden" name="item_id" value="{{ item.job_id }}">
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Resume (PDF only, max 10MB) *</label>
-                        <input type="file" class="form-control" name="resume" id="resumeInput" accept=".pdf" required>
-                        <div class="form-text">Upload your latest resume in PDF format.</div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Resume (PDF)
+                            <span class="text-red-400">*</span></label>
+                        <div class="relative group">
+                            <input type="file" name="resume" id="resumeInput" accept=".pdf" required
+                                class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 transition-all cursor-pointer">
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">Max 10MB. Must be a PDF file.</p>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cover Letter <span class="text-danger">*</span></label>
-                        <textarea class="form-control" name="cover_letter" rows="5" maxlength="5000" required
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Cover Letter
+                            <span class="text-red-400">*</span></label>
+                        <textarea name="cover_letter" rows="5" maxlength="5000" required
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all resize-none"
                             placeholder="Explain why you're a great fit for this role..."></textarea>
-                        <div class="form-text"><span id="coverLetterCount">0</span>/5000 characters</div>
+                        <div class="flex justify-end mt-2">
+                            <span class="text-xs text-slate-500"><span id="coverLetterCount">0</span>/5000</span>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="submitBtn">
-                        <i class="bi bi-send me-2"></i>Submit Application
-                    </button>
-                </div>
-            </form>
+
+                    <div class="pt-4 flex gap-4">
+                        <button type="button" onclick="document.getElementById('applyModal').classList.add('hidden')"
+                            class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-slate-300 font-bold rounded-xl transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" id="submitBtn"
+                            class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-500/20">
+                            Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 {% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/opportunities.js') }}"></script>
+<script>
+    // Counter logic for modal
+    const clInput = document.querySelector('textarea[name="cover_letter"]');
+    const clCount = document.getElementById('coverLetterCount');
+    if (clInput && clCount) {
+        clInput.addEventListener('input', () => {
+            clCount.textContent = clInput.value.length;
+        });
+    }
+</script>
+<style>
+    .animate-gradient-x {
+        background-size: 200% 200%;
+        animation: gradient-x 3s ease infinite;
+    }
+
+    @keyframes gradient-x {
+        0% {
+            background-position: 0% 50%
+        }
+
+        50% {
+            background-position: 100% 50%
+        }
+
+        100% {
+            background-position: 0% 50%
+        }
+    }
+</style>
 {% endblock %}

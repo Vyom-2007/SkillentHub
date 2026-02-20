@@ -1,345 +1,333 @@
 {% extends "base.html" %}
 
-{% block title %}Opportunities - SkillentHub{% endblock %}
+{% block title %}Opportunities - SkillEntHub{% endblock %}
 
 {% block extra_css %}
 <style>
-    .opportunities-sidebar {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        position: sticky;
-        top: 90px;
+    /* Custom Scrollbar for sidebar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
     }
 
-    .opp-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        margin-bottom: 1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
     }
 
-    .opp-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
     }
 
-    .opp-title {
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
     }
 
-    .opp-company {
-        color: var(--primary-color);
-        font-weight: 500;
+    /* Checkbox Styling */
+    .checkbox-wrapper input:checked+div {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
     }
 
-    .opp-meta {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin: 0.5rem 0;
-    }
-
-    .opp-badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.5rem;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .badge-job {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .badge-internship {
-        background: #fce7f3;
-        color: #be185d;
-    }
-
-    .badge-remote {
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .badge-hybrid {
-        background: #fef3c7;
-        color: #d97706;
-    }
-
-    .badge-onsite {
-        background: #f3f4f6;
-        color: #4b5563;
-    }
-
-    .skill-tag {
-        display: inline-block;
-        padding: 0.125rem 0.5rem;
-        background: #f1f5f9;
-        border-radius: 1rem;
-        font-size: 0.75rem;
-        margin: 0.125rem;
-    }
-
-    .filter-section {
-        margin-bottom: 1.5rem;
-    }
-
-    .filter-section label {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
+    .checkbox-wrapper input:checked+div svg {
         display: block;
-    }
-
-    .type-tabs {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .type-tab {
-        flex: 1;
-        padding: 0.75rem;
-        text-align: center;
-        border-radius: 0.5rem;
-        background: #f1f5f9;
-        cursor: pointer;
-        transition: all 0.2s;
-        border: none;
-    }
-
-    .type-tab:hover,
-    .type-tab.active {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .type-tab .count {
-        font-size: 0.75rem;
-        opacity: 0.8;
-    }
-
-    .no-results {
-        text-align: center;
-        padding: 3rem;
-        color: #94a3b8;
-    }
-
-    .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.8);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-    }
-
-    .opp-container {
-        position: relative;
-        min-height: 200px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
         <!-- Sidebar Filters -->
-        <div class="col-lg-3 mb-4">
-            <div class="opportunities-sidebar">
-                <h5 class="mb-4"><i class="bi bi-funnel me-2"></i>Filters</h5>
+        <div class="w-full lg:w-1/4 space-y-6">
+            <div
+                class="glass-panel p-6 rounded-2xl sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto custom-scrollbar">
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                        <span class="material-symbols-outlined text-[20px]">tune</span>
+                    </div>
+                    <h2 class="text-lg font-bold text-white">Filters</h2>
+                </div>
 
-                <!-- Type Tabs -->
-                <div class="type-tabs">
-                    <button class="type-tab {% if current_type == 'all' %}active{% endif %}" data-type="all">
-                        All<div class="count">{{ counts.jobs + counts.internships }}</div>
+                <!-- Type Tabs (as Buttons) -->
+                <div class="grid grid-cols-3 gap-2 p-1 bg-white/5 rounded-xl mb-6">
+                    <button
+                        class="type-tab px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center flex flex-col items-center gap-1 {% if current_type == 'all' %}bg-blue-600 text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:text-white hover:bg-white/5{% endif %}"
+                        data-type="all">
+                        <span>All</span>
+                        <span class="text-[10px] opacity-70">{{ counts.jobs + counts.internships }}</span>
                     </button>
-                    <button class="type-tab {% if current_type == 'job' %}active{% endif %}" data-type="job">
-                        Jobs<div class="count">{{ counts.jobs }}</div>
+                    <button
+                        class="type-tab px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center flex flex-col items-center gap-1 {% if current_type == 'job' %}bg-blue-600 text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:text-white hover:bg-white/5{% endif %}"
+                        data-type="job">
+                        <span>Jobs</span>
+                        <span class="text-[10px] opacity-70">{{ counts.jobs }}</span>
                     </button>
-                    <button class="type-tab {% if current_type == 'internship' %}active{% endif %}"
+                    <button
+                        class="type-tab px-3 py-2 rounded-lg text-xs font-semibold transition-all text-center flex flex-col items-center gap-1 {% if current_type == 'internship' %}bg-blue-600 text-white shadow-lg shadow-blue-500/20{% else %}text-slate-400 hover:text-white hover:bg-white/5{% endif %}"
                         data-type="internship">
-                        Internships<div class="count">{{ counts.internships }}</div>
+                        <span>Interns</span>
+                        <span class="text-[10px] opacity-70">{{ counts.internships }}</span>
                     </button>
                 </div>
 
                 <!-- Search -->
-                <div class="filter-section">
-                    <label><i class="bi bi-search me-1"></i>Keyword</label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Job title, skills...">
+                <div class="space-y-3 mb-6">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">search</span> Keyword
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="Job title, skills..."
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all">
+                    </div>
                 </div>
 
                 <!-- Location -->
-                <div class="filter-section">
-                    <label><i class="bi bi-geo-alt me-1"></i>Location</label>
-                    <select class="form-select" id="locationFilter">
-                        <option value="">All Locations</option>
+                <div class="space-y-3 mb-6">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">location_on</span> Location
+                    </label>
+                    <select id="locationFilter"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                        <option value="" class="bg-slate-800">All Locations</option>
                         {% for loc in locations %}
-                        <option value="{{ loc }}">{{ loc }}</option>
+                        <option value="{{ loc }}" class="bg-slate-800">{{ loc }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <!-- Work Mode -->
-                <div class="filter-section">
-                    <label><i class="bi bi-laptop me-1"></i>Work Mode</label>
-                    <select class="form-select" id="workModeFilter">
-                        <option value="">All</option>
-                        <option value="remote">Remote</option>
-                        <option value="on-site">On-site</option>
-                        <option value="hybrid">Hybrid</option>
+                <div class="space-y-3 mb-6">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">laptop_chromebook</span> Work Mode
+                    </label>
+                    <select id="workModeFilter"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                        <option value="" class="bg-slate-800">All Modes</option>
+                        <option value="remote" class="bg-slate-800">Remote</option>
+                        <option value="on-site" class="bg-slate-800">On-site</option>
+                        <option value="hybrid" class="bg-slate-800">Hybrid</option>
                     </select>
                 </div>
 
-                <!-- Job Type (Jobs only) -->
-                <div class="filter-section" id="jobTypeSection">
-                    <label><i class="bi bi-briefcase me-1"></i>Job Type</label>
-                    <select class="form-select" id="jobTypeFilter">
-                        <option value="">All Types</option>
-                        <option value="full-time">Full-time</option>
-                        <option value="part-time">Part-time</option>
-                        <option value="contract">Contract</option>
+                <!-- Job Type -->
+                <div class="space-y-3 mb-6" id="jobTypeSection">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">work</span> Job Type
+                    </label>
+                    <select id="jobTypeFilter"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                        <option value="" class="bg-slate-800">All Types</option>
+                        <option value="full-time" class="bg-slate-800">Full-time</option>
+                        <option value="part-time" class="bg-slate-800">Part-time</option>
+                        <option value="contract" class="bg-slate-800">Contract</option>
                     </select>
                 </div>
 
-                <!-- Experience (Jobs only) -->
-                <div class="filter-section" id="experienceSection">
-                    <label><i class="bi bi-bar-chart me-1"></i>Experience</label>
-                    <select class="form-select" id="experienceFilter">
-                        <option value="">Any</option>
+                <!-- Experience -->
+                <div class="space-y-3 mb-6" id="experienceSection">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">bar_chart</span> Experience
+                    </label>
+                    <select id="experienceFilter"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                        <option value="" class="bg-slate-800">Any Experience</option>
                         {% for exp in experience_levels %}
-                        <option value="{{ exp }}">{{ exp }}</option>
+                        <option value="{{ exp }}" class="bg-slate-800">{{ exp }}</option>
                         {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Date Posted -->
+                <div class="space-y-3 mb-6">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">calendar_month</span> Posted
+                    </label>
+                    <select id="dateFilter"
+                        class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer">
+                        <option value="" class="bg-slate-800">Any time</option>
+                        <option value="7" class="bg-slate-800">Last 7 days</option>
+                        <option value="30" class="bg-slate-800">Last 30 days</option>
+                        <option value="90" class="bg-slate-800">Last 90 days</option>
                     </select>
                 </div>
 
                 <!-- Skills -->
-                <div class="filter-section">
-                    <label><i class="bi bi-lightning-charge me-1"></i>Skills</label>
-                    <div class="card p-2 border-0 bg-light" style="max-height: 150px; overflow-y: auto;">
+                <div class="space-y-3 mb-6">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">bolt</span> Skills
+                    </label>
+                    <div
+                        class="bg-white/5 border border-white/10 rounded-xl p-3 max-h-[150px] overflow-y-auto custom-scrollbar space-y-2">
                         {% for skill in skills %}
-                        <div class="form-check">
-                            <input class="form-check-input skill-filter" type="checkbox" value="{{ skill }}"
-                                id="skill_{{ loop.index }}">
-                            <label class="form-check-label small" for="skill_{{ loop.index }}">
-                                {{ skill }}
-                            </label>
-                        </div>
+                        <label class="flex items-center gap-3 cursor-pointer group checkbox-wrapper">
+                            <input type="checkbox" value="{{ skill }}" id="skill_{{ loop.index }}"
+                                class="sr-only skill-filter">
+                            <div
+                                class="w-4 h-4 rounded border border-white/20 bg-white/5 flex items-center justify-center transition-colors group-hover:border-blue-500/50">
+                                <svg class="w-3 h-3 text-white hidden pointer-events-none" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <span class="text-sm text-slate-400 group-hover:text-slate-200 transition-colors">{{ skill
+                                }}</span>
+                        </label>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- Date Posted -->
-                <div class="filter-section">
-                    <label><i class="bi bi-calendar me-1"></i>Posted</label>
-                    <select class="form-select" id="dateFilter">
-                        <option value="">Any time</option>
-                        <option value="7">Last 7 days</option>
-                        <option value="30">Last 30 days</option>
-                        <option value="90">Last 90 days</option>
-                    </select>
+                <div class="pt-4 border-t border-white/10">
+                    <button onclick="clearFilters()"
+                        class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-slate-300 font-semibold rounded-xl text-sm transition-colors border border-white/10 hover:border-white/20 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">filter_alt_off</span>
+                        Clear Filters
+                    </button>
                 </div>
-
-                <button class="btn btn-outline-secondary btn-sm w-100" onclick="clearFilters()">
-                    <i class="bi bi-x-circle me-1"></i>Clear Filters
-                </button>
             </div>
         </div>
 
         <!-- Main Content -->
-        <div class="col-lg-9">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4><i class="bi bi-briefcase me-2"></i>Opportunities</h4>
-                <div class="d-flex gap-2">
+        <div class="w-full lg:w-3/4">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <span class="material-symbols-outlined text-blue-400">explore</span>
+                    Opportunities
+                </h1>
+                <!-- Loading Indicator (Hidden by default) -->
+                <div id="loadingOverlay" class="hidden items-center gap-2 text-blue-400">
+                    <div class="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span class="text-sm font-medium">Updating...</span>
                 </div>
             </div>
 
-            <div class="opp-container">
-                <div class="loading-overlay" id="loadingOverlay">
-                    <div class="spinner-border text-primary"></div>
-                </div>
+            <div id="opportunitiesContainer" class="space-y-4">
+                {% for item in opportunities %}
+                <div class="glass-card hover:bg-white/[0.07] group relative transition-all duration-300">
+                    <div class="flex flex-col md:flex-row gap-6 items-start">
+                        <!-- Logo Placeholder -->
+                        <div
+                            class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 flex items-center justify-center shrink-0 border border-white/10 text-xl font-bold text-blue-400">
+                            {{ (item.company_name or 'C')[0] }}
+                        </div>
 
-                <div id="opportunitiesContainer">
-                    {% for item in opportunities %}
-                    <div class="opp-card">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <span
-                                    class="opp-badge {% if item.type == 'job' %}badge-job{% else %}badge-internship{% endif %}">
+                        <div class="flex-1 w-full">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3
+                                        class="text-xl font-bold text-white group-hover:text-blue-400 transition-colors mb-1">
+                                        {{ item.title }}</h3>
+                                    <p class="text-slate-400 font-medium text-sm">{{ item.company_name or 'Company' }}
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <!-- Match Score -->
+                                    {% if item.match_score is defined and item.match_score is not none %}
+                                    <div class="px-3 py-1 rounded-full text-xs font-bold border
+                                            {% if item.match_score >= 80 %}bg-green-500/10 text-green-400 border-green-500/20
+                                            {% elif item.match_score >= 50 %}bg-yellow-500/10 text-yellow-400 border-yellow-500/20
+                                            {% else %}bg-slate-700 text-slate-400 border-slate-600{% endif %}">
+                                        {{ item.match_score }}% Match
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Bookmark -->
+                                    <button
+                                        class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-blue-400 transition-colors save-btn"
+                                        onclick="toggleSave(this, '{{ item.type }}', {{ item.id }})"
+                                        title="{{ 'Unsave' if item.is_saved else 'Save' }}">
+                                        <span
+                                            class="material-symbols-outlined text-[20px] {% if item.is_saved %}text-blue-400 fill-current{% endif %}">
+                                            bookmark
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tags Row -->
+                            <div class="flex flex-wrap items-center gap-2 mb-4">
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold
+                                     {% if item.type == 'job' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
+                                     {% else %}bg-pink-500/10 text-pink-400 border border-pink-500/20{% endif %}">
                                     {{ item.type|capitalize }}
                                 </span>
                                 <span
-                                    class="opp-badge {% if item.work_mode == 'remote' %}badge-remote{% elif item.work_mode == 'hybrid' %}badge-hybrid{% else %}badge-onsite{% endif %}">
+                                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/5 text-slate-300 border border-white/10 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">
+                                        {% if item.work_mode == 'remote' %}public
+                                        {% elif item.work_mode == 'hybrid' %}safety_divider
+                                        {% else %}apartment{% endif %}
+                                    </span>
                                     {{ (item.work_mode or 'on-site')|replace('-', ' ')|title }}
                                 </span>
-                            </div>
-                            <div class="text-end">
-                                <button class="btn btn-link p-0 text-decoration-none save-btn me-2"
-                                    onclick="toggleSave(this, '{{ item.type }}', {{ item.id }})"
-                                    title="{{ 'Unsave' if item.is_saved else 'Save' }}">
-                                    <i
-                                        class="bi {% if item.is_saved %}bi-bookmark-fill text-primary{% else %}bi-bookmark{% endif %} fs-5"></i>
-                                </button>
-                                {% if item.match_score is defined and item.match_score is not none %}
-                                {% if item.match_score >= 80 %}
-                                <div class="mb-1"><span class="badge bg-success">Match: {{ item.match_score }}%</span>
-                                </div>
-                                {% elif item.match_score >= 50 %}
-                                <div class="mb-1"><span class="badge bg-warning text-dark">Match: {{ item.match_score
-                                        }}%</span></div>
-                                {% endif %}
-                                {% endif %}
-                                <small class="text-muted">{{ item.posted_at.strftime('%b %d') if item.posted_at else ''
-                                    }}</small>
-                            </div>
-                        </div>
-                        <h5 class="opp-title mt-2">{{ item.title }}</h5>
-                        <p class="opp-company mb-1">{{ item.company_name or 'Company' }}</p>
-                        <p class="opp-meta">
-                            <i class="bi bi-geo-alt me-1"></i>{{ item.location }}
-                            {% if item.type == 'job' and item.salary_range %}
-                            <span class="ms-3"><i class="bi bi-currency-rupee me-1"></i>{{ item.salary_range }}</span>
-                            {% elif item.type == 'internship' and item.stipend %}
-                            <span class="ms-3"><i class="bi bi-currency-rupee me-1"></i>{{ item.stipend }}</span>
-                            {% endif %}
-                            {% if item.duration %}
-                            <span class="ms-3"><i class="bi bi-clock me-1"></i>{{ item.duration }}</span>
-                            {% endif %}
-                        </p>
-                        {% if item.skills_required %}
-                        <div class="mt-2">
-                            {% for skill in item.skills_required.split(',')[:5] %}
-                            <span class="skill-tag">{{ skill.strip() }}</span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        <div class="mt-3">
-                            <a href="{{ url_for('opportunities.job_detail', job_id=item.id) if item.type == 'job' else url_for('opportunities.internship_detail', internship_id=item.id) }}"
-                                class="btn btn-primary btn-sm">View Details</a>
-                        </div>
-                    </div>
-                    {% else %}
-                    <div class="no-results">
-                        <i class="bi bi-briefcase display-1"></i>
-                        <p class="mt-3">No opportunities found.</p>
-                    </div>
-                    {% endfor %}
-                </div>
+                                <span
+                                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/5 text-slate-300 border border-white/10 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">location_on</span>
+                                    {{ item.location }}
+                                </span>
 
-                <!-- Pagination Controls -->
-                 <nav aria-label="Page navigation" class="mt-4" id="paginationContainer">
-                    <!-- Javascript will populate this -->
-                 </nav>
+                                {% if item.type == 'job' and item.salary_range %}
+                                <span
+                                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">payments</span>
+                                    {{ item.salary_range }}
+                                </span>
+                                {% elif item.type == 'internship' and item.stipend %}
+                                <span
+                                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-green-500/10 text-green-400 border border-green-500/20 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">payments</span>
+                                    {{ item.stipend }}
+                                </span>
+                                {% endif %}
+
+                                <span class="text-xs text-slate-500 ml-auto flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">schedule</span>
+                                    {{ item.posted_at.strftime('%b %d') if item.posted_at else 'Recent' }}
+                                </span>
+                            </div>
+
+                            <!-- Skills -->
+                            {% if item.skills_required %}
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                {% for skill in item.skills_required.split(',')[:5] %}
+                                <span
+                                    class="text-xs text-slate-400 bg-white/[0.03] border border-white/5 px-2 py-1 rounded-md">
+                                    {{ skill.strip() }}
+                                </span>
+                                {% endfor %}
+                                {% if item.skills_required.split(',')|length > 5 %}
+                                <span class="text-xs text-slate-500 px-2 py-1">+{{
+                                    item.skills_required.split(',')|length - 5 }}</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            <div class="mt-2">
+                                <a href="{{ url_for('opportunities.job_detail', job_id=item.id) if item.type == 'job' else url_for('opportunities.internship_detail', internship_id=item.id) }}"
+                                    class="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-blue-600 border border-white/10 hover:border-blue-500 text-white text-sm font-bold rounded-lg transition-all group-hover:shadow-lg group-hover:shadow-blue-500/20">
+                                    View Details
+                                    <span
+                                        class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-20 bg-white/5 border border-white/10 rounded-2xl border-dashed">
+                    <div class="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-4xl text-slate-600">search_off</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">No opportunities found</h3>
+                    <p class="text-slate-400">Try adjusting your filters or search terms.</p>
+                </div>
+                {% endfor %}
             </div>
+
+            <!-- Pagination (Placeholder for JS) -->
+            <nav aria-label="Page navigation" class="mt-8 flex justify-center" id="paginationContainer">
+                <!-- Populated by JS -->
+            </nav>
         </div>
     </div>
 </div>

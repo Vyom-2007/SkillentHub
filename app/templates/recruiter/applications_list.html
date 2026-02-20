@@ -1,228 +1,293 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}Applications - ATS - Recruiter Portal{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-            <h4 class="mb-1">Application Tracking (ATS)</h4>
-            <p class="text-muted mb-0">Manage candidates and hiring pipeline</p>
+            <h1 class="text-3xl font-bold text-white mb-2">Application Tracking (ATS)</h1>
+            <p class="text-slate-400">Manage candidates and hiring pipeline</p>
         </div>
+        <!-- Bulk Actions Placeholder -->
         <div>
-            <!-- Bulk Actions (Placeholder) -->
-            <button class="btn btn-outline-secondary btn-sm" disabled title="Select rows for bulk actions">
-                <i class="bi bi-check2-square"></i> Bulk Update (Soon)
+            <button disabled
+                class="flex items-center gap-2 px-4 py-2 bg-white/5 text-slate-500 rounded-xl border border-white/5 cursor-not-allowed">
+                <span class="material-symbols-outlined">checklist</span> Bulk Update (Soon)
             </button>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <select class="form-select" name="status">
-                        <option value="">All Statuses</option>
-                        <option value="applied" {% if filters.status=='applied' %}selected{% endif %}>Applied</option>
-                        <option value="reviewing" {% if filters.status=='reviewing' %}selected{% endif %}>Reviewing
-                        </option>
-                        <option value="shortlisted" {% if filters.status=='shortlisted' %}selected{% endif %}>
-                            Shortlisted</option>
-                        <option value="interview" {% if filters.status=='interview' %}selected{% endif %}>Interview
-                        </option>
-                        <option value="offer" {% if filters.status=='offer' %}selected{% endif %}>Offer</option>
-                        <option value="hired" {% if filters.status=='hired' %}selected{% endif %}>Hired</option>
-                        <option value="rejected" {% if filters.status=='rejected' %}selected{% endif %}>Rejected
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" name="item_type">
-                        <option value="">All Types</option>
-                        <option value="job" {% if filters.item_type=='job' %}selected{% endif %}>Jobs</option>
-                        <option value="internship" {% if filters.item_type=='internship' %}selected{% endif %}>
-                            Internships</option>
-                        <option value="competition" {% if filters.item_type=='competition' %}selected{% endif %}>
-                            Competitions</option>
-                        <option value="hackathon" {% if filters.item_type=='hackathon' %}selected{% endif %}>Hackathons
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
-        </div>
+    <div class="glass-panel rounded-2xl p-6 mb-8">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-5 relative">
+                <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">filter_list</span>
+                <select name="status"
+                    class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 focus:outline-none appearance-none bg-black/20">
+                    <option value="" class="bg-slate-800">All Statuses</option>
+                    <option value="applied" {% if filters.status=='applied' %}selected{% endif %} class="bg-slate-800">
+                        Applied</option>
+                    <option value="reviewing" {% if filters.status=='reviewing' %}selected{% endif %}
+                        class="bg-slate-800">Reviewing</option>
+                    <option value="shortlisted" {% if filters.status=='shortlisted' %}selected{% endif %}
+                        class="bg-slate-800">Shortlisted</option>
+                    <option value="interview" {% if filters.status=='interview' %}selected{% endif %}
+                        class="bg-slate-800">Interview</option>
+                    <option value="offer" {% if filters.status=='offer' %}selected{% endif %} class="bg-slate-800">Offer
+                    </option>
+                    <option value="hired" {% if filters.status=='hired' %}selected{% endif %} class="bg-slate-800">Hired
+                    </option>
+                    <option value="rejected" {% if filters.status=='rejected' %}selected{% endif %}
+                        class="bg-slate-800">Rejected</option>
+                </select>
+            </div>
+            <div class="md:col-span-5 relative">
+                <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">category</span>
+                <select name="item_type"
+                    class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 focus:outline-none appearance-none bg-black/20">
+                    <option value="" class="bg-slate-800">All Types</option>
+                    <option value="job" {% if filters.item_type=='job' %}selected{% endif %} class="bg-slate-800">Jobs
+                    </option>
+                    <option value="internship" {% if filters.item_type=='internship' %}selected{% endif %}
+                        class="bg-slate-800">Internships</option>
+                    <option value="competition" {% if filters.item_type=='competition' %}selected{% endif %}
+                        class="bg-slate-800">Competitions</option>
+                    <option value="hackathon" {% if filters.item_type=='hackathon' %}selected{% endif %}
+                        class="bg-slate-800">Hackathons</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit"
+                    class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">filter_alt</span> Filter
+                </button>
+            </div>
+        </form>
     </div>
 
     <!-- Applications Table -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table align-middle table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Candidate</th>
-                            <th class="text-center">Match</th>
-                            <th>Applied For</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                            <th class="text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for app in applications %}
-                        <tr>
-                            <td class="ps-4">
-                                {% from '_avatar.html' import avatar %}
-                                <a href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}"
-                                    class="text-decoration-none text-dark d-flex align-items-center">
-                                    {{ avatar(app.full_name, app.profile_picture, 40, 'me-3 border') }}
-                                    <div>
-                                        <h6 class="mb-0 fw-bold">{{ app.full_name }}</h6>
-                                        <small class="text-muted">{{ app.email }}</small>
-                                    </div>
-                                </a>
-                            </td>
-                            <td class="text-center">
-                                {% if app.match_score is defined and app.match_score is not none %}
-                                {% if app.match_score >= 80 %}
-                                <span class="badge bg-success">{{ app.match_score }}%</span>
-                                {% elif app.match_score >= 50 %}
-                                <span class="badge bg-warning text-dark">{{ app.match_score }}%</span>
-                                {% else %}
-                                <span class="badge bg-secondary">{{ app.match_score }}%</span>
-                                {% endif %}
-                                {% else %}
-                                <span class="text-muted small">-</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">{{ app.item_title }}</div>
-                                <span class="badge bg-light text-secondary border text-uppercase"
-                                    style="font-size: 0.65rem;">{{ app.item_type }}</span>
-                                {% if app.team_name %}
-                                <span class="badge bg-info bg-opacity-10 text-info border border-info ms-1"
-                                    style="font-size: 0.65rem;">Item Team: {{ app.team_name }}</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-muted small">
-                                {{ app.applied_at.strftime('%Y-%m-%d') if app.applied_at else 'N/A' }}
-                                <br><small>{{ app.applied_at.strftime('%I:%M %p') if app.applied_at else '' }}</small>
-                            </td>
-                            <td>{% set status_colors = {'applied': 'secondary', 'reviewing': 'info', 'shortlisted':
-                                'primary', 'interview': 'warning', 'offer': 'warning text-dark', 'hired': 'success',
-                                'rejected': 'danger', 'accepted': 'success'} %}
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-white/10 bg-white/5">
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Candidate</th>
+                        <th class="p-4 text-center text-slate-300 font-semibold text-sm uppercase tracking-wider">Match
+                        </th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Applied For</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Date</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Status</th>
+                        <th class="p-4 text-right text-slate-300 font-semibold text-sm uppercase tracking-wider">Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for app in applications %}
+                    <tr class="hover:bg-white/5 transition-colors group">
+                        <!-- Candidate -->
+                        <td class="p-4">
+                            {% from '_avatar.html' import avatar %}
+                            <a href="{{ url_for('recruiter.application_detail', application_id=app.application_id) }}"
+                                class="flex items-center gap-3 group/link">
+                                {{ avatar(app.full_name, app.profile_picture, 40, 'shadow border border-white/10
+                                rounded-full') }}
+                                <div>
+                                    <h6 class="font-bold text-white group-hover/link:text-blue-400 transition-colors">{{
+                                        app.full_name }}</h6>
+                                    <p class="text-xs text-slate-500">{{ app.email }}</p>
+                                </div>
+                            </a>
+                        </td>
+
+                        <!-- Match Score -->
+                        <td class="p-4 text-center">
+                            {% if app.match_score is defined and app.match_score is not none %}
+                            {% if app.match_score >= 80 %}
+                            <span
+                                class="inline-block px-2 py-0.5 rounded text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20">{{
+                                app.match_score }}%</span>
+                            {% elif app.match_score >= 50 %}
+                            <span
+                                class="inline-block px-2 py-0.5 rounded text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">{{
+                                app.match_score }}%</span>
+                            {% else %}
+                            <span
+                                class="inline-block px-2 py-0.5 rounded text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">{{
+                                app.match_score }}%</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-slate-600">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Applied For -->
+                        <td class="p-4">
+                            <div class="font-bold text-white mb-0.5 line-clamp-1">{{ app.item_title }}</div>
+                            <div class="flex items-center gap-2">
                                 <span
-                                    class="badge bg-{{ status_colors.get(app.status, 'secondary') }} bg-opacity-10 text-{{ status_colors.get(app.status, 'secondary') }}">
-                                    {{ app.status|capitalize }}
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                {% if app.item_type in ['job', 'internship'] %}
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle"
-                                        data-bs-toggle="dropdown" aria-expanded="false" data-bs-boundary="viewport">
-                                        Action
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <h6 class="dropdown-header">Update Status</h6>
-                                        </li>
-                                        {% if app.status == 'applied' %}
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
-                                                method="POST">
-                                                <input type="hidden" name="status" value="shortlisted">
-                                                <input type="hidden" name="next" value="{{ request.url }}">
-                                                <button type="submit" class="dropdown-item">Shortlist</button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        {% if app.status == 'shortlisted' %}
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
-                                                method="POST">
-                                                <input type="hidden" name="status" value="interview">
-                                                <input type="hidden" name="next" value="{{ request.url }}">
-                                                <button type="submit" class="dropdown-item">Interview</button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        {% if app.status == 'interview' %}
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
-                                                method="POST">
-                                                <input type="hidden" name="status" value="offer">
-                                                <input type="hidden" name="next" value="{{ request.url }}">
-                                                <button type="submit" class="dropdown-item">Offer</button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        {% if app.status == 'offer' %}
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
-                                                method="POST">
-                                                <input type="hidden" name="status" value="hired">
-                                                <input type="hidden" name="next" value="{{ request.url }}">
-                                                <button type="submit" class="dropdown-item text-success"><i
-                                                        class="bi bi-check-circle me-2"></i>Hire</button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        {% if app.status not in ['rejected', 'hired', 'declined', 'accepted'] %}
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
-                                                method="POST">
-                                                <input type="hidden" name="status" value="rejected">
-                                                <input type="hidden" name="next" value="{{ request.url }}">
-                                                <button type="submit" class="dropdown-item text-danger"><i
-                                                        class="bi bi-x-circle me-2"></i>Reject</button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                </div>
-                                {% else %}
-                                {# Event Registrations #}
-                                {# Event Registrations #}
-                                {# Email button removed as per request #}
-
-                                {# Message Action for any registered user #}
-                                {% if app.user_id %}
-                                <a href="{{ url_for('messages.messages', user=app.user_id, type='user') }}"
-                                    class="btn btn-sm btn-outline-success ms-1" title="Message Candidate">
-                                    <i class="bi bi-chat-dots"></i>
-                                </a>
+                                    class="text-[10px] font-bold uppercase text-slate-400 bg-white/5 px-1.5 py-0.5 rounded border border-white/5">{{
+                                    app.item_type }}</span>
+                                {% if app.team_name %}
+                                <span
+                                    class="text-[10px] font-bold uppercase text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">Team:
+                                    {{ app.team_name }}</span>
                                 {% endif %}
+                            </div>
+                        </td>
 
-                                <span class="text-muted small ms-2">Event</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="bi bi-person-x fs-1 d-block mb-3"></i>
-                                    No applications found matching your criteria.
+                        <!-- Date -->
+                        <td class="p-4">
+                            <div class="text-sm text-slate-300">{{ app.applied_at.strftime('%Y-%m-%d') if app.applied_at
+                                else 'N/A' }}</div>
+                            <div class="text-xs text-slate-500">{{ app.applied_at.strftime('%I:%M %p') if app.applied_at
+                                else '' }}</div>
+                        </td>
+
+                        <!-- Status -->
+                        <td class="p-4">
+                            {% set status_colors = {
+                            'applied': 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+                            'reviewing': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+                            'shortlisted': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                            'interview': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+                            'offer': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                            'hired': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                            'accepted': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+                            'rejected': 'bg-red-500/10 text-red-400 border-red-500/20'
+                            } %}
+                            <span
+                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold border {{ status_colors.get(app.status, 'bg-slate-500/10 text-slate-400 border-slate-500/20') }} capitalize">
+                                {{ app.status }}
+                            </span>
+                        </td>
+
+                        <!-- Action -->
+                        <td class="p-4 text-right">
+                            {% if app.item_type in ['job', 'internship'] %}
+                            <div class="relative inline-block dropdown-container">
+                                <button type="button"
+                                    class="btn-action flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600/10 text-blue-400 hover:bg-blue-600/20 transition-all text-sm font-bold border border-blue-600/20"
+                                    onclick="toggleDropdown(this)">
+                                    Action <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                                </button>
+
+                                <!-- Custom Dropdown Menu -->
+                                <div
+                                    class="hidden dropdown-menu absolute right-0 mt-2 w-48 glass-panel border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
+                                    <div
+                                        class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-white/5">
+                                        Update Status</div>
+
+                                    {% if app.status == 'applied' %}
+                                    <form
+                                        action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="shortlisted">
+                                        <input type="hidden" name="next" value="{{ request.url }}">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors">Shortlist</button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if app.status == 'shortlisted' %}
+                                    <form
+                                        action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="interview">
+                                        <input type="hidden" name="next" value="{{ request.url }}">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors">Interview</button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if app.status == 'interview' %}
+                                    <form
+                                        action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="offer">
+                                        <input type="hidden" name="next" value="{{ request.url }}">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors">Offer</button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if app.status == 'offer' %}
+                                    <form
+                                        action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="hired">
+                                        <input type="hidden" name="next" value="{{ request.url }}">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors font-bold flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-[16px]">check_circle</span> Hire
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
+                                    {% if app.status not in ['rejected', 'hired', 'declined', 'accepted'] %}
+                                    <div class="h-px bg-white/10 my-1"></div>
+                                    <form
+                                        action="{{ url_for('recruiter.update_application_status', application_id=app.application_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="rejected">
+                                        <input type="hidden" name="next" value="{{ request.url }}">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors font-bold flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-[16px]">cancel</span> Reject
+                                        </button>
+                                    </form>
+                                    {% endif %}
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                            {% else %}
+                            {% if app.user_id %}
+                            <a href="{{ url_for('messages.messages', user=app.user_id, type='user') }}"
+                                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-all text-sm font-bold border border-emerald-500/20">
+                                <span class="material-symbols-outlined text-[16px]">chat</span> Message
+                            </a>
+                            {% endif %}
+                            <span class="text-xs text-slate-500 ml-2 font-bold uppercase">Event</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="p-12 text-center text-slate-500">
+                            <div
+                                class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="material-symbols-outlined text-4xl">person_search</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">No Applications Found</h3>
+                            <p>Try adjusting your filters or wait for candidates to apply.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<script>
+    // Simple Dropdown Toggle Logic
+    function toggleDropdown(btn) {
+        // Close all others
+        const allMenus = document.querySelectorAll('.dropdown-menu');
+        const menu = btn.nextElementSibling;
+
+        allMenus.forEach(m => {
+            if (m !== menu) m.classList.add('hidden');
+        });
+
+        menu.classList.toggle('hidden');
+    }
+
+    // Close on click outside
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.dropdown-container')) {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+        }
+    });
+</script>
 {% endblock %}

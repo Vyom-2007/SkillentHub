@@ -1,113 +1,157 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}Scheduled Interviews - SkillentHub{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Scheduled Interviews</h1>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Scheduled Interviews</h1>
+        <p class="text-slate-400">Manage your upcoming and past interviews</p>
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-body">
-            {% if interviews %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Candidate</th>
-                            <th>Role</th>
-                            <th>Date & Time</th>
-                            <th>Mode</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for interview in interviews %}
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    {% from '_avatar.html' import avatar %}
-                                    {{ avatar(interview.candidate_name, interview.profile_picture, 30, 'me-2') }}
-                                    <a href="{{ url_for('recruiter.application_detail', application_id=interview.application_id) }}"
-                                        class="text-decoration-none text-dark fw-bold">
-                                        {{ interview.candidate_name }}
-                                    </a>
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-white/10 bg-white/5">
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Candidate</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Role</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Date & Time</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Mode</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Status</th>
+                        <th class="p-4 text-right text-slate-300 font-semibold text-sm uppercase tracking-wider">Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for interview in interviews %}
+                    <tr class="hover:bg-white/5 transition-colors group">
+                        <td class="p-4">
+                            <a href="{{ url_for('recruiter.application_detail', application_id=interview.application_id) }}"
+                                class="flex items-center gap-3">
+                                {% if interview.profile_picture %}
+                                <img src="{{ interview.profile_picture }}" alt="{{ interview.candidate_name }}"
+                                    class="w-10 h-10 rounded-full border border-white/10 object-cover">
+                                {% else %}
+                                <div
+                                    class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold border border-white/10">
+                                    {{ interview.candidate_name[:1] }}
                                 </div>
-                            </td>
-                            <td>{{ interview.item_title }}</td>
-                            <td>{{ interview.scheduled_at.strftime('%b %d, %Y %H:%M') }}</td>
-                            <td>
-                                <span
-                                    class="badge {% if interview.mode == 'online' %}bg-info{% else %}bg-warning text-dark{% endif %}">
-                                    {{ interview.mode|capitalize }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if interview.status == 'confirmed' %}
-                                <span class="badge bg-success">Confirmed</span>
-                                {% elif interview.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">Pending</span>
-                                {% elif interview.status == 'declined' %}
-                                <span class="badge bg-danger">Declined</span>
-                                {% elif interview.status == 'completed' %}
-                                <span class="badge bg-primary">Completed</span>
-                                {% elif interview.status == 'cancelled' %}
-                                <span class="badge bg-secondary">Cancelled</span>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
-                                        data-bs-toggle="dropdown">
-                                        Actions
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item"
-                                                href="{{ url_for('recruiter.application_detail', application_id=interview.application_id) }}">View
-                                                Application</a></li>
-                                        {% if interview.location_url %}
-                                        <li><a class="dropdown-item" href="{{ interview.location_url }}"
-                                                target="_blank">Join/View Link</a></li>
-                                        {% endif %}
-                                        {% if interview.status in ['pending', 'confirmed'] %}
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_interview_status', interview_id=interview.interview_id) }}"
-                                                method="POST" class="d-inline">
-                                                <input type="hidden" name="status" value="completed">
-                                                <button type="submit" class="dropdown-item text-success">Mark
-                                                    Completed</button>
-                                            </form>
-                                        </li>
-                                        <li>
-                                            <form
-                                                action="{{ url_for('recruiter.update_interview_status', interview_id=interview.interview_id) }}"
-                                                method="POST" class="d-inline">
-                                                <input type="hidden" name="status" value="cancelled">
-                                                <button type="submit" class="dropdown-item text-danger">Cancel
-                                                    Interview</button>
-                                            </form>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
+                                <span class="font-bold text-white group-hover:text-blue-400 transition-colors">{{
+                                    interview.candidate_name }}</span>
+                            </a>
+                        </td>
+                        <td class="p-4 text-slate-300">{{ interview.item_title }}</td>
+                        <td class="p-4 text-slate-400 font-mono text-sm">{{ interview.scheduled_at.strftime('%b %d, %Y
+                            %H:%M') }}</td>
+                        <td class="p-4">
+                            {% if interview.mode == 'online' %}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">
+                                <span class="material-symbols-outlined text-[14px]">videocam</span> Online
+                            </span>
+                            {% else %}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">
+                                <span class="material-symbols-outlined text-[14px]">call</span> Phone
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4">
+                            {% if interview.status == 'confirmed' %}
+                            <span
+                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/10 text-green-400 border border-green-500/20 uppercase">Confirmed</span>
+                            {% elif interview.status == 'pending' %}
+                            <span
+                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 uppercase">Pending</span>
+                            {% elif interview.status == 'declined' %}
+                            <span
+                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20 uppercase">Declined</span>
+                            {% elif interview.status == 'completed' %}
+                            <span
+                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">Completed</span>
+                            {% elif interview.status == 'cancelled' %}
+                            <span
+                                class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20 uppercase">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="relative inline-block dropdown-container">
+                                <button type="button"
+                                    class="btn-action p-2 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                                    onclick="toggleDropdown(this)">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+
+                                <div
+                                    class="hidden dropdown-menu absolute right-0 mt-2 w-48 glass-panel border border-white/10 rounded-xl shadow-xl z-50 overflow-hidden">
+                                    <a href="{{ url_for('recruiter.application_detail', application_id=interview.application_id) }}"
+                                        class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors">View
+                                        Application</a>
+
+                                    {% if interview.location_url %}
+                                    <a href="{{ interview.location_url }}" target="_blank"
+                                        class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+                                        Join/View Link <span
+                                            class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                    </a>
+                                    {% endif %}
+
+                                    {% if interview.status in ['pending', 'confirmed'] %}
+                                    <div class="h-px bg-white/10 my-1"></div>
+                                    <form
+                                        action="{{ url_for('recruiter.update_interview_status', interview_id=interview.interview_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="completed">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-colors font-bold">Mark
+                                            Completed</button>
+                                    </form>
+                                    <form
+                                        action="{{ url_for('recruiter.update_interview_status', interview_id=interview.interview_id) }}"
+                                        method="POST">
+                                        <input type="hidden" name="status" value="cancelled">
+                                        <button
+                                            class="w-full text-left px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors font-bold">Cancel
+                                            Interview</button>
+                                    </form>
+                                    {% endif %}
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5">
-                <p class="text-muted mb-0">No interviews scheduled yet.</p>
-            </div>
-            {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="p-12 text-center text-slate-500">
+                            <div
+                                class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="material-symbols-outlined text-4xl">calendar_today</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-white mb-2">No interviews scheduled</h3>
+                            <p>Upcoming interviews will appear here.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<script>
+    function toggleDropdown(btn) {
+        const menu = btn.nextElementSibling;
+        const allMenus = document.querySelectorAll('.dropdown-menu');
+        allMenus.forEach(m => {
+            if (m !== menu) m.classList.add('hidden');
+        });
+        menu.classList.toggle('hidden');
+    }
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.dropdown-container')) {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+        }
+    });
+</script>
 {% endblock %}

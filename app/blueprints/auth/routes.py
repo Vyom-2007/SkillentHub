@@ -37,6 +37,15 @@ def dashboard():
 
     # Get profile details (completion, resume status)
     profile = profile_service.get_profile_with_details(user_id)
+    if not profile:
+        profile = {
+            'full_name': session.get('full_name', 'User'),
+            'completion': 0,
+            'resume_url': None,
+            'skills': [],
+            'education': [],
+            'experience': []
+        }
 
     # Get upcoming interview
     next_interview = interview_service.get_next_upcoming_interview(user_id)

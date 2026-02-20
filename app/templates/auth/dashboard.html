@@ -3,223 +3,270 @@
 {% block title %}Dashboard - SkillEntHub{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-12">
-    <!-- Welcome Section -->
+<!-- Welcome Section -->
+<div
+    class="glass-panel rounded-3xl p-8 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
     <div
-        class="glass-panel rounded-3xl p-8 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
-        <div
-            class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full pointer-events-none">
-        </div>
-        <div class="relative z-10">
-            <h1 class="text-3xl font-bold text-white mb-2">Welcome, {{ session.get('full_name', 'User').split(' ')[0]
-                }}!</h1>
-            <p class="text-slate-400 max-w-lg">Your profile is looking great. Complete the remaining sections to
-                increase your visibility to top recruiters by 3x.</p>
-        </div>
-        <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10 w-full md:w-auto">
-            <div class="flex-1 w-full sm:w-64">
-                <div class="flex justify-between mb-2">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Profile Strength</span>
-                    <span class="text-xs font-bold text-blue-400">75%</span>
-                </div>
-                <div class="h-2 bg-slate-700/50 rounded-full overflow-hidden">
-                    <div
-                        class="h-full bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full w-[75%] shadow-[0_0_10px_rgba(59,130,246,0.5)]">
-                    </div>
+        class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full pointer-events-none">
+    </div>
+    <div class="relative z-10 w-full">
+        <h1 class="text-3xl font-bold text-white mb-2">Welcome, {{ session.get('full_name', 'User').split(' ')[0] }}!
+        </h1>
+        <p class="text-slate-400 max-w-lg">Your profile is looking great. Complete the remaining sections to
+            increase your visibility to top recruiters by 3x.</p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-center gap-6 relative z-10 w-full md:w-auto">
+        <div class="flex-1 w-full sm:w-64">
+            <div class="flex justify-between mb-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Profile Strength</span>
+                <span class="text-xs font-bold text-blue-400">{{ profile.completion }}%</span>
+            </div>
+            <div class="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                    style="width: {{ profile.completion }}%">
                 </div>
             </div>
-            <a href="{{ url_for('profile.edit') }}"
-                class="w-full sm:w-auto px-6 py-2.5 bg-white text-slate-900 hover:bg-blue-50 hover:text-blue-900 rounded-xl text-sm font-bold transition-all shadow-lg shadow-white/5 whitespace-nowrap inline-flex justify-center items-center">
-                Complete Profile
-            </a>
+        </div>
+        <a href="{{ url_for('profile.view', user_id=session.user_id) }}"
+            class="w-full sm:w-auto px-6 py-2.5 bg-white text-slate-900 hover:bg-blue-50 hover:text-blue-900 rounded-xl text-sm font-bold transition-all shadow-lg shadow-white/5 whitespace-nowrap inline-flex justify-center items-center">
+            Complete Profile
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-12 gap-6">
+    <!-- Left Column -->
+    <div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-blue-500/50">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Applications</p>
+                <p class="text-4xl font-extrabold text-white group-hover:text-blue-400 transition-colors">{{
+                    stats.applied }}</p>
+            </div>
+            <div
+                class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-purple-500/50">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Shortlisted</p>
+                <p class="text-4xl font-extrabold text-white group-hover:text-purple-400 transition-colors">{{
+                    stats.shortlisted }}</p>
+            </div>
+            <div
+                class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-amber-500/50">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Interviews</p>
+                <p class="text-4xl font-extrabold text-white group-hover:text-amber-400 transition-colors">{{
+                    stats.interview }}</p>
+            </div>
+            <div
+                class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-emerald-500/50">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Offers/Hired</p>
+                <p class="text-4xl font-extrabold text-white group-hover:text-emerald-400 transition-colors">{{
+                    stats.offer + stats.hired }}</p>
+            </div>
+        </div>
+
+        <!-- Applications Table -->
+        <div class="glass-panel rounded-3xl overflow-hidden flex-1 min-h-[400px]">
+            <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-400">work_history</span>
+                    My Applications
+                </h2>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('auth.my_applications') }}"
+                        class="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                        View All
+                    </a>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr
+                            class="text-slate-500 text-xs uppercase tracking-wider border-b border-white/5 bg-white/[0.01]">
+                            <th class="px-6 py-4 font-semibold pl-8">Job Title / Company</th>
+                            <th class="px-6 py-4 font-semibold">Applied Date</th>
+                            <th class="px-6 py-4 font-semibold">Status</th>
+                            <th class="px-6 py-4 font-semibold text-right pr-8">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% if recent_apps %}
+                        {% for app in recent_apps %}
+                        <tr class="hover:bg-white/[0.03] transition-colors group">
+                            <td class="px-6 py-4 pl-8">
+                                <div class="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">
+                                    {{ app.title }}</div>
+                                <div class="text-xs text-slate-500 mt-0.5">{{ app.company_name }}</div>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-400">{{ time_ago(app.applied_at) }}</td>
+                            <td class="px-6 py-4">
+                                {% if app.status == 'applied' %}
+                                <span class="status-badge status-applied">Applied</span>
+                                {% elif app.status == 'shortlisted' %}
+                                <span class="status-badge status-shortlisted">Shortlisted</span>
+                                {% elif app.status == 'interview' %}
+                                <span class="status-badge status-interview">Interview</span>
+                                {% elif app.status == 'offer' %}
+                                <span class="status-badge status-offer">Offer</span>
+                                {% elif app.status == 'hired' %}
+                                <span class="status-badge status-hired">Hired</span>
+                                {% elif app.status == 'rejected' %}
+                                <span class="status-badge status-rejected">Rejected</span>
+                                {% else %}
+                                <span class="text-xs text-slate-400">{{ app.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-right pr-8">
+                                {% if app.item_type == 'job' %}
+                                <a href="{{ url_for('opportunities.job_detail', job_id=app.item_id) }}"
+                                    class="text-xs font-bold text-slate-400 hover:text-white border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all">View</a>
+                                {% else %}
+                                <a href="{{ url_for('opportunities.internship_detail', internship_id=app.item_id) }}"
+                                    class="text-xs font-bold text-slate-400 hover:text-white border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all">View</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                <span class="material-symbols-outlined text-4xl mb-2 opacity-20">inbox</span>
+                                <p class="text-sm">You haven't applied to any jobs yet.</p>
+                                <a href="{{ url_for('opportunities.opportunities') }}"
+                                    class="inline-block mt-3 text-blue-400 hover:text-blue-300 text-sm font-bold">Find
+                                    Jobs</a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-6">
-        <!-- Left Column -->
-        <div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div
-                    class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-blue-500/50">
-                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Applications</p>
-                    <p class="text-4xl font-extrabold text-white group-hover:text-blue-400 transition-colors">24</p>
-                </div>
-                <div
-                    class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-purple-500/50">
-                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Shortlisted</p>
-                    <p class="text-4xl font-extrabold text-white group-hover:text-purple-400 transition-colors">8</p>
-                </div>
-                <div
-                    class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-amber-500/50">
-                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Interviews</p>
-                    <p class="text-4xl font-extrabold text-white group-hover:text-amber-400 transition-colors">3</p>
-                </div>
-                <div
-                    class="glass-panel glass-card-hover rounded-2xl p-5 text-center group border-l-4 border-l-emerald-500/50">
-                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">Offers/Hired</p>
-                    <p class="text-4xl font-extrabold text-white group-hover:text-emerald-400 transition-colors">1</p>
-                </div>
+    <!-- Right Column -->
+    <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+        <!-- Profile Summary -->
+        <div class="glass-panel rounded-3xl p-6 relative overflow-hidden group">
+            <div
+                class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full pointer-events-none transition-all duration-500 group-hover:from-blue-500/20">
             </div>
 
-            <!-- Applications Table -->
-            <div class="glass-panel rounded-3xl overflow-hidden flex-1 min-h-[400px]">
-                <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-blue-400">work_history</span>
-                        My Applications
-                    </h2>
-                    <div class="flex gap-2">
-                        <button class="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 transition-colors">
-                            <span class="material-symbols-outlined text-[20px]">filter_list</span>
-                        </button>
-                        <button class="p-1.5 hover:bg-white/5 rounded-lg text-slate-400 transition-colors">
-                            <span class="material-symbols-outlined text-[20px]">more_horiz</span>
-                        </button>
+            <div class="flex items-center justify-between mb-4 relative z-10">
+                <h3 class="text-md font-bold text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-400">person</span>
+                    Profile Summary
+                </h3>
+                <a href="{{ url_for('profile.edit') }}"
+                    class="text-xs font-bold text-blue-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/5">
+                    Edit
+                </a>
+            </div>
+
+            <div class="space-y-4 relative z-10">
+                <!-- Headline & Location -->
+                <div>
+                    {% if profile.headline %}
+                    <p class="text-sm font-semibold text-white mb-1 line-clamp-2">{{ profile.headline }}</p>
+                    {% else %}
+                    <p class="text-sm text-slate-400 italic mb-1">Add a headline to stand out</p>
+                    {% endif %}
+
+                    {% if profile.location %}
+                    <div class="flex items-center gap-1 text-xs text-slate-400">
+                        <span class="material-symbols-outlined text-[14px]">location_on</span>
+                        {{ profile.location }}
                     </div>
+                    {% endif %}
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr
-                                class="text-slate-500 text-xs uppercase tracking-wider border-b border-white/5 bg-white/[0.01]">
-                                <th class="px-6 py-4 font-semibold pl-8">Job Title / Company</th>
-                                <th class="px-6 py-4 font-semibold">Applied Date</th>
-                                <th class="px-6 py-4 font-semibold">Status</th>
-                                <th class="px-6 py-4 font-semibold text-right pr-8">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-white/5">
-                            <!-- Static content for now matching design -->
-                            <tr class="hover:bg-white/[0.03] transition-colors group">
-                                <td class="px-6 py-4 pl-8">
-                                    <div
-                                        class="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">
-                                        Senior UI Designer</div>
-                                    <div class="text-xs text-slate-500 mt-0.5">TechFlow Systems</div>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-slate-400">Oct 12, 2023</td>
-                                <td class="px-6 py-4">
-                                    <span class="status-badge status-shortlisted">Shortlisted</span>
-                                </td>
-                                <td class="px-6 py-4 text-right pr-8">
-                                    <button
-                                        class="text-xs font-bold text-slate-400 hover:text-white border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all">View
-                                        Details</button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-white/[0.03] transition-colors group">
-                                <td class="px-6 py-4 pl-8">
-                                    <div
-                                        class="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">
-                                        Frontend Developer</div>
-                                    <div class="text-xs text-slate-500 mt-0.5">Nova Spark Inc.</div>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-slate-400">Oct 10, 2023</td>
-                                <td class="px-6 py-4">
-                                    <span class="status-badge status-interview">Interviewing</span>
-                                </td>
-                                <td class="px-6 py-4 text-right pr-8">
-                                    <button
-                                        class="text-xs font-bold text-slate-400 hover:text-white border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all">View
-                                        Details</button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-white/[0.03] transition-colors group">
-                                <td class="px-6 py-4 pl-8">
-                                    <div
-                                        class="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">
-                                        Product Manager</div>
-                                    <div class="text-xs text-slate-500 mt-0.5">CloudSync</div>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-slate-400">Oct 08, 2023</td>
-                                <td class="px-6 py-4">
-                                    <span class="status-badge status-applied">Applied</span>
-                                </td>
-                                <td class="px-6 py-4 text-right pr-8">
-                                    <button
-                                        class="text-xs font-bold text-slate-400 hover:text-white border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg transition-all">View
-                                        Details</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <!-- Bio -->
+                {% if profile.bio %}
+                <p class="text-xs text-slate-400 line-clamp-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                    {{ profile.bio }}
+                </p>
+                {% endif %}
+
+                <!-- Top Skills -->
+                {% if profile.skills %}
+                <div class="flex flex-wrap gap-2">
+                    {% for skill in profile.skills[:5] %}
+                    <span
+                        class="px-2 py-1 bg-blue-500/10 text-blue-300 text-[10px] font-semibold rounded-lg border border-blue-500/20">
+                        {{ skill.skill_name }}
+                    </span>
+                    {% endfor %}
+                    {% if profile.skills|length > 5 %}
+                    <span
+                        class="px-2 py-1 bg-white/5 text-slate-400 text-[10px] font-semibold rounded-lg border border-white/10">
+                        +{{ profile.skills|length - 5 }}
+                    </span>
+                    {% endif %}
                 </div>
+                {% else %}
+                <div class="text-center py-4 border border-dashed border-slate-700/50 rounded-xl">
+                    <p class="text-xs text-slate-500 mb-2">No skills added yet</p>
+                    <a href="{{ url_for('profile.edit') }}"
+                        class="text-[10px] font-bold text-blue-400 hover:text-blue-300">
+                        Add Skills
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Right Column -->
-        <div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
-            <!-- Upcoming Interviews -->
-            <div class="glass-panel rounded-3xl p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-md font-bold text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-amber-400">calendar_month</span>
-                        Upcoming Interviews
-                    </h3>
-                </div>
-                <div class="space-y-3">
-                    <div
-                        class="bg-white/[0.03] border border-white/5 hover:border-amber-500/30 rounded-xl p-4 transition-all group cursor-pointer relative overflow-hidden">
-                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500/50"></div>
-                        <div class="flex justify-between items-start mb-2 pl-2">
-                            <div>
-                                <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">
-                                    Tech Interview</h4>
-                                <p class="text-xs text-slate-400">Nova Spark Inc.</p>
-                            </div>
-                            <div class="bg-amber-500/10 text-amber-300 text-[10px] font-bold px-2 py-1 rounded">TODAY
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-4 text-xs text-slate-400 pl-2">
-                            <span class="flex items-center gap-1"><span
-                                    class="material-symbols-outlined text-[14px]">schedule</span> 10:30 AM</span>
-                            <span class="flex items-center gap-1"><span
-                                    class="material-symbols-outlined text-[14px]">videocam</span> Remote</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Updates -->
-            <div class="glass-panel rounded-3xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-md font-bold text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-purple-400">bolt</span>
-                        Recent Updates
-                    </h3>
-                </div>
-                <div class="space-y-0">
-                    <div class="relative pl-6 py-3 border-l border-white/10">
-                        <div
-                            class="absolute -left-[5px] top-4 w-2.5 h-2.5 rounded-full bg-blue-500 ring-4 ring-[#0f172a]">
-                        </div>
-                        <p class="text-xs text-slate-300 mb-0.5"><span class="font-bold text-white">TechFlow</span>
-                            viewed your application.</p>
-                        <p class="text-[10px] text-slate-500">2 hours ago</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Status -->
-            <div class="glass-panel rounded-3xl p-6">
-                <h3 class="text-md font-bold text-white mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-slate-400">account_circle</span>
-                    Profile Status
+        <!-- Recent Notifications -->
+        <div class="glass-panel rounded-3xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-md font-bold text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-purple-400">notifications</span>
+                    Notifications
                 </h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                        <div class="flex items-center gap-3">
-                            <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                                <span class="material-symbols-outlined text-[18px]">description</span>
-                            </div>
-                            <div class="text-xs">
-                                <p class="font-bold text-white">Resume</p>
-                                <p class="text-slate-500">Updated 2d ago</p>
-                            </div>
-                        </div>
-                        <span class="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
+            </div>
+            <div class="space-y-0">
+                {% if notifications %}
+                {% for notif in notifications %}
+                <div class="relative pl-6 py-3 border-l border-white/10">
+                    <div
+                        class="absolute -left-[5px] top-4 w-2.5 h-2.5 rounded-full {{ 'bg-blue-500' if not notif.is_read else 'bg-slate-500' }} ring-4 ring-[#0f172a]">
                     </div>
+                    <p class="text-xs text-slate-300 mb-0.5">{{ notif.content }}</p>
+                    <p class="text-[10px] text-slate-500">{{ time_ago(notif.created_at) }}</p>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-6 text-slate-500">
+                    <span class="material-symbols-outlined text-2xl mb-1 opacity-20">notifications_off</span>
+                    <p class="text-xs">No new notifications.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Profile Status -->
+        <div class="glass-panel rounded-3xl p-6">
+            <h3 class="text-md font-bold text-white mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-slate-400">account_circle</span>
+                Profile Documents
+            </h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                            <span class="material-symbols-outlined text-[18px]">description</span>
+                        </div>
+                        <div class="text-xs">
+                            <p class="font-bold text-white">Resume</p>
+                            <p class="text-slate-500">
+                                {% if profile.resume_url %}Uploaded{% else %}Missing{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% if profile.resume_url %}
+                    <span class="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
+                    {% else %}
+                    <span class="material-symbols-outlined text-red-400 text-[18px]">error</span>
+                    {% endif %}
                 </div>
             </div>
         </div>

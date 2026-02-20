@@ -1,61 +1,81 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}Saved Candidates - SkillentHub{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h4 mb-0">Saved Candidates</h2>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Saved Candidates</h1>
+        <p class="text-slate-400">Bookmarked profiles for future reference</p>
     </div>
 
     {% if candidates %}
-    <div class="row g-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for candidate in candidates %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-start">
-                        {% from '_avatar.html' import avatar %}
-                        {{ avatar(candidate.full_name, candidate.profile_picture, 64, 'me-3') }}
-                        <div>
-                            <h5 class="card-title mb-1">{{ candidate.full_name }}</h5>
-                            <p class="text-muted small mb-2">{{ candidate.headline or 'No headline' }}</p>
-                            <p class="card-text small mb-2"><i class="bi bi-geo-alt me-1"></i>{{ candidate.location or
-                                'Location not specified' }}</p>
-                        </div>
-                    </div>
+        <div
+            class="glass-panel rounded-2xl p-6 flex flex-col h-full bg-[#0f172a] group hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300">
+            <div class="flex items-start gap-4 mb-4">
+                {% if candidate.profile_picture %}
+                <img src="{{ candidate.profile_picture }}" alt="{{ candidate.full_name }}"
+                    class="w-16 h-16 rounded-full border-2 border-white/10 object-cover">
+                {% else %}
+                <div
+                    class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white border-2 border-white/10 shadow-lg shrink-0">
+                    <span class="material-symbols-outlined text-3xl">person</span>
+                </div>
+                {% endif %}
 
-                    {% if candidate.note %}
-                    <div class="mt-3 p-2 bg-light rounded small">
-                        <strong>Note:</strong> {{ candidate.note }}
+                <div>
+                    <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">{{
+                        candidate.full_name }}</h3>
+                    <p class="text-sm text-slate-400 mb-1 line-clamp-1">{{ candidate.headline or 'No headline' }}</p>
+                    <div class="flex items-center gap-1 text-xs text-slate-500">
+                        <span class="material-symbols-outlined text-[14px]">location_on</span>
+                        {{ candidate.location or 'Location not specified' }}
                     </div>
-                    {% endif %}
+                </div>
+            </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <small class="text-muted">Saved {{ candidate.saved_at.strftime('%b %d, %Y') }}</small>
-                        <div class="btn-group">
-                            <!-- View Profile Button (if implemented) -->
-                            <!-- <a href="#" class="btn btn-sm btn-outline-primary">View Profile</a> -->
+            {% if candidate.note %}
+            <div class="mb-4 p-3 rounded-xl bg-white/5 border border-white/5 text-sm text-slate-300 italic">
+                <span class="font-bold not-italic text-slate-500 text-xs uppercase mr-1">Note:</span> {{ candidate.note
+                }}
+            </div>
+            {% endif %}
 
-                            <button onclick="unsaveCandidate({{ candidate.user_id }}, this)"
-                                class="btn btn-sm btn-outline-danger" title="Remove">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
+            <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
+                <span class="text-xs text-slate-500">Saved {{ candidate.saved_at.strftime('%b %d, %Y') }}</span>
+
+                <div class="flex gap-2">
+                    <button onclick="unsaveCandidate({{ candidate.user_id }}, this)"
+                        class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+                        title="Remove">
+                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                    <!-- View Profile can be added here -->
+                    <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"
+                        target="_blank"
+                        class="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                        title="View Profile">
+                        <span class="material-symbols-outlined text-[20px]">open_in_new</span>
+                    </a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5">
-        <div class="mb-3">
-            <i class="bi bi-bookmark-heart display-1 text-muted"></i>
+    <div class="glass-panel rounded-3xl p-16 text-center">
+        <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-5xl text-slate-600">bookmark_border</span>
         </div>
-        <h4 class="text-muted">No saved candidates yet</h4>
-        <p class="text-muted">Save promising candidates from applications to view them here.</p>
-        <a href="{{ url_for('recruiter.dashboard') }}" class="btn btn-primary mt-3">Go to Dashboard</a>
+        <h2 class="text-2xl font-bold text-white mb-2">No saved candidates yet</h2>
+        <p class="text-slate-400 mb-8 max-w-md mx-auto">Found some interesting profiles? Save them to this list to
+            easily access them anytime.</p>
+        <a href="{{ url_for('recruiter.dashboard') }}"
+            class="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all">
+            Go to Dashboard
+        </a>
     </div>
     {% endif %}
 </div>
@@ -75,14 +95,19 @@
             const data = await response.json();
 
             if (data.success) {
-                // Remove the card from DOM with a fade effect
-                const card = btn.closest('.col-md-6'); // Adjust selector based on structure
-                card.style.transition = 'opacity 0.3s ease';
+                // Find parent card
+                const card = btn.closest('.glass-panel');
+
+                // Animate removal
+                card.style.transform = 'scale(0.9)';
                 card.style.opacity = '0';
+
                 setTimeout(() => {
-                    card.remove();
-                    // Check if list is empty and show empty state if needed
-                    if (document.querySelectorAll('.col-md-6').length === 0) {
+                    card.parentElement.remove(); // Remove the column wrapper if using grid cols
+
+                    // Check if empty and reload or show empty state
+                    const remaining = document.querySelectorAll('.glass-panel').length;
+                    if (remaining === 0) {
                         location.reload();
                     }
                 }, 300);

@@ -1,164 +1,187 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}{{ profile.full_name }} - Candidate{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 mb-0 text-gray-800">Candidate Profile</h2>
-        <a href="{{ url_for('recruiter_candidates.list_candidates') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Back to Search
-        </a>
-    </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <a href="{{ url_for('recruiter_candidates.list_candidates') }}"
+        class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors group">
+        <span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        Back to Search
+    </a>
 
-    <div class="row">
-        <!-- Sidebar: Profile Summary -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow mb-4">
-                <div class="card-body text-center">
-                    {% from '_avatar.html' import avatar %}
-                    {{ avatar(profile.full_name, profile.profile_picture, 150, 'mb-3') }}
-                    <h4 class="font-weight-bold text-primary mb-1">{{ profile.full_name }}</h4>
-                    <p class="text-muted mb-2">{{ profile.headline or 'No headline' }}</p>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sidebar: Candidate Profile -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="glass-panel rounded-3xl p-8 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white/5 to-transparent"></div>
 
-                    <div class="d-flex justify-content-center mb-3">
-                        <span class="badge bg-secondary me-2"><i class="bi bi-geo-alt-fill"></i> {{ profile.location or
-                            'Unknown' }}</span>
+                <div class="relative z-10">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture }}" alt="{{ profile.full_name }}"
+                        class="w-32 h-32 rounded-full border-4 border-white/10 shadow-2xl mx-auto mb-4 object-cover">
+                    {% else %}
+                    <div
+                        class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white border-4 border-white/10 shadow-2xl mx-auto mb-4">
+                        <span class="material-symbols-outlined text-5xl">person</span>
+                    </div>
+                    {% endif %}
+
+                    <h2 class="text-xl font-bold text-white mb-1">{{ profile.full_name }}</h2>
+                    <p class="text-slate-400 text-sm mb-4">{{ profile.headline or 'No headline provided' }}</p>
+
+                    <div class="flex items-center justify-center gap-2 text-slate-400 text-sm mb-6">
+                        <span class="material-symbols-outlined text-red-400 text-[18px]">location_on</span>
+                        {{ profile.location or 'Unknown' }}
                     </div>
 
-                    <div class="d-grid gap-2">
+                    <div class="space-y-3">
                         <a href="{{ url_for('recruiter_messages.messages', user=profile.user_id, type='user') }}"
-                            class="btn btn-primary">
-                            <i class="bi bi-chat-dots"></i> Message
+                            class="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg shadow-blue-600/20">
+                            <span class="material-symbols-outlined text-[20px]">chat</span>
+                            Message Candidate
                         </a>
                     </div>
                 </div>
             </div>
 
             <!-- Skills -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Skills</h6>
-                </div>
-                <div class="card-body">
+            <div class="glass-panel rounded-2xl p-6">
+                <h3
+                    class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b border-white/10 pb-2">
+                    Skills</h3>
+                <div class="space-y-2">
                     {% for skill in skills %}
-                    <div class="mb-2">
-                        <span
-                            class="badge bg-light text-dark border p-2 w-100 d-flex justify-content-between align-items-center">
-                            {{ skill.skill_name }}
-                            <small class="text-muted">{{ skill.proficiency_level|title }}</small>
-                        </span>
+                    <div
+                        class="flex items-center justify-between p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                        <span class="text-slate-200 font-medium">{{ skill.skill_name }}</span>
+                        <span class="text-xs text-blue-400 font-bold uppercase">{{ skill.proficiency_level }}</span>
                     </div>
                     {% else %}
-                    <p class="text-muted text-center">No skills listed.</p>
+                    <p class="text-slate-500 text-sm text-center py-2">No skills listed.</p>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <!-- Main Content: Bio, Experience, Education -->
-        <div class="col-lg-8">
+        <!-- Main Content (Right) -->
+        <div class="lg:col-span-2 space-y-6">
             <!-- About -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">About</h6>
-                </div>
-                <div class="card-body">
-                    <p>{{ profile.bio or 'No bio provided.' }}</p>
+            <div class="glass-panel rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-400">info</span> About
+                </h3>
+                <div class="text-slate-300 leading-relaxed text-sm">
+                    {{ profile.bio or 'No bio provided.' }}
                 </div>
             </div>
 
             <!-- Experience -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Experience</h6>
-                </div>
-                <div class="card-body">
+            <div class="glass-panel rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-purple-400">work</span> Experience
+                </h3>
+                <div class="space-y-8 relative border-l border-white/10 ml-2 pl-6">
                     {% for exp in experience %}
-                    <div class="mb-4">
-                        <h5 class="font-weight-bold">{{ exp.position }}</h5>
-                        <h6 class="text-primary">{{ exp.company_name }}</h6>
-                        <small class="text-muted">
-                            {{ exp.start_date.strftime('%b %Y') }} -
-                            {% if exp.is_current %}Present{% else %}{{ exp.end_date.strftime('%b %Y') if exp.end_date
-                            else '?' }}{% endif %}
-                            | {{ exp.location }}
-                        </small>
-                        <p class="mt-2">{{ exp.description }}</p>
+                    <div class="relative">
+                        <div
+                            class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-purple-500 border-2 border-[#0f172a]">
+                        </div>
+                        <h4 class="text-lg font-bold text-white">{{ exp.position }}</h4>
+                        <div class="flex items-center gap-2 text-sm text-slate-400 mb-2">
+                            <span class="text-purple-300 font-bold">{{ exp.company_name }}</span>
+                            <span>&bull;</span>
+                            <span>{{ exp.start_date.strftime('%b %Y') }} - {% if exp.is_current %}Present{% else %}{{
+                                exp.end_date.strftime('%b %Y') if exp.end_date else '?' }}{% endif %}</span>
+                            <span>&bull;</span>
+                            <span>{{ exp.location }}</span>
+                        </div>
+                        <p class="text-slate-300 text-sm leading-relaxed">{{ exp.description }}</p>
                     </div>
-                    {% if not loop.last %}
-                    <hr>{% endif %}
                     {% else %}
-                    <p class="text-muted">No experience listed.</p>
+                    <p class="text-slate-500 text-sm">No experience listed.</p>
                     {% endfor %}
                 </div>
             </div>
 
             <!-- Education -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Education</h6>
-                </div>
-                <div class="card-body">
+            <div class="glass-panel rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-emerald-400">school</span> Education
+                </h3>
+                <div class="space-y-6 relative border-l border-white/10 ml-2 pl-6">
                     {% for edu in education %}
-                    <div class="mb-3">
-                        <h5 class="font-weight-bold">{{ edu.institution_name }}</h5>
-                        <div class="text-muted">{{ edu.degree }} in {{ edu.field_of_study }}</div>
-                        <small class="text-muted">{{ edu.start_year }} - {{ edu.end_year }}</small>
+                    <div class="relative">
+                        <div
+                            class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0f172a]">
+                        </div>
+                        <h4 class="text-lg font-bold text-white">{{ edu.institution_name }}</h4>
+                        <div class="text-slate-300 text-sm mb-1">{{ edu.degree }} in {{ edu.field_of_study }}</div>
+                        <div class="text-slate-500 text-xs">{{ edu.start_year }} - {{ edu.end_year }}</div>
                     </div>
-                    {% if not loop.last %}
-                    <hr>{% endif %}
                     {% else %}
-                    <p class="text-muted">No education listed.</p>
+                    <p class="text-slate-500 text-sm">No education listed.</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Achievements / Wins -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Achievements</h6>
-                </div>
-                <div class="card-body">
-                    {% if wins %}
+            <!-- Achievements -->
+            <div class="glass-panel rounded-2xl p-6">
+                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-400">emoji_events</span> Achievements
+                </h3>
+
+                {% if wins %}
+                <div class="grid gap-4">
                     {% for win in wins %}
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div class="p-4 rounded-xl bg-white/5 border border-white/5">
+                        <div class="flex items-start justify-between mb-2">
                             <div>
-                                <h5 class="font-weight-bold mb-1">
-                                    <i class="bi bi-trophy-fill text-warning me-2"></i>{{ win.rank }} Place
+                                <h5
+                                    class="font-bold text-amber-400 flex items-center gap-2 text-sm uppercase tracking-wider">
+                                    <span class="material-symbols-outlined text-lg">trophy</span> {{ win.rank }} Place
                                 </h5>
-                                <h6 class="text-primary mb-1">{{ win.event_title }}</h6>
-                                <div class="text-muted small mb-2">
-                                    {{ win.event_type }} • {{ win.event_date.strftime('%b %Y') if win.event_date else
-                                    'Unknown Date' }}
-                                </div>
-                                {% if win.team_name %}
-                                <div class="text-muted small">
-                                    <strong>Team:</strong> {{ win.team_name }}
+                                <h4 class="text-white font-bold text-lg">{{ win.event_title }}</h4>
+                            </div>
+                            <span class="text-xs text-slate-500 font-mono">{{ win.event_date.strftime('%b %Y') if
+                                win.event_date else 'Unknown' }}</span>
+                        </div>
+                        <div class="text-slate-400 text-xs mb-3 flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded bg-white/5 border border-white/5 uppercase font-bold">{{
+                                win.event_type }}</span>
+                            {% if win.team_name %}
+                            <span>Team: <span class="text-slate-300">{{ win.team_name }}</span></span>
+                            {% endif %}
+                        </div>
+
+                        {% if win.members %}
+                        <div class="mt-3">
+                            <p class="text-xs text-slate-500 uppercase font-bold mb-2">Teammates</p>
+                            <div class="flex -space-x-2 overflow-hidden">
+                                {% for member in win.members %}
+                                {% if member.profile_picture %}
+                                <img class="inline-block h-8 w-8 rounded-full ring-2 ring-[#0f172a]"
+                                    src="{{ member.profile_picture }}" alt="{{ member.full_name }}"
+                                    title="{{ member.full_name }}">
+                                {% else %}
+                                <div class="inline-flex h-8 w-8 items-center justify-center rounded-full ring-2 ring-[#0f172a] bg-slate-700 text-xs font-bold text-white"
+                                    title="{{ member.full_name }}">
+                                    {{ member.full_name[:1] }}
                                 </div>
                                 {% endif %}
+                                {% endfor %}
                             </div>
-                        </div>
-                        {% if win.members %}
-                        <div class="mt-2 text-muted small">Teammates:</div>
-                        <div class="d-flex mt-1 flex-wrap gap-2">
-                            {% for member in win.members %}
-                            <div class="text-center" style="width: 40px;" title="{{ member.full_name }}">
-                                {{ avatar(member.full_name, member.profile_picture, 30, 'border') }}
-                            </div>
-                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
-                    {% if not loop.last %}
-                    <hr>{% endif %}
                     {% endfor %}
-                    {% else %}
-                    <p class="text-muted">No achievements listed.</p>
-                    {% endif %}
                 </div>
+                {% else %}
+                <p class="text-slate-500 text-sm">No achievements listed.</p>
+                {% endif %}
             </div>
+
         </div>
     </div>
 </div>

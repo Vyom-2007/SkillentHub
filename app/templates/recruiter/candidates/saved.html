@@ -3,65 +3,82 @@
 {% block title %}Saved Candidates - SkillentHub{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4><i class="bi bi-bookmark-fill me-2 text-primary"></i>Saved Candidates</h4>
-        <a href="{{ url_for('recruiter_candidates.list_candidates') }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-search me-1"></i>Find Candidates
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Saved Candidates</h1>
+            <p class="text-slate-400">Bookmarked profiles for future reference</p>
+        </div>
+        <a href="{{ url_for('recruiter_candidates.list_candidates') }}"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-lg shadow-blue-600/20">
+            <span class="material-symbols-outlined">search</span>
+            Find Candidates
         </a>
     </div>
 
     {% if candidates %}
-    <div class="row">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for candidate in candidates %}
-        <div class="col-md-6 col-lg-4 mb-4" id="saved-candidate-{{ candidate.user_id }}">
-            <div class="card h-100 shadow-sm hover-shadow transition">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        {% from '_avatar.html' import avatar %}
-                        {{ avatar(candidate.full_name, candidate.profile_picture, 50, 'me-3') }}
-                        <div>
-                            <h5 class="card-title mb-0">
-                                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"
-                                    class="text-decoration-none text-dark">
-                                    {{ candidate.full_name }}
-                                </a>
-                            </h5>
-                            <small class="text-muted">{{ candidate.headline or 'No headline' }}</small>
-                        </div>
-                        <div class="ms-auto">
-                            <button class="btn btn-link text-danger p-0"
-                                onclick="unsaveCandidate({{ candidate.user_id }})" title="Remove">
-                                <i class="bi bi-bookmark-fill"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mb-2 text-secondary small">
-                        <i class="bi bi-geo-alt me-1"></i> {{ candidate.location or 'Location not specified' }}
-                    </div>
-
-                    {% if candidate.note %}
-                    <div class="alert alert-light border p-2 mb-0 small">
-                        <i class="bi bi-sticky me-1"></i> {{ candidate.note }}
-                    </div>
-                    {% endif %}
+        <div class="glass-panel rounded-2xl p-6 flex flex-col h-full group hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300"
+            id="saved-candidate-{{ candidate.user_id }}">
+            <div class="flex items-start gap-4 mb-4">
+                {% if candidate.profile_picture %}
+                <img src="{{ candidate.profile_picture }}" alt="{{ candidate.full_name }}"
+                    class="w-16 h-16 rounded-full border-2 border-white/10 object-cover">
+                {% else %}
+                <div
+                    class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white border-2 border-white/10 shadow-lg shrink-0">
+                    <span class="material-symbols-outlined text-3xl">person</span>
                 </div>
-                <div class="card-footer bg-white border-top-0 pt-0 text-muted small">
-                    Saved {{ candidate.saved_at.strftime('%Y-%m-%d') }}
+                {% endif %}
+
+                <div class="min-w-0">
+                    <h3 class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
+                        <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"
+                            class="hover:underline decoration-blue-500/50 underline-offset-4">
+                            {{ candidate.full_name }}
+                        </a>
+                    </h3>
+                    <p class="text-sm text-slate-400 mb-1 line-clamp-1">{{ candidate.headline or 'No headline' }}</p>
+                    <div class="flex items-center gap-1 text-xs text-slate-500">
+                        <span class="material-symbols-outlined text-[14px]">location_on</span>
+                        {{ candidate.location or 'Location not specified' }}
+                    </div>
                 </div>
+                <div class="ml-auto">
+                    <button class="text-red-400 hover:text-red-300 transition-colors p-1"
+                        onclick="unsaveCandidate({{ candidate.user_id }})" title="Remove">
+                        <span class="material-symbols-outlined">bookmark_remove</span>
+                    </button>
+                </div>
+            </div>
+
+            {% if candidate.note %}
+            <div class="mb-4 p-3 rounded-xl bg-white/5 border border-white/5 text-sm text-slate-300 italic">
+                <span class="font-bold not-italic text-slate-500 text-xs uppercase mr-1">Note:</span> {{ candidate.note
+                }}
+            </div>
+            {% endif %}
+
+            <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-500">
+                <span>Saved {{ candidate.saved_at.strftime('%Y-%m-%d') }}</span>
+                <a href="{{ url_for('recruiter_candidates.view_candidate', user_id=candidate.user_id) }}"
+                    class="font-bold text-blue-400 hover:text-blue-300">View Profile</a>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="text-center py-5">
-        <div class="mb-3">
-            <i class="bi bi-people display-1 text-muted"></i>
+    <div class="glass-panel rounded-3xl p-16 text-center">
+        <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-5xl text-slate-600">bookmark_border</span>
         </div>
-        <h5>No saved candidates yet</h5>
-        <p class="text-muted">Bookmark promising candidates to view them here later.</p>
-        <a href="{{ url_for('recruiter_candidates.list_candidates') }}" class="btn btn-primary mt-2">Find Candidates</a>
+        <h2 class="text-2xl font-bold text-white mb-2">No saved candidates yet</h2>
+        <p class="text-slate-400 mb-8 max-w-md mx-auto">Bookmark promising candidates to view them here later.</p>
+        <a href="{{ url_for('recruiter_candidates.list_candidates') }}"
+            class="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all">
+            Find Candidates
+        </a>
     </div>
     {% endif %}
 </div>
@@ -79,10 +96,15 @@
             });
 
             if (response.ok) {
-                document.getElementById(`saved-candidate-${userId}`).remove();
-                if (document.querySelectorAll('.col-md-6').length === 0) {
-                    location.reload();
-                }
+                const card = document.getElementById(`saved-candidate-${userId}`);
+                card.style.transform = 'scale(0.95)';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.remove();
+                    if (document.querySelectorAll('[id^="saved-candidate-"]').length === 0) {
+                        location.reload();
+                    }
+                }, 300);
             } else {
                 alert('Failed to remove candidate.');
             }

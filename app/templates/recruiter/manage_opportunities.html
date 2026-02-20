@@ -1,131 +1,169 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}My Opportunities - Recruiter Portal{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-            <h4 class="mb-1">My Opportunities</h4>
-            <p class="text-muted mb-0">Manage your posted jobs, internships, and events</p>
+            <h1 class="text-3xl font-bold text-white mb-2">My Opportunities</h1>
+            <p class="text-slate-400">Manage your posted jobs, internships, and events</p>
         </div>
-        <div>
-            <div class="dropdown d-inline-block">
-                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-plus-lg me-1"></i> Post New
+        <div class="flex gap-3">
+            <div class="relative group">
+                <button
+                    class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all">
+                    <span class="material-symbols-outlined">add</span>
+                    Post New
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{{ url_for('recruiter.create_job') }}">Job</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('recruiter.create_internship') }}">Internship</a></li>
-                    <li><a class="dropdown-item" href="{{ url_for('recruiter.create_competition') }}">Competition</a>
-                    </li>
-                    <li><a class="dropdown-item" href="{{ url_for('recruiter.create_hackathon') }}">Hackathon</a></li>
-                </ul>
+                <!-- Dropdown Menu -->
+                <div
+                    class="absolute right-0 mt-2 w-48 glass-panel rounded-xl border border-white/10 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                    <a href="{{ url_for('recruiter.create_job') }}"
+                        class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-400">work</span> Job
+                    </a>
+                    <a href="{{ url_for('recruiter.create_internship') }}"
+                        class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-cyan-400">school</span> Internship
+                    </a>
+                    <a href="{{ url_for('recruiter.create_competition') }}"
+                        class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-400">emoji_events</span> Competition
+                    </a>
+                    <a href="{{ url_for('recruiter.create_hackathon') }}"
+                        class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-red-400">code</span> Hackathon
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" name="search" placeholder="Search by title..."
-                        value="{{ request.args.get('search', '') }}">
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" name="status">
-                        <option value="">All Status</option>
-                        <option value="active" {% if filter_status=='active' %}selected{% endif %}>Active</option>
-                        <option value="inactive" {% if filter_status=='inactive' %}selected{% endif %}>Inactive</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
-                </div>
-            </form>
-        </div>
+    <div class="glass-panel rounded-2xl p-6 mb-8">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-5 relative">
+                <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">search</span>
+                <input type="text" name="search" value="{{ request.args.get('search', '') }}"
+                    class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 focus:outline-none placeholder-slate-500"
+                    placeholder="Search by title...">
+            </div>
+            <div class="md:col-span-3 relative">
+                <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">filter_list</span>
+                <select name="status"
+                    class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 focus:outline-none appearance-none bg-black/20">
+                    <option value="" class="bg-slate-800">All Status</option>
+                    <option value="active" {% if filter_status=='active' %}selected{% endif %} class="bg-slate-800">
+                        Active</option>
+                    <option value="inactive" {% if filter_status=='inactive' %}selected{% endif %} class="bg-slate-800">
+                        Inactive</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit"
+                    class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">filter_alt</span> Filter
+                </button>
+            </div>
+            <div class="md:col-span-2">
+                <a href="{{ url_for('recruiter.manage_opportunities') }}"
+                    class="w-full py-2.5 bg-transparent hover:bg-white/5 text-slate-400 hover:text-white font-medium rounded-xl border border-transparent hover:border-white/10 transition-all flex items-center justify-center gap-2 text-center decoration-0">
+                    Clear
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- Opportunities List -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table align-middle table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Title / Type</th>
-                            <th>Posted Date</th>
-                            <th class="text-center">Applicants</th>
-                            <th>Status</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in opportunities %}
-                        <tr>
-                            <td class="ps-4">
-                                <h6 class="mb-0 text-dark">{{ item.title }}</h6>
-                                <span class="badge bg-light text-secondary border text-uppercase"
-                                    style="font-size: 0.7rem;">{{ item.type }}</span>
-                            </td>
-                            <td>{{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'N/A' }}</td>
-                            <td class="text-center">
-                                <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3">{{
-                                    item.app_count }}</span>
-                            </td>
-                            <td>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input toggle-status" type="checkbox" role="switch"
-                                        data-id="{{ item.id }}" data-type="{{ item.type }}" {% if item.is_active
-                                        %}checked{% endif %}>
-                                    <label class="form-check-label small text-muted">
-                                        {{ 'Active' if item.is_active else 'Inactive' }}
-                                    </label>
+    <div class="glass-panel rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-white/10 bg-white/5">
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Title / Type</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Posted Date</th>
+                        <th class="p-4 text-center text-slate-300 font-semibold text-sm uppercase tracking-wider">
+                            Applicants</th>
+                        <th class="p-4 text-slate-300 font-semibold text-sm uppercase tracking-wider">Status</th>
+                        <th class="p-4 text-right text-slate-300 font-semibold text-sm uppercase tracking-wider">Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    {% for item in opportunities %}
+                    <tr class="hover:bg-white/5 transition-colors group">
+                        <td class="p-4">
+                            <div class="font-bold text-white mb-1">{{ item.title }}</div>
+                            <span
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border border-white/10 bg-white/5 text-slate-300 uppercase">
+                                {{ item.type }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-slate-400 font-mono text-sm">
+                            {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else 'N/A' }}
+                        </td>
+                        <td class="p-4 text-center">
+                            <span
+                                class="inline-flex items-center justify-center min-w-[2rem] h-8 px-2 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold text-sm">
+                                {{ item.app_count }}
+                            </span>
+                        </td>
+                        <td class="p-4">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer toggle-status" data-id="{{ item.id }}"
+                                    data-type="{{ item.type }}" {% if item.is_active %}checked{% endif %}>
+                                <div
+                                    class="w-11 h-6 bg-slate-700/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600">
                                 </div>
-                            </td>
-                            <td class="text-end pe-4">
+                                <span class="ml-3 text-sm font-medium text-slate-400 status-label">{{ 'Active' if
+                                    item.is_active else 'Inactive' }}</span>
+                            </label>
+                        </td>
+                        <td class="p-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
                                 {% if item.type in ['competition', 'hackathon'] %}
                                 <a href="{{ url_for('recruiter.view_registrations', item_type=item.type, item_id=item.id) }}"
-                                    class="btn btn-sm btn-outline-info me-1" title="View Registrations">
-                                    <i class="bi bi-people"></i>
+                                    class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                                    title="View Registrations">
+                                    <span class="material-symbols-outlined text-[20px]">group</span>
                                 </a>
                                 {% endif %}
 
                                 {% if item.type == 'job' %}
                                 <a href="{{ url_for('recruiter.edit_job', job_id=item.id) }}"
-                                    class="btn btn-sm btn-light text-muted" title="Edit"><i
-                                        class="bi bi-pencil"></i></a>
+                                    class="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                                    title="Edit">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </a>
                                 {% elif item.type == 'internship' %}
                                 <a href="{{ url_for('recruiter.edit_internship', internship_id=item.id) }}"
-                                    class="btn btn-sm btn-light text-muted" title="Edit"><i
-                                        class="bi bi-pencil"></i></a>
-                                {% else %}
-                                <!-- Edit not yet implemented for events -->
-                                <a href="#" class="btn btn-sm btn-light text-muted disabled"
-                                    title="Edit (Coming Soon)"><i class="bi bi-pencil"></i></a>
+                                    class="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                                    title="Edit">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </a>
                                 {% endif %}
 
-                                <button class="btn btn-sm btn-light text-danger delete-opportunity-btn"
+                                <button
+                                    class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors delete-opportunity-btn"
                                     data-url="{{ url_for('recruiter.delete_opportunity_route', item_type=item.type, item_id=item.id) }}"
                                     title="Delete">
-                                    <i class="bi bi-trash"></i>
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </button>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                                    No opportunities found.
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-slate-500">
+                            <span class="material-symbols-outlined text-5xl mb-4 opacity-50">inbox</span>
+                            <p class="text-lg">No opportunities found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

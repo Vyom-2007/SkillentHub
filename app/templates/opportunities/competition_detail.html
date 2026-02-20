@@ -1,221 +1,238 @@
 {% extends "base.html" %}
 
-{% block title %}{{ event.title }} - Competition{% endblock %}
-
-{% block extra_css %}
-<style>
-    .detail-container {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-
-    .detail-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    .status-badge {
-        padding: 0.375rem 1rem;
-        border-radius: 1rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-
-    .status-upcoming {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .status-ongoing {
-        background: #d1fae5;
-        color: #059669;
-    }
-
-    .status-completed {
-        background: #f3f4f6;
-        color: #6b7280;
-    }
-
-    .prize-card {
-        background: linear-gradient(135deg, #fbbf24, #f59e0b);
-        border-radius: 1rem;
-        padding: 1.5rem;
-        color: white;
-        text-align: center;
-    }
-
-    .prize-card h3 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-    }
-
-    .info-item {
-        padding: 1rem;
-        background: #f8fafc;
-        border-radius: 0.75rem;
-    }
-
-    .info-label {
-        font-size: 0.75rem;
-        color: #64748b;
-        text-transform: uppercase;
-    }
-
-    .info-value {
-        font-weight: 600;
-        color: #1e293b;
-    }
-
-    .section-title {
-        font-weight: 600;
-        margin: 1.5rem 0 0.75rem;
-        color: #1e293b;
-    }
-
-    .countdown {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-</style>
-{% endblock %}
+{% block title %}{{ event.title }} - SkillEntHub{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="detail-container">
-        <a href="{{ url_for('competitions.competitions_list') }}" class="btn btn-link mb-3 ps-0">
-            <i class="bi bi-arrow-left me-1"></i>Back to Competitions
-        </a>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Back Link -->
+    <a href="{{ url_for('competitions.competitions_list') }}"
+        class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8 group">
+        <span
+            class="material-symbols-outlined text-[20px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        Back to Competitions
+    </a>
 
-        <div class="detail-card">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                    <span class="status-badge status-{{ event.status }}">
+    <div class="glass-panel rounded-3xl p-8 md:p-10 relative overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-600/10 rounded-full blur-[100px] pointer-events-none">
+        </div>
+
+        <!-- Header Section -->
+        <div class="relative z-10 flex flex-col md:flex-row gap-8 items-start mb-10">
+            <div
+                class="w-24 h-24 rounded-2xl bg-gradient-to-br from-yellow-600 to-orange-600 flex items-center justify-center shrink-0 border border-white/10 shadow-2xl shadow-yellow-500/20 text-4xl font-bold text-white">
+                <span class="material-symbols-outlined text-[48px]">trophy</span>
+            </div>
+
+            <div class="flex-1 w-full">
+                <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2">{{ event.title }}</h1>
+                        <p class="text-xl text-yellow-500 font-medium">{{ event.company_name or 'SkillEntHub' }}</p>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-3">
+                    <span class="px-3 py-1.5 rounded-lg text-sm font-semibold 
+                        {% if event.status == 'upcoming' %}bg-blue-500/10 text-blue-400 border border-blue-500/20
+                        {% elif event.status == 'ongoing' %}bg-green-500/10 text-green-400 border border-green-500/20
+                        {% else %}bg-slate-700/50 text-slate-400 border border-slate-600/50{% endif %}">
                         {{ event.status|capitalize }}
                     </span>
-                    <h3 class="mt-3 mb-1">{{ event.title }}</h3>
-                    <p class="text-muted">Organized by {{ event.company_name or 'SkillentHub' }}</p>
-                </div>
-                {% if event.prize %}
-                <div class="prize-card">
-                    <small>Prize Pool</small>
-                    <h3><i class="bi bi-trophy me-2"></i>{{ event.prize }}</h3>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Info Grid -->
-            <div class="info-grid mb-4">
-                <div class="info-item">
-                    <div class="info-label">Starts</div>
-                    <div class="info-value">
-                        <i class="bi bi-calendar me-1"></i>
-                        {{ event.start_date.strftime('%b %d, %Y • %I:%M %p') if event.start_date else 'TBA' }}
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Participants</div>
-                    <div class="info-value">
-                        <i class="bi bi-people me-1"></i>
-                        {{ event.registration_count or 0 }}{% if event.max_participants %} / {{ event.max_participants
-                        }}{% endif %}
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Reg. Deadline</div>
-                    <div class="info-value">
-                        <i class="bi bi-clock-history me-1"></i>
-                        {{ event.registration_deadline.strftime('%b %d, %Y • %I:%M %p') if event.registration_deadline
-                        else 'Open until end' }}
-                    </div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Ends</div>
-                    <div class="info-value">
-                        <i class="bi bi-calendar me-1"></i>
-                        {{ event.end_date.strftime('%b %d, %Y • %I:%M %p') if event.end_date else 'TBA' }}
-                    </div>
+                    {% if event.prize %}
+                    <span
+                        class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">emoji_events</span>
+                        {{ event.prize }}
+                    </span>
+                    {% endif %}
                 </div>
             </div>
+        </div>
 
-            <!-- Description -->
-            <h6 class="section-title">About</h6>
-            <p style="white-space: pre-line;">{{ event.description }}</p>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Content -->
+            <div class="lg:col-span-2 space-y-10">
 
-            <!-- Rules -->
-            {% if event.rules %}
-            <h6 class="section-title">Rules</h6>
-            <p style="white-space: pre-line;">{{ event.rules }}</p>
-            {% endif %}
+                <!-- Description -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-yellow-400">description</span>
+                        Description
+                    </h3>
+                    <div class="text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
+                        {{ event.description }}
+                    </div>
+                </div>
 
-            <!-- Register Button -->
-            <hr class="my-4">
-            <div class="d-flex gap-3">
-                {% if is_registered %}
-                <button class="btn btn-success btn-lg" disabled>
-                    <i class="bi bi-check-circle me-2"></i>Registered ✓
-                </button>
-                {% elif event.status == 'completed' %}
-                <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="bi bi-lock me-2"></i>Event Ended
-                </button>
-                {% elif event.registration_deadline and now > event.registration_deadline %}
-                <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="bi bi-x-circle me-2"></i>Registration Closed
-                </button>
-                {% elif event.max_participants and event.registration_count >= event.max_participants %}
-                <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="bi bi-x-circle me-2"></i>Fully Booked
-                </button>
-                {% else %}
-                <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#registerModal">
-                    <i class="bi bi-person-plus me-2"></i>Register Now
-                </button>
+                <!-- Rules -->
+                {% if event.rules %}
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-yellow-400">gavel</span>
+                        Rules & Regulations
+                    </h3>
+                    <div class="text-slate-300 leading-relaxed whitespace-pre-line space-y-4">
+                        {{ event.rules }}
+                    </div>
+                </div>
                 {% endif %}
+
+            </div>
+
+            <!-- Right Column: Sidebar Info -->
+            <div class="space-y-6">
+                <div class="glass-card p-6 rounded-2xl space-y-6">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Competition Overview</h3>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">calendar_clock</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Start Date</p>
+                            <p class="text-white font-medium">{{ event.start_date.strftime('%b %d, %Y') if
+                                event.start_date else 'TBA' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">event_busy</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">End Date</p>
+                            <p class="text-white font-medium">{{ event.end_date.strftime('%b %d, %Y') if event.end_date
+                                else 'TBA' }}</p>
+                        </div>
+                    </div>
+
+                    {% if event.max_participants %}
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">groups</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Max Participants</p>
+                            <p class="text-white font-medium">{{ event.max_participants }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined">person_add</span>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold">Registered</p>
+                            <p class="text-white font-medium">{{ event.registration_count or 0 }} Participants</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/10">
+                        {% if is_registered %}
+                        <button
+                            class="w-full py-3 bg-green-500/20 border border-green-500/30 text-green-400 font-bold rounded-xl flex items-center justify-center gap-2 cursor-default">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            Registered
+                        </button>
+                        {% elif event.status != 'completed' %}
+                        <button onclick="document.getElementById('registerModal').classList.remove('hidden')"
+                            class="w-full relative group overflow-hidden rounded-xl p-[1px] shadow-lg shadow-yellow-500/20 transition-all hover:shadow-yellow-500/40 hover:scale-[1.02]">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-r from-yellow-600 via-orange-500 to-yellow-600 animate-gradient-x">
+                            </div>
+                            <div
+                                class="relative bg-slate-900 group-hover:bg-slate-900/90 transition-colors rounded-xl px-4 py-3 flex items-center justify-center gap-2">
+                                <span class="font-bold text-white tracking-wide">Register Now</span>
+                                <span class="material-symbols-outlined text-white">how_to_reg</span>
+                            </div>
+                        </button>
+                        {% else %}
+                        <button
+                            class="w-full py-3 bg-slate-700/50 text-slate-400 font-bold rounded-xl flex items-center justify-center gap-2 cursor-not-allowed">
+                            Competition Ended
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Register Modal -->
+<!-- Register Modal (Glassmorphism) -->
 {% if not is_registered and event.status != 'completed' %}
-<div class="modal fade" id="registerModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Confirm Registration</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to register for <strong>{{ event.title }}</strong>?</p>
-                <p class="text-muted small mb-0">
-                    <i class="bi bi-calendar me-1"></i>
-                    {{ event.start_date.strftime('%b %d, %Y • %I:%M %p') if event.start_date else '' }}
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmRegisterBtn"
-                    onclick="registerEvent('competition', {{ event.competition_id }})">
-                    <i class="bi bi-check me-1"></i>Confirm
+<div id="registerModal" class="fixed inset-0 z-[100] hidden" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity"
+        onclick="document.getElementById('registerModal').classList.add('hidden')"></div>
+
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative w-full max-w-lg transform transition-all">
+            <div class="glass-panel p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                <!-- Close Button -->
+                <button onclick="document.getElementById('registerModal').classList.add('hidden')"
+                    class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+                    <span class="material-symbols-outlined text-2xl">close</span>
                 </button>
+
+                <div class="text-center mb-8">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-600 to-orange-600 flex items-center justify-center mx-auto mb-4 text-white shadow-lg shadow-yellow-500/20">
+                        <span class="material-symbols-outlined text-3xl">how_to_reg</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white">Register for {{ event.title }}</h3>
+                    <p class="text-slate-400 mt-2">Confirm your participation</p>
+                </div>
+
+                <div class="space-y-6">
+                    <p class="text-slate-300 text-center text-sm">
+                        You are about to register for this competition. Good luck!
+                    </p>
+
+                    <div class="pt-4 flex gap-4">
+                        <button type="button" onclick="document.getElementById('registerModal').classList.add('hidden')"
+                            class="flex-1 py-3 bg-white/5 hover:bg-white/10 text-slate-300 font-bold rounded-xl transition-colors">
+                            Cancel
+                        </button>
+                        <button type="button" id="confirmRegisterBtn"
+                            onclick="registerEvent('competition', {{ event.competition_id }})"
+                            class="flex-1 py-3 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-yellow-500/20">
+                            Confirm Registration
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endif %}
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/events.js') }}"></script>
+<style>
+    .animate-gradient-x {
+        background-size: 200% 200%;
+        animation: gradient-x 3s ease infinite;
+    }
+
+    @keyframes gradient-x {
+        0% {
+            background-position: 0% 50%
+        }
+
+        50% {
+            background-position: 100% 50%
+        }
+
+        100% {
+            background-position: 0% 50%
+        }
+    }
+</style>
 {% endblock %}

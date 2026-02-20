@@ -1,0 +1,11 @@
+--- Testing User Dashboard Service ---
+Testing for user_id: 9
+Calling get_profile_with_details...
+Profile not found for user 9
+Calling get_user_applications...
+Applications found: 0
+
+--- Testing Recruiter Dashboard Service ---
+Testing for recruiter_id: 9
+Recruiter stats retrieved successfully
+{'total_jobs': 0, 'total_internships': 0, 'total_competitions': 0, 'total_hackathons': 0, 'total_applications': 0, 'applications_this_week': 0, 'new_applications_24h': 0, 'recent_applications': []}

@@ -1,63 +1,109 @@
-{% extends "base_recruiter.html" %}
+{% extends "base.html" %}
 
 {% block title %}Settings - Recruiter Portal{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <h4 class="mb-4">Account Settings</h4>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white mb-2">Account Settings</h1>
+        <p class="text-slate-400">Manage your company profile and security preferences</p>
+    </div>
 
-    <div class="row g-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Company Profile Settings -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white fw-bold py-3">Company Profile</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('recruiter.update_profile') }}">
-                        <div class="mb-3">
-                            <label class="form-label">Company Email</label>
-                            <input type="email" class="form-control" value="{{ profile.company_email }}" disabled
-                                readonly>
-                            <div class="form-text">Email cannot be changed. Contact support for assistance.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Company Name</label>
-                            <input type="text" class="form-control" name="company_name"
-                                value="{{ profile.company_name }}" required>
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
+        <div class="glass-panel rounded-2xl p-6 h-full">
+            <div class="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                    <span class="material-symbols-outlined">business</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Company Profile</h3>
+                    <p class="text-xs text-slate-400">Public information</p>
                 </div>
             </div>
+
+            <form method="POST" action="{{ url_for('recruiter.update_profile') }}" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Company
+                        Email</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">mail</span>
+                        <input type="email" value="{{ profile.company_email }}" disabled readonly
+                            class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-slate-400 bg-white/5 border border-white/5 cursor-not-allowed">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1 pl-1">Contact support to change email.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Company
+                        Name</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">apartment</span>
+                        <input type="text" name="company_name" value="{{ profile.company_name }}" required
+                            class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50 focus:outline-none placeholder-slate-500">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                        class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">save</span> Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
 
         <!-- Security Settings -->
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white fw-bold py-3">Security</div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('recruiter.change_password') }}">
-                        <div class="mb-3">
-                            <label class="form-label">Current Password</label>
-                            <input type="password" class="form-control" name="current_password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">New Password</label>
-                            <input type="password" class="form-control" name="new_password" required>
-                            <div class="form-text">Must be at least 8 characters, with 1 uppercase letter and 1 number.
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Confirm New Password</label>
-                            <input type="password" class="form-control" name="confirm_password" required>
-                        </div>
-                        <div class="text-end">
-                            <button type="submit" class="btn btn-danger text-white">Change Password</button>
-                        </div>
-                    </form>
+        <div class="glass-panel rounded-2xl p-6 h-full">
+            <div class="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
+                    <span class="material-symbols-outlined">security</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">Security</h3>
+                    <p class="text-xs text-slate-400">Password and authentication</p>
                 </div>
             </div>
+
+            <form method="POST" action="{{ url_for('recruiter.change_password') }}" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Current
+                        Password</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">lock</span>
+                        <input type="password" name="current_password" required
+                            class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-red-500/50 focus:outline-none placeholder-slate-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">New
+                        Password</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">key</span>
+                        <input type="password" name="new_password" required
+                            class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-red-500/50 focus:outline-none placeholder-slate-500">
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1 pl-1">Min 8 chars, 1 uppercase, 1 special.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Confirm New
+                        Password</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-3 text-slate-500">check_circle</span>
+                        <input type="password" name="confirm_password" required
+                            class="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-white focus:ring-2 focus:ring-red-500/50 focus:outline-none placeholder-slate-500">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                        class="w-full py-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-600/30 font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">lock_reset</span> Change Password
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

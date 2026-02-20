@@ -1,202 +1,268 @@
 {% extends "base.html" %}
 
-{% block title %}Profile Setup - SkillentHub{% endblock %}
-
-{% block extra_css %}
-<style>
-    .skills-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .skill-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        background: #f1f5f9;
-        border: 2px solid #e2e8f0;
-        border-radius: 2rem;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .skill-badge:hover {
-        border-color: var(--primary-color);
-    }
-
-    .skill-badge.selected {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        border-color: transparent;
-        color: white;
-    }
-
-    .skill-badge input {
-        display: none;
-    }
-
-    .education-entry {
-        background: #f8fafc;
-        border-radius: 1rem;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        position: relative;
-    }
-
-    .education-entry .remove-btn {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: none;
-        border: none;
-        color: #dc3545;
-        cursor: pointer;
-        font-size: 1.25rem;
-    }
-
-    .profile-picture-preview {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid #e2e8f0;
-    }
-
-    .file-input-wrapper {
-        position: relative;
-        display: inline-block;
-    }
-
-    .file-input-wrapper input[type="file"] {
-        position: absolute;
-        left: 0;
-        top: 0;
-        opacity: 0;
-        width: 100%;
-        height: 100%;
-        cursor: pointer;
-    }
-
-    .char-counter {
-        font-size: 0.875rem;
-        color: #64748b;
-    }
-
-    .char-counter.warning {
-        color: #d97706;
-    }
-
-    .char-counter.danger {
-        color: #dc3545;
-    }
-</style>
-{% endblock %}
+{% block title %}Complete Profile - SkillEntHub{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-            <div class="auth-card" style="max-width: 100%;">
-                <div class="text-center mb-4">
-                    <i class="bi bi-person-badge fs-1" style="color: var(--primary-color);"></i>
-                    <h1 class="auth-title mt-2">Complete Your Profile</h1>
-                    <p class="auth-subtitle">Tell us about yourself to get started</p>
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <div
+            class="w-16 h-16 mx-auto bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4 ring-1 ring-white/20">
+            <span class="material-symbols-outlined text-3xl text-white">person_add</span>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2">Complete Your Profile</h1>
+        <p class="text-slate-400">Tell us a bit about yourself to get started with SkillEntHub.</p>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="glass-panel rounded-3xl p-8 md:p-10 relative overflow-hidden">
+        <!-- Background Decor -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/10 rounded-full blur-[80px] pointer-events-none"></div>
+
+        <form method="POST" enctype="multipart/form-data" id="profileForm" class="relative z-10 space-y-8">
+
+            <!-- Avatar Section -->
+            <div class="flex flex-col items-center">
+                <div class="relative group cursor-pointer mb-4">
+                    <div class="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+                    <div class="w-32 h-32 rounded-full border-4 border-white/10 bg-slate-800 bg-cover bg-center relative z-10 overflow-hidden shadow-2xl"
+                        id="avatarPreview" style="background-image: url('https://via.placeholder.com/150?text=');">
+                        <div class="flex items-center justify-center h-full w-full text-slate-600 bg-slate-800">
+                            <span class="material-symbols-outlined text-5xl">add_a_photo</span>
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-white">photo_camera</span>
+                        </div>
+                    </div>
+                    <input type="file" name="profile_picture" id="profilePicture"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept=".jpg,.jpeg,.png">
+                </div>
+                <p class="text-sm text-slate-500">Upload a professional photo (Max 5MB)</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Full Name -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Full Name <span
+                            class="text-red-400">*</span></label>
+                    <input type="text" name="full_name" value="{{ data.full_name or '' }}" required
+                        class="glass-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+                        placeholder="e.g. John Doe">
                 </div>
 
-                <form method="POST" enctype="multipart/form-data" id="profileForm">
-                    <!-- Profile Picture -->
-                    <div class="text-center mb-4">
-                        <img src="https://via.placeholder.com/150?text=Photo" alt="Profile"
-                            class="profile-picture-preview mb-3" id="picturePreview">
-                        <div class="file-input-wrapper">
-                            <button type="button" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-camera me-1"></i>Upload Photo
-                            </button>
-                            <input type="file" name="profile_picture" id="profilePicture" accept=".jpg,.jpeg,.png">
-                        </div>
-                        <p class="small text-muted mt-2">Max 5MB, JPG or PNG</p>
-                    </div>
+                <!-- Headline -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Headline <span
+                            class="text-red-400">*</span></label>
+                    <input type="text" name="headline" value="{{ data.headline or '' }}" required
+                        class="glass-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+                        placeholder="e.g. Senior Software Engineer">
+                </div>
+            </div>
 
-                    <!-- Basic Info -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="full_name" value="{{ data.full_name or '' }}"
-                                required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Headline <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="headline" value="{{ data.headline or '' }}"
-                                placeholder="e.g., Full Stack Developer" required>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Location -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Location</label>
+                    <div class="relative">
+                        <span
+                            class="absolute left-4 top-3.5 material-symbols-outlined text-slate-500 text-[20px]">location_on</span>
+                        <input type="text" name="location" value="{{ data.location or '' }}"
+                            class="glass-input w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+                            placeholder="City, Country">
                     </div>
+                </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Location</label>
-                            <input type="text" class="form-control" name="location" value="{{ data.location or '' }}"
-                                placeholder="City, State">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Phone</label>
-                            <input type="tel" class="form-control" name="phone" id="phone"
-                                value="{{ data.phone or '' }}" placeholder="10 digit number" maxlength="10">
-                        </div>
+                <!-- Phone -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Phone</label>
+                    <div class="relative">
+                        <span
+                            class="absolute left-4 top-3.5 material-symbols-outlined text-slate-500 text-[20px]">call</span>
+                        <input type="tel" name="phone" value="{{ data.phone or '' }}"
+                            class="glass-input w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+                            placeholder="+1 (555) 000-0000">
                     </div>
+                </div>
+            </div>
 
-                    <!-- Bio -->
-                    <div class="mb-4">
-                        <label class="form-label">Bio</label>
-                        <textarea class="form-control" name="bio" id="bio" rows="4" maxlength="5000"
-                            placeholder="Tell us about yourself...">{{ data.bio or '' }}</textarea>
-                        <div class="d-flex justify-content-end mt-1">
-                            <span class="char-counter"><span id="bioCount">0</span>/5000</span>
-                        </div>
-                    </div>
+            <!-- Bio -->
+            <div class="space-y-1.5">
+                <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Bio</label>
+                <textarea name="bio" rows="4" maxlength="5000"
+                    class="glass-input w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner resize-none"
+                    placeholder="Tell us about yourself, your experience, and what you're looking for...">{{ data.bio or '' }}</textarea>
+                <div class="flex justify-end">
+                    <span class="text-xs text-slate-500"><span id="bioCount">0</span>/5000</span>
+                </div>
+            </div>
 
-                    <!-- Skills -->
-                    <div class="mb-4">
-                        <label class="form-label">Skills</label>
-                        <div class="skills-container" id="skillsContainer">
-                            {% for skill in skills %}
-                            <div class="skill-badge">
-                                <input type="checkbox" name="skills" value="{{ skill.skill_id }}"
-                                    id="skill_{{ skill.skill_id }}">
-                                <label for="skill_{{ skill.skill_id }}">{{ skill.skill_name }}</label>
-                            </div>
-                            {% endfor %}
+            <!-- Skills -->
+            <div class="space-y-3">
+                <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Skills</label>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                    <div class="flex flex-wrap gap-2" id="skillsContainer">
+                        {% for skill in skills %}
+                        <div class="relative">
+                            <input type="checkbox" name="skills" value="{{ skill.skill_id }}"
+                                id="skill_{{ skill.skill_id }}" class="peer sr-only">
+                            <label for="skill_{{ skill.skill_id }}"
+                                class="inline-block px-4 py-2 rounded-full bg-slate-800 border border-white/10 text-slate-300 font-medium text-sm cursor-pointer transition-all hover:bg-slate-700 hover:text-white peer-checked:bg-blue-600 peer-checked:border-blue-500 peer-checked:text-white peer-checked:shadow-lg peer-checked:shadow-blue-600/20">
+                                {{ skill.skill_name }}
+                            </label>
                         </div>
+                        {% endfor %}
                         {% if not skills %}
-                        <p class="text-muted small">No skills available.</p>
+                        <p class="text-slate-500 italic text-sm">No predefined skills available.</p>
                         {% endif %}
                     </div>
-
-                    <!-- Education -->
-                    <div class="mb-4">
-                        <label class="form-label">Education</label>
-                        <div id="educationContainer"></div>
-                        <button type="button" class="btn btn-outline-secondary btn-sm" id="addEducation">
-                            <i class="bi bi-plus-lg me-1"></i>Add Education
-                        </button>
-                    </div>
-
-                    <hr class="my-4">
-                    <button type="submit" class="btn btn-primary w-100 py-2">
-                        <i class="bi bi-check-circle me-2"></i>Complete Profile
-                    </button>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <!-- Education (Simplified for setup) -->
+            <div class="space-y-3">
+                <label class="block text-xs uppercase tracking-wider font-bold text-slate-400 ml-1">Education</label>
+                <div id="educationContainer" class="space-y-4"></div>
+                <button type="button" id="addEducation"
+                    class="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 border-dashed rounded-xl text-slate-300 hover:text-white font-medium transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    Add Education
+                </button>
+            </div>
+
+            <div class="pt-6 border-t border-white/10">
+                <button type="submit"
+                    class="w-full relative group overflow-hidden rounded-xl p-[1px] shadow-lg shadow-blue-500/20 transition-all hover:shadow-blue-500/40 hover:scale-[1.01]">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 animate-gradient-x">
+                    </div>
+                    <div
+                        class="relative bg-slate-900 group-hover:bg-slate-900/90 transition-colors rounded-xl px-4 py-3.5 flex items-center justify-center gap-2">
+                        <span class="font-bold text-white tracking-wide">Complete Profile</span>
+                        <span class="material-symbols-outlined text-white">arrow_forward</span>
+                    </div>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
+<!-- Education Template -->
+<template id="educationTemplate">
+    <div class="bg-slate-800/50 border border-white/10 rounded-xl p-4 relative education-entry animate-fade-in-up">
+        <button type="button"
+            class="absolute top-2 right-2 text-slate-500 hover:text-red-400 transition-colors remove-btn">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <input type="text" name="edu_degree[]"
+                class="glass-input w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                placeholder="Degree (e.g. B.S. CS)">
+            <input type="text" name="edu_institution[]"
+                class="glass-input w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                placeholder="Institution">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="text" name="edu_field[]"
+                class="glass-input w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                placeholder="Field">
+            <input type="number" name="edu_start[]"
+                class="glass-input w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                placeholder="Start Year">
+            <input type="number" name="edu_end[]"
+                class="glass-input w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+                placeholder="End Year">
+        </div>
+    </div>
+</template>
+
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        initProfileForm();
-        addEducationEntry();
+        // Profile Picture Preview
+        const profileInput = document.getElementById('profilePicture');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        if (profileInput && avatarPreview) {
+            profileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        avatarPreview.style.backgroundImage = `url('${e.target.result}')`;
+                        avatarPreview.querySelector('div').style.display = 'none'; // Hide placeholder icon
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Bio Counter
+        const bioInput = document.querySelector('textarea[name="bio"]');
+        const bioCount = document.getElementById('bioCount');
+        if (bioInput && bioCount) {
+            bioInput.addEventListener('input', () => {
+                bioCount.textContent = bioInput.value.length;
+            });
+            // Init count
+            bioCount.textContent = bioInput.value.length;
+        }
+
+        // Education Logic
+        const eduContainer = document.getElementById('educationContainer');
+        const addEduBtn = document.getElementById('addEducation');
+        const eduTemplate = document.getElementById('educationTemplate');
+
+        if (addEduBtn && eduContainer && eduTemplate) {
+            addEduBtn.addEventListener('click', () => {
+                const clone = eduTemplate.content.cloneNode(true);
+                // Add remove listener to the new button
+                const removeBtn = clone.querySelector('.remove-btn');
+                removeBtn.addEventListener('click', function () {
+                    this.closest('.education-entry').remove();
+                });
+                eduContainer.appendChild(clone);
+            });
+        }
     });
 </script>
+<style>
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-up {
+        animation: fade-in-up 0.3s ease-out forwards;
+    }
+
+    .animate-gradient-x {
+        background-size: 200% 200%;
+        animation: gradient-x 3s ease infinite;
+    }
+
+    @keyframes gradient-x {
+        0% {
+            background-position: 0% 50%
+        }
+
+        50% {
+            background-position: 100% 50%
+        }
+
+        100% {
+            background-position: 0% 50%
+        }
+    }
+</style>
 {% endblock %}
